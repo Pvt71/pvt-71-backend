@@ -67,6 +67,12 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency> <!-- provides a simple, fluent mapping API for mapping between datatype -->
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>3.2.0</version>
+		</dependency>
+
 
 
 		<!-- AUTHORIZATION/SECURITY DEPENDENCIES -->
