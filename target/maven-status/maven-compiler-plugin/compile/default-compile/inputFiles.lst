@@ -1,4 +1,5 @@
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\config\MapperConfig.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\config\SecurityConfig.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\controllers\ChallengeController.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\dto\ChallengeDto.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\entities\ChallengeEntity.java
@@ -7,6 +8,5 @@ C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\mappers\Mapper.ja
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\mappers\mapperimpl\ChallengeMapper.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\Project71Application.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\repositories\ChallengeRepository.java
-C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\repositories\TEMPRepository.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\ChallengeService.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\serviceimpl\ChallengeServiceImpl.java
