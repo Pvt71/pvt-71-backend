@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.pvt")
 @CrossOrigin
 public class Project71Application extends SpringBootServletInitializer {
 

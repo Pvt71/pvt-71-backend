@@ -1,2 +1,14 @@
+com\pvt\project71\domain\entities\ChallengeEntity$ChallengeEntityBuilder.class
+com\pvt\project71\domain\entities\ChallengeEntity.class
 com\pvt\project71\Project71Application.class
+com\pvt\project71\services\serviceimpl\ChallengeServiceImpl.class
+com\pvt\project71\mappers\Mapper.class
 com\pvt\project71\MainController.class
+com\pvt\project71\mappers\mapperimpl\ChallengeMapper.class
+com\pvt\project71\controllers\ChallengeController.class
+com\pvt\project71\domain\dto\ChallengeDto.class
+com\pvt\project71\repositories\TEMPRepository.class
+com\pvt\project71\services\ChallengeService.class
+com\pvt\project71\repositories\ChallengeRepository.class
+com\pvt\project71\domain\dto\ChallengeDto$ChallengeDtoBuilder.class
+com\pvt\project71\config\MapperConfig.class
