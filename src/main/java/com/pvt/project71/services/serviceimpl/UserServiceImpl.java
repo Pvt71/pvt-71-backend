@@ -1,5 +1,6 @@
 package com.pvt.project71.services.serviceimpl;
 
+import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.UserService;
@@ -13,20 +14,20 @@ import java.util.stream.StreamSupport;
 @Service
 public class UserServiceImpl implements UserService {
 
-    //Contains the CRUD functionality
+    //Contains the database functionality
     private UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository){
         this.userRepository = userRepository;
     }
 
-    //Create
+    //CRUD - Create & Update (full)
     @Override
-    public UserEntity createUser(UserEntity user) {
+    public UserEntity save(UserEntity user) {
         return userRepository.save(user);
     }
 
-    //Read (many)
+    //CRUD - Read (many)
     @Override
     public List<UserEntity> findAll() {
         return StreamSupport.stream(userRepository
@@ -36,9 +37,31 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
-    //Read (one)
+    //CRUD - Read (one)
     @Override
     public Optional<UserEntity> findOne(String email) {
         return userRepository.findById(email);
     }
+
+    //CRUD - Update (partial)
+    @Override
+    public UserEntity partialUpdate(String email, UserEntity userEntity) {
+        userEntity.setEmail(email);
+
+        return userRepository.findById(email).map(existingUser -> {
+            //If attribute exists and not null, update said attribute
+            Optional.ofNullable(userEntity.getUsername()).ifPresent(existingUser::setUsername);
+            Optional.ofNullable(userEntity.getProfilePictureUrl()).ifPresent(existingUser::setProfilePictureUrl);
+            Optional.ofNullable(userEntity.getSchool()).ifPresent(existingUser::setSchool);
+
+            return userRepository.save(existingUser);
+        }).orElseThrow(() -> new RuntimeException("User does not exist"));
+    }
+
+    @Override
+    public boolean isExists(String email) {
+        return userRepository.existsById(email);
+    }
+
+
 }

@@ -7,8 +7,8 @@ import java.util.Optional;
 
 public interface UserService {
 
-    // CRUD - Create
-    UserEntity createUser(UserEntity user);
+    // CRUD - Create & Update (full)
+    UserEntity save(UserEntity user);
 
     // CRUD - Read (many)
     List<UserEntity> findAll();
@@ -16,4 +16,8 @@ public interface UserService {
     // CRUD - Read (one)
     Optional<UserEntity> findOne(String email);
 
+    // CRUD - Update (partial)
+    UserEntity partialUpdate(String email, UserEntity userEntity);
+
+    boolean isExists(String email);
 }

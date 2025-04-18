@@ -7,6 +7,7 @@ import com.pvt.project71.mappers.mapperimpl.UserMapperImpl;
 import com.pvt.project71.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class UserController {
     @PostMapping(path = "/users")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto user){
         UserEntity userEntity = userMapper.mapFrom(user);
-        UserEntity savedUserEntity = userService.createUser(userEntity);
+        UserEntity savedUserEntity = userService.save(userEntity);
         return new ResponseEntity<>(userMapper.mapTo(savedUserEntity), HttpStatus.CREATED);
     }
 
@@ -52,4 +53,37 @@ public class UserController {
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    // CRUD - Update (full update)
+    @PutMapping(path = "/users/{email}")
+    public ResponseEntity<UserDto> fullUpdateUser(
+            @PathVariable("email") String email,
+            @RequestBody UserDto userDto){
+
+        if(!userService.isExists(email)){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        userDto.setEmail(email);
+        UserEntity userEntity = userMapper.mapFrom(userDto);
+        UserEntity savedUserEntity = userService.save(userEntity);
+        return new ResponseEntity<>(
+                userMapper.mapTo(savedUserEntity),
+                HttpStatus.OK
+        );
+    }
+
+    // CRUD - Update (partial update)
+    @PatchMapping(path = "/users/{email}")
+    public ResponseEntity<UserDto> partialUpdate(
+            @PathVariable("email") String email,
+            @RequestBody UserDto userDto
+    ){
+        if(!userService.isExists(email)){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        UserEntity userEntity = userMapper.mapFrom(userDto);
+        UserEntity updatedUser = userService.partialUpdate(email, userEntity);
+        return new ResponseEntity<>(userMapper.mapTo(updatedUser), HttpStatus.OK);
+    }
 }
