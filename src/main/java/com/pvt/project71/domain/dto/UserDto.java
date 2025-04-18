@@ -14,7 +14,9 @@ import lombok.NoArgsConstructor;
 
 public class UserDto {
 
+    //@Email checks if email is in the format of something@domain.com
     @Email(message = "Invalid email format.")
+    //@NotBlank checks whether email is blank or not
     @NotBlank(message = "Email is required.")
     private String email;
 
