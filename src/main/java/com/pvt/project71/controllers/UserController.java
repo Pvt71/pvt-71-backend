@@ -5,6 +5,7 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.mappers.Mapper;
 import com.pvt.project71.mappers.mapperimpl.UserMapperImpl;
 import com.pvt.project71.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
@@ -28,7 +29,7 @@ public class UserController {
 
     // CRUD - Create
     @PostMapping(path = "/users")
-    public ResponseEntity<UserDto> createUser(@RequestBody UserDto user){
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user){
         UserEntity userEntity = userMapper.mapFrom(user);
         UserEntity savedUserEntity = userService.save(userEntity);
         return new ResponseEntity<>(userMapper.mapTo(savedUserEntity), HttpStatus.CREATED);
@@ -57,7 +58,7 @@ public class UserController {
     @PutMapping(path = "/users/{email}")
     public ResponseEntity<UserDto> fullUpdateUser(
             @PathVariable("email") String email,
-            @RequestBody UserDto userDto){
+            @Valid @RequestBody UserDto userDto){
 
         if(!userService.isExists(email)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -76,7 +77,7 @@ public class UserController {
     @PatchMapping(path = "/users/{email}")
     public ResponseEntity<UserDto> partialUpdate(
             @PathVariable("email") String email,
-            @RequestBody UserDto userDto
+            @Valid @RequestBody UserDto userDto
     ){
         if(!userService.isExists(email)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
