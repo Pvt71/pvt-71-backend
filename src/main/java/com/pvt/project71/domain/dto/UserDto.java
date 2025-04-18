@@ -20,4 +20,9 @@ public class UserDto {
 
     private String profilePictureUrl;
 
+    //När events/scores/challenges finns:
+    //private List<Event> events;
+    //private List<Score> scores;
+    //private List<Challenge> challenges;
+
 }

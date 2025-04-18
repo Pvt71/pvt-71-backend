@@ -1,9 +1,7 @@
 package com.pvt.project71.domain.entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,5 +23,15 @@ public class UserEntity {
     private String school;
 
     private String profilePictureUrl;
+
+    //När events/scores/challenges finns:
+    //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
+    //private List<Event> events;
+
+    //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
+    //private List<Score> scores;
+
+    //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
+    //private List<Challenge> challenges;
 
 }
