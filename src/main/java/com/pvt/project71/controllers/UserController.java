@@ -87,4 +87,11 @@ public class UserController {
         UserEntity updatedUser = userService.partialUpdate(email, userEntity);
         return new ResponseEntity<>(userMapper.mapTo(updatedUser), HttpStatus.OK);
     }
+
+    // CRUD - Delete
+    @DeleteMapping(path = "/users/{email}")
+    public ResponseEntity deleteUser(@PathVariable("email") String email){
+        userService.delete(email);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

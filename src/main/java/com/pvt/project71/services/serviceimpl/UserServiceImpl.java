@@ -58,6 +58,12 @@ public class UserServiceImpl implements UserService {
         }).orElseThrow(() -> new RuntimeException("User does not exist"));
     }
 
+    // CRUD - Delete
+    @Override
+    public void delete(String email) {
+        userRepository.deleteById(email);
+    }
+
     @Override
     public boolean isExists(String email) {
         return userRepository.existsById(email);

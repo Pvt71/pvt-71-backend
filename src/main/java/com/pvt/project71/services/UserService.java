@@ -19,5 +19,9 @@ public interface UserService {
     // CRUD - Update (partial)
     UserEntity partialUpdate(String email, UserEntity userEntity);
 
+    // CRUD - Delete
+    void delete(String email);
+
     boolean isExists(String email);
+
 }
