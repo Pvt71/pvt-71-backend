@@ -16,8 +16,16 @@ public class ChallengeServiceImpl implements ChallengeService {
         this.challengeRepository = challengeRepository;
     }
 
+    /**
+     *
+     * @param challengeEntity Om ChallengeEntity har lämnat Event field tomt får den automatiskt standard Event
+     * @return Den sparade ChallengeEntity
+     */
     @Override
-    public ChallengeEntity createChallenge(ChallengeEntity challengeEntity) {
+    public ChallengeEntity save(ChallengeEntity challengeEntity) {
+        //TODO: Lägga in logik så att man inte kan ge för mycket poäng
+        //TODO: Ska fixa så att om inte en event passeras igenom får den standard event här innan det sparas
+
         return challengeRepository.save(challengeEntity);
     }
 
@@ -29,5 +37,17 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     public void delete(Integer id) {
         challengeRepository.deleteById(id);
+    }
+
+    @Override
+    public ChallengeEntity partialUpdate(Integer id, ChallengeEntity challengeEntity) {
+        return challengeRepository.findById(id).map(existing -> {
+            Optional.ofNullable(challengeEntity.getName()).ifPresent(existing::setName);
+            Optional.ofNullable(challengeEntity.getDescription()).ifPresent(existing::setDescription);
+            Optional.ofNullable(challengeEntity.getEndDate()).ifPresent(existing::setEndDate);
+            Optional.ofNullable(challengeEntity.getRewardPoints()).ifPresent(existing::setRewardPoints);
+
+            return challengeRepository.save(existing);
+        }).orElseThrow(() -> new RuntimeException("Challenge doesnt exist"));
     }
 }

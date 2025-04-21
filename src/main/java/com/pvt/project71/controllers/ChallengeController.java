@@ -22,10 +22,11 @@ public class ChallengeController {
     }
 
     @PostMapping(path = "/challenges")
-    public ChallengeDto createChallenge(@RequestBody ChallengeDto challengeDto) {
-        ChallengeEntity savedChallengeEntity = challengeService.createChallenge(challengeMapper.mapFrom(challengeDto));
-        return challengeMapper.mapTo(savedChallengeEntity);
+    public ResponseEntity<ChallengeDto> createChallenge(@RequestBody ChallengeDto challengeDto) {
+        ChallengeEntity savedChallengeEntity = challengeService.save(challengeMapper.mapFrom(challengeDto));
+        return new ResponseEntity<>(challengeMapper.mapTo(savedChallengeEntity), HttpStatus.CREATED);
     }
+
     @GetMapping(path = "/challenges/{id}")
     public ResponseEntity<ChallengeDto> getChallenge(@PathVariable("id") Integer id) {
         Optional<ChallengeEntity> found = challengeService.find(id);
@@ -34,9 +35,35 @@ public class ChallengeController {
             return new ResponseEntity<>(dto, HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
     @DeleteMapping(path = "/challenges/{id}")
     public ResponseEntity deleteChallenge(@PathVariable("id") Integer id) {
+        if (challengeService.find(id).isEmpty()) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
         challengeService.delete(id);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping(path = "/challenges/{id}")
+    public ResponseEntity<ChallengeDto> partialUpdate(@PathVariable("id") Integer id, @RequestBody ChallengeDto challengeDto) {
+        if (challengeService.find(id).isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        challengeDto.setId(id);
+        ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
+        ChallengeEntity updatedChallenge = challengeService.partialUpdate(id, challengeEntity);
+        return new ResponseEntity<>(challengeMapper.mapTo(updatedChallenge), HttpStatus.OK);
+    }
+
+    @PutMapping(path = "/challenges/{id}")
+    public ResponseEntity<ChallengeDto> fullUpdate(@PathVariable("id") Integer id, @RequestBody ChallengeDto challengeDto) {
+        if (challengeService.find(id).isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        challengeDto.setId(id);
+        ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
+        ChallengeEntity updatedChallenge = challengeService.save(challengeEntity);
+        return  new ResponseEntity<>(challengeMapper.mapTo(updatedChallenge), HttpStatus.OK);
     }
 }

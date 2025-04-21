@@ -34,3 +34,5 @@ build/
 
 docker-compose.yml
 Dockerfile
+/src/main/resources/application-local.properties
+/src/test/resources/application-test.properties
