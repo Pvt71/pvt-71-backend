@@ -5,7 +5,7 @@ import com.pvt.project71.domain.entities.UserEntity;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserService {
+public interface    UserService {
 
     // CRUD - Create & Update (full)
     UserEntity save(UserEntity user);
