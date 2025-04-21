@@ -14,29 +14,28 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @SpringBootTest
+@ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application-test.properties")
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class ChallengeTests {
-    private ChallengeService challengeService;
-    private MockMvc mockMvc;
-    private ObjectMapper objectMapper;
-    private ChallengeRepository challengeRepository;
     @Autowired
-    ChallengeTests(MockMvc mockMvc, ChallengeService challengeService, ObjectMapper objectMapper, ChallengeRepository challengeRepository) {
-        this.mockMvc = mockMvc;
-        this.challengeService = challengeService;
-        this.objectMapper = objectMapper;
-        this.challengeRepository = challengeRepository;
-    }
+    private ChallengeService challengeService;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private ChallengeRepository challengeRepository;
 
     @AfterEach
     public void cleanup() {
