@@ -3,9 +3,11 @@ package com.pvt.project71;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-@SpringBootApplication(scanBasePackages = "com.pvt")
+
+@SpringBootApplication
 @CrossOrigin
 public class Project71Application extends SpringBootServletInitializer {
 
