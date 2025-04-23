@@ -3,6 +3,7 @@ package com.pvt.project71;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.dto.UserDto;
+import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 
@@ -74,4 +75,5 @@ public class TestDataUtil {
                 .profilePictureUrl("testUrl2")
                 .build();
     }
+
 }
