@@ -23,7 +23,10 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)//Ska vara disabled
-                .authorizeHttpRequests(a -> a.anyRequest().permitAll())
+                .authorizeHttpRequests(a -> {
+                    a.requestMatchers("/view-profile").authenticated();
+                    a.anyRequest().permitAll();
+                })
                 .oauth2Login(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults())
                 .build();
