@@ -1,6 +1,7 @@
 package com.pvt.project71.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.pvt.project71.domain.enums.ProofType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class ChallengeEntity {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDate;
     private String name;
+    private Integer maxCompletions;
 
     //@ManyToOne
     //@JoinColumn(name = "placeholder", nullable = false)
@@ -34,4 +36,6 @@ public class ChallengeEntity {
 
     private int rewardPoints;
     private String description;
+    private ProofType proofType;
+
 }

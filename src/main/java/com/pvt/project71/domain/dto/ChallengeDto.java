@@ -1,6 +1,7 @@
 package com.pvt.project71.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.pvt.project71.domain.enums.ProofType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,4 +23,7 @@ public class ChallengeDto {
 
     private int rewardPoints;
     private String description;
+    private ProofType proofType;
+    private Integer maxCompletions;
+
 }

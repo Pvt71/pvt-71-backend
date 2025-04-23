@@ -19,6 +19,7 @@ public class ChallengeAttemptEntity {
 
     Status status;
 
+
     @ManyToOne
     @MapsId("challengeId")
     ChallengeEntity challenge;
