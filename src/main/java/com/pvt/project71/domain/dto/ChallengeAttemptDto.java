@@ -20,4 +20,5 @@ public class ChallengeAttemptDto {
     Status status;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     LocalDateTime submittedAt;
+    String content;
 }
