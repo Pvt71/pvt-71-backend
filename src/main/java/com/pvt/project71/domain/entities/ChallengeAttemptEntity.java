@@ -1,11 +1,14 @@
 package com.pvt.project71.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pvt.project71.domain.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -18,13 +21,9 @@ public class ChallengeAttemptEntity {
     ChallengeAttemptId id;
 
     Status status;
-
-
-    @ManyToOne
-    @MapsId("challengeId")
-    ChallengeEntity challenge;
-
-    @ManyToOne
-    @MapsId("email")
-    UserEntity user;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    LocalDateTime submittedAt;
+    //@ManyToOne
+    //@MapsId("email")
+    //UserEntity user;
 }

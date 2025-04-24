@@ -18,6 +18,6 @@ import java.io.Serializable;
 @Embeddable
 public class ChallengeAttemptId implements Serializable {
     private Integer challengeId;
-    private String email;
+    private String userEmail;
 
 }

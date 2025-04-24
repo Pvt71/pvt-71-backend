@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -33,6 +34,10 @@ public class ChallengeEntity {
     //@ManyToOne
     //@JoinColumn(name = "creator_email", nullable = false)
     //private UserEntity creator;
+
+    @OneToMany( cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ChallengeAttemptEntity> attempts;
+
 
     private int rewardPoints;
     private String description;

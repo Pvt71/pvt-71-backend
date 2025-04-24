@@ -2,7 +2,6 @@ package com.pvt.project71;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pvt.project71.domain.dto.ChallengeAttemptDto;
-import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
 import com.pvt.project71.domain.entities.ChallengeAttemptId;
 import com.pvt.project71.domain.enums.Status;
@@ -47,11 +46,8 @@ public class ChallengeAttemptTests {
     @Autowired
     private ChallengeAttemptRepository challengeAttemptRepository;
     @Autowired
-    private UserMapperImpl userMapper;
-    @Autowired
     private ChallengeAttemptMapper challengeAttemptMapper;
-    @Autowired
-    private ChallengeMapper challengeMapper;
+
 
     @AfterEach
     public void cleanup() {challengeAttemptRepository.deleteAll();}
@@ -60,26 +56,28 @@ public class ChallengeAttemptTests {
     public void testCreatingEntityAndMapToDTOIsDoneCorrectly() {
         ChallengeAttemptEntity challengeAttemptEntity = ChallengeAttemptEntity.builder()
                 .id(new ChallengeAttemptId(1, TestDataUtil.createValidTestUserEntity().getEmail()))
-                .challenge(TestDataUtil.createChallengeEnitityA())
-                .user(TestDataUtil.createValidTestUserEntity()).status(Status.ACCEPTED).build();
+                //.challenge(TestDataUtil.createChallengeEnitityA())
+                //.user(TestDataUtil.createValidTestUserEntity()).
+                .status(Status.ACCEPTED).build();
         ChallengeAttemptDto challengeAttemptDto = challengeAttemptMapper.mapTo(challengeAttemptEntity);
         assertAll(
-                () -> assertEquals(userMapper.mapTo(challengeAttemptEntity.getUser()), challengeAttemptDto.getUser()),
-                () -> assertEquals(challengeMapper.mapTo(challengeAttemptEntity.getChallenge()), challengeAttemptDto.getChallenge()),
+                () -> assertEquals(TestDataUtil.createValidTestUserEntity().getEmail(), challengeAttemptDto.getUserEmail()),
+                () -> assertEquals(1, challengeAttemptDto.getChallengeId()),
                 () -> assertEquals(challengeAttemptEntity.getStatus(), challengeAttemptDto.getStatus())
         );
     }
     @Test
     public void testCreatingDtoAndMapToEntityIsDoneCorrectly() {
         ChallengeAttemptDto challengeAttemptDto = ChallengeAttemptDto.builder().status(Status.ACCEPTED)
-                .challenge(TestDataUtil.createChallengeDtoA()).user(TestDataUtil.createValidTestUserDtoA()).build();
+                .challengeId(TestDataUtil.createChallengeDtoA().getId())
+                .userEmail(TestDataUtil.createValidTestUserDtoA().getEmail()).build();
         ChallengeAttemptEntity challengeAttemptEntity = challengeAttemptMapper.mapFrom(challengeAttemptDto);
         assertAll(
-                () -> assertEquals(challengeAttemptDto.getUser(), userMapper.mapTo(challengeAttemptEntity.getUser())),
-                () -> assertEquals(challengeAttemptDto.getChallenge(), challengeMapper.mapTo(challengeAttemptEntity.getChallenge())),
+                //() -> assertEquals(challengeAttemptDto.getUser(), userMapper.mapTo(challengeAttemptEntity.getUser())),
+                //() -> assertEquals(challengeAttemptDto.getChallenge(), challengeMapper.mapTo(challengeAttemptEntity.getChallenge())),
                 () -> assertEquals(challengeAttemptDto.getStatus(), challengeAttemptEntity.getStatus()),
-                () -> assertEquals(challengeAttemptDto.getUser().getEmail(), challengeAttemptEntity.getId().getEmail()),
-                () -> assertEquals(challengeAttemptDto.getChallenge().getId(), challengeAttemptEntity.getId().getChallengeId())
+                () -> assertEquals(challengeAttemptDto.getUserEmail(), challengeAttemptEntity.getId().getUserEmail()),
+                () -> assertEquals(challengeAttemptDto.getChallengeId(), challengeAttemptEntity.getId().getChallengeId())
         );
     }
 }
