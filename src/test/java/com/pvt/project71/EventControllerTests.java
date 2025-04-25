@@ -1,8 +1,7 @@
-package com.pvt.project71.controllers;
+package com.pvt.project71;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pvt.project71.TestDataUtil;
 import com.pvt.project71.domain.dto.EventDto;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.services.EventService;
@@ -20,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
