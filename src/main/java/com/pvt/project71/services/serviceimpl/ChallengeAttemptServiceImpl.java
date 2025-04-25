@@ -34,14 +34,17 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
         } else if (challengeAttemptRepository.findById(challengeAttemptEntity.getId()).isPresent()) {
             throw new DuplicateKeyException("Attempt already exists");
         }
+        //challengeEntity.get().getAttempts().add(challengeAttemptEntity); //Måste fixas vidare och testas massa
         if (challengeEntity.get().getProofType() == ProofType.REQUEST) {
+            //it is updated then saved
             challengeAttemptEntity.setStatus(Status.PENDING);
             return save(challengeAttemptEntity);
+
         }
         //Annars ska logik för hur det anses vara accepterat köras
         //TODO: implementera logiken
 
-        //För nu ska man inte ens nå det här
+            //För nu ska man inte ens nå det här
         return null;
     }
 

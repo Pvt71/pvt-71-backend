@@ -46,8 +46,8 @@ public class ChallengeAttemptController {
         }
     }
     @PatchMapping("/accept/{userEmail}")
-    public ResponseEntity<ChallengeAttemptDto> acceptChallengeAttempt(@PathVariable("userEmail") String email) {
-        Optional<ChallengeAttemptEntity> attemptToAccept = challengeAttemptService.find(new ChallengeAttemptId());
+    public ResponseEntity<ChallengeAttemptDto> acceptChallengeAttempt( @PathVariable("id") Integer id, @PathVariable("userEmail") String email) {
+        Optional<ChallengeAttemptEntity> attemptToAccept = challengeAttemptService.find(new ChallengeAttemptId(id, email));
         if (attemptToAccept.isEmpty()) {
             return new ResponseEntity<ChallengeAttemptDto>(HttpStatus.NOT_FOUND);
         } else if (attemptToAccept.get().getStatus() == Status.ACCEPTED) {

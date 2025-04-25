@@ -6,6 +6,7 @@ import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.enums.ProofType;
 
 import java.time.LocalDateTime;
 
@@ -15,11 +16,11 @@ public class TestDataUtil {
     // "2025-10-27T16:30" test tiden som man kan ta och jämföra med.
     public static ChallengeEntity createChallengeEnitityA() {
         return  ChallengeEntity.builder().endDate(TEST_TIME).name("A").description("First Letter of the alphabet")
-                .rewardPoints(1000).build();
+                .rewardPoints(1000).proofType(ProofType.REQUEST).build();
     }
     public static ChallengeDto createChallengeDtoA() {
         return  ChallengeDto.builder().endDate(TEST_TIME).name("A").description("First Letter of the alphabet")
-                .rewardPoints(1000).build();
+                .rewardPoints(1000).proofType(ProofType.REQUEST).build();
     }
     public static ChallengeEntity createChallengeEnitityB() {
         return  ChallengeEntity.builder().endDate(TEST_TIME).name("B").description("Not the First Letter of the alphabet")

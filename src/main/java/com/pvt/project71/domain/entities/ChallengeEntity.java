@@ -35,7 +35,7 @@ public class ChallengeEntity {
     //@JoinColumn(name = "creator_email", nullable = false)
     //private UserEntity creator;
 
-    @OneToMany( cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "id.challengeId",cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     List<ChallengeAttemptEntity> attempts;
 
 
