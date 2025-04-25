@@ -5,6 +5,8 @@ import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.EventEntity;
+import com.pvt.project71.domain.dto.EventDto;
 
 import java.time.LocalDateTime;
 
@@ -74,4 +76,36 @@ public class TestDataUtil {
                 .profilePictureUrl("testUrl2")
                 .build();
     }
+    public static EventEntity createTestEventEntityA(EventEntity eventEntity) {
+        return EventEntity.builder()
+                .name("TestEventA")
+                .description("TestDescription")
+                .endDate(TEST_TIME)
+                .build();
+    }
+    public static EventDto createTestEventDtoA(EventEntity eventEntity) {
+        return EventDto.builder()
+                .name("TestEventA")
+                .description("TestDescription")
+                .endDate(TEST_TIME)
+                .build();
+    }
+    public static EventEntity createTestEventEntityB(EventEntity eventEntity) {
+        return EventEntity.builder()
+                .name("TestEventB")
+                .description("TestDescription")
+                .endDate(TEST_TIME)
+                .build();
+    }
+    public static EventDto createTestEventDtoB(EventEntity eventEntity) {
+        return EventDto.builder()
+                .name("TestEventB")
+                .description("TestDescription")
+                .endDate(TEST_TIME)
+                .build();
+    }
 }
+
+    
+
+

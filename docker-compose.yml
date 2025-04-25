@@ -1,0 +1,31 @@
+
+services:
+  # H2 database service
+  h2db:
+    image: oscarfonts/h2:latest  # Using the latest H2 image from Docker Hub
+    container_name: h2db
+    ports:
+      - "9092:9092"  # Expose H2's default port (9092)
+    environment:
+      - H2_OPTIONS=-ifNotExists  # If database doesn't exist, create it
+    networks:
+      - test-network  # Use a custom network to allow Spring Boot to connect to H2
+    restart: always  # Automatically restart the container if it stops
+
+  springboot-app:
+    build: .
+    image: test-image  # Replace with the name of your Spring Boot image
+    container_name: springboot-app
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+    depends_on:
+      - h2db  # Ensure the H2 database starts before Spring Boot app
+    networks:
+      - test-network  # Connect Spring Boot to the same network as H2
+    ports:
+      - "8080:8080"  # Expose your Spring Boot app on port 8080
+    restart: always  # Automatically restart the app if it stops
+
+networks:
+  test-network:
+    driver: bridge  # Default network driver
