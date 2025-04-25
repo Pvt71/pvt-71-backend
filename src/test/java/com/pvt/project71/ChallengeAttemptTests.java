@@ -12,7 +12,6 @@ import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeAttemptService;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.UserService;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.util.Assert;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -122,7 +121,7 @@ public class ChallengeAttemptTests {
         ChallengeEntity challengeEntity = challengeService.save(TestDataUtil.createChallengeEnitityA());
         mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT));
         challengeEntity = challengeService.find(challengeEntity.getId()).get();
-        assertFalse(challengeEntity.getAttempts().isEmpty());
+            assertFalse(challengeEntity.getAttempts().isEmpty());
     }
     @Test
     public void testAcceptingASubmittedAttempt() throws Exception{
@@ -149,7 +148,7 @@ public class ChallengeAttemptTests {
         mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT));
         mockMvc.perform(patch("/challenges/" + challengeEntity.getId() + "/accept/Test@Test.com"));
         challengeEntity = challengeService.find(challengeEntity.getId()).get();
-        assertEquals(challengeEntity.getAttempts().get(0).getStatus(), Status.ACCEPTED);
+        assertEquals(Status.ACCEPTED, challengeEntity.getAttempts().get(0).getStatus());
     }
     @Test
     public void testDeletingAChallengeWithAnAttemptAndThatTheAttemptIsDeletedToo() throws Exception {
@@ -161,7 +160,7 @@ public class ChallengeAttemptTests {
     @Test
     public void testAcceptingAnAlreadyAcceptedAttemptShouldGive409() throws Exception {
         ChallengeEntity challengeEntity = challengeService.save(TestDataUtil.createChallengeEnitityA());
-        mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT));
+        mockMvc.perform(post("/challenges/" + challengeEntity.getId() + "/submit/" + CONTENT));
         mockMvc.perform(patch("/challenges/" + challengeEntity.getId() + "/accept/Test@Test.com"));
         mockMvc.perform(patch("/challenges/" + challengeEntity.getId() + "/accept/Test@Test.com"))
                 .andExpect(status().isConflict());

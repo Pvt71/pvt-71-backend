@@ -3,9 +3,10 @@ package com.pvt.project71.services.serviceimpl;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeService;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -26,7 +27,9 @@ public class ChallengeServiceImpl implements ChallengeService {
     public ChallengeEntity save(ChallengeEntity challengeEntity) {
         //TODO: Lägga in logik så att man inte kan ge för mycket poäng
         //TODO: Ska fixa så att om inte en event passeras igenom får den standard event här innan det sparas
-
+        if (challengeEntity.getAttempts() == null) {
+            challengeEntity.setAttempts(new ArrayList<>());
+        }
         return challengeRepository.save(challengeEntity);
     }
 
@@ -52,4 +55,5 @@ public class ChallengeServiceImpl implements ChallengeService {
             return challengeRepository.save(existing);
         }).orElseThrow(() -> new RuntimeException("Challenge doesnt exist"));
     }
+
 }

@@ -12,6 +12,8 @@ import com.pvt.project71.services.ChallengeAttemptService;
 import com.pvt.project71.services.ChallengeService;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -35,11 +37,11 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
             throw new DuplicateKeyException("Attempt already exists");
         }
         challengeAttemptEntity.setChallenge(challengeEntity.get());
-        //challengeEntity.get().getAttempts().add(challengeAttemptEntity); //Måste fixas vidare och testas massa
+        challengeEntity.get().getAttempts().add(challengeAttemptEntity);
         if (challengeEntity.get().getProofType() == ProofType.REQUEST) {
-            //it is updated then saved
             challengeAttemptEntity.setStatus(Status.PENDING);
-            return save(challengeAttemptEntity);
+            challengeService.save(challengeEntity.get());
+            return challengeAttemptEntity;
 
         }
         //Annars ska logik för hur det anses vara accepterat köras
