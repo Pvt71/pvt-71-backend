@@ -3,6 +3,7 @@ package com.pvt.project71.services.serviceimpl;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -30,6 +31,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
+    @Transactional
     public Optional<ChallengeEntity> find(Integer id) {
         return challengeRepository.findById(id);
     }

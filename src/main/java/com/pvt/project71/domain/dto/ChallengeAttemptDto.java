@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class ChallengeAttemptDto {
-    Integer challengeId;
+    ChallengeDto challenge;
     String userEmail;
 
     Status status;

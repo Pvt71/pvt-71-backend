@@ -66,37 +66,36 @@ public class ChallengeAttemptTests {
     public void testCreatingEntityAndMapToDTOIsDoneCorrectly() {
         ChallengeAttemptEntity challengeAttemptEntity = ChallengeAttemptEntity.builder()
                 .id(new ChallengeAttemptId(1, TestDataUtil.createValidTestUserEntity().getEmail()))
-                .status(Status.ACCEPTED).build();
+                .status(Status.ACCEPTED).challenge(TestDataUtil.createChallengeEnitityA()).build();
         ChallengeAttemptDto challengeAttemptDto = challengeAttemptMapper.mapTo(challengeAttemptEntity);
         assertAll(
                 () -> assertEquals(TestDataUtil.createValidTestUserEntity().getEmail(), challengeAttemptDto.getUserEmail()),
-                () -> assertEquals(1, challengeAttemptDto.getChallengeId()),
+                () -> assertEquals(TestDataUtil.createChallengeDtoA(), challengeAttemptDto.getChallenge()),
                 () -> assertEquals(challengeAttemptEntity.getStatus(), challengeAttemptDto.getStatus())
         );
     }
     @Test
     public void testCreatingDtoAndMapToEntityIsDoneCorrectly() {
         ChallengeAttemptDto challengeAttemptDto = ChallengeAttemptDto.builder().status(Status.ACCEPTED)
-                .challengeId(TestDataUtil.createChallengeDtoA().getId())
+                .challenge(TestDataUtil.createChallengeDtoA())
                 .userEmail(TestDataUtil.createValidTestUserDtoA().getEmail()).build();
         ChallengeAttemptEntity challengeAttemptEntity = challengeAttemptMapper.mapFrom(challengeAttemptDto);
         assertAll(
                 () -> assertEquals(challengeAttemptDto.getStatus(), challengeAttemptEntity.getStatus()),
                 () -> assertEquals(challengeAttemptDto.getUserEmail(), challengeAttemptEntity.getId().getUserEmail()),
-                () -> assertEquals(challengeAttemptDto.getChallengeId(), challengeAttemptEntity.getId().getChallengeId())
+                () -> assertEquals(challengeAttemptDto.getChallenge().getId(), challengeAttemptEntity.getId().getChallengeId())
         );
     }
     @Test
     public void testSubmittingAnAttemptToExistingChallengeWorksCorrectly() throws Exception{
 
         ChallengeEntity challengeEntity = challengeService.save(TestDataUtil.createChallengeEnitityA());
-
         mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT))
                 .andExpect(status().isCreated())
                 .andExpectAll(
                         jsonPath("$.status").value("PENDING"),
                         jsonPath("$.userEmail").value("Test@Test.com"),//Var mail som var bestämt för nu i controller
-                        jsonPath("$.challengeId").value(challengeEntity.getId()),
+                        jsonPath("$.challenge.id").value(challengeEntity.getId()),//Måste fixas när entityDTo har listan med attempts med sig
                         jsonPath("$.content").value(CONTENT));
     }
     @Test
@@ -118,6 +117,7 @@ public class ChallengeAttemptTests {
                 .andExpect(status().isConflict());
     }
     @Test
+    @Transactional
     public void testSubmittingAnAttemptToExistingChallengeAndRetrieveItViaTheChallengeShouldGiveAttempt() throws Exception {
         ChallengeEntity challengeEntity = challengeService.save(TestDataUtil.createChallengeEnitityA());
         mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT));
@@ -133,7 +133,7 @@ public class ChallengeAttemptTests {
                 .andExpectAll(
                         jsonPath("$.status").value("ACCEPTED"),
                         jsonPath("$.userEmail").value("Test@Test.com"),//Var mail som var bestämt för nu i controller
-                        jsonPath("$.challengeId").value(challengeEntity.getId()),
+                        jsonPath("$.challenge.id").value(challengeEntity.getId()),
                         jsonPath("$.content").value(CONTENT));
     }
     @Test
@@ -143,6 +143,7 @@ public class ChallengeAttemptTests {
                 .andExpect(status().isNotFound());
     }
     @Test
+    @Transactional
     public void testAcceptingSubmittedAttemptAndCheckItIsUpdatedInChallengesAttemptListCorrectly() throws Exception {
         ChallengeEntity challengeEntity = challengeService.save(TestDataUtil.createChallengeEnitityA());
         mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT));
