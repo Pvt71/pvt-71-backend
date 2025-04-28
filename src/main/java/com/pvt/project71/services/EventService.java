@@ -20,4 +20,6 @@ public interface EventService {
 
 
     void delete(Long id);
+
+    EventEntity getDefaultEvent();
 }

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @RestController
@@ -23,8 +24,12 @@ public class ChallengeController {
 
     @PostMapping(path = "/challenges")
     public ResponseEntity<ChallengeDto> createChallenge(@RequestBody ChallengeDto challengeDto) {
-        ChallengeEntity savedChallengeEntity = challengeService.save(challengeMapper.mapFrom(challengeDto));
-        return new ResponseEntity<>(challengeMapper.mapTo(savedChallengeEntity), HttpStatus.CREATED);
+        try {
+            ChallengeEntity savedChallengeEntity = challengeService.save(challengeMapper.mapFrom(challengeDto));
+            return new ResponseEntity<>(challengeMapper.mapTo(savedChallengeEntity), HttpStatus.CREATED);
+        } catch (NoSuchElementException noSuchElementException) {
+            return new ResponseEntity<ChallengeDto>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping(path = "/challenges/{id}")

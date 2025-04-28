@@ -26,20 +26,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
-@ActiveProfiles("local")
+@ActiveProfiles("test")
 
 public class EventControllerTests {
 
+    @Autowired
     private EventService eventService;
+    @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    public EventControllerTests(MockMvc mockMvc, EventService eventService) {
-        this.eventService = eventService;
-        this.mockMvc = mockMvc;
-    }
+
     @BeforeEach
     public void clearDatabase() {
         eventService.findAll().forEach(event -> eventService.delete(event.getId()));
@@ -94,9 +92,9 @@ public class EventControllerTests {
                 MockMvcRequestBuilders.get("/events")
                     .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$[0].id").isNumber()
+                MockMvcResultMatchers.jsonPath("$[1].id").isNumber()
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$[0].name").value("TestEventA")
+                MockMvcResultMatchers.jsonPath("$[1].name").value("TestEventA")
         );
     }
 
@@ -125,7 +123,7 @@ public class EventControllerTests {
         eventService.save(testEvent);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/events/1")
+                MockMvcRequestBuilders.get("/events/2")
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.id").isNumber()

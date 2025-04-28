@@ -4,7 +4,9 @@ import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.services.EventService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,6 +23,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventEntity save(EventEntity eventEntity) {
+        getDefaultEvent();//Ser till att default alltid finns först som event med id 1.
+        if (eventEntity.getChallenges() == null) {
+            eventEntity.setChallenges(new ArrayList<>());
+        }
         return eventRepository.save(eventEntity);
     }
 
@@ -34,6 +40,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public Optional<EventEntity> findOne(Long id) {
         return eventRepository.findById(id);
     }
@@ -60,5 +67,13 @@ public class EventServiceImpl implements EventService {
         eventRepository.deleteById(id);
     }
 
-
+    @Override
+    @Transactional
+    public EventEntity getDefaultEvent() {
+        Optional<EventEntity> defaultEvent = findOne(1L);
+        if (defaultEvent.isEmpty()) {
+            return eventRepository.save(EventEntity.builder().name("Default").challenges(new ArrayList<>()).build());
+        }
+        return defaultEvent.get();
+    }
 }

@@ -17,7 +17,7 @@ public class ChallengeDto {
     private String name;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDate;
-    //private EventDto event;
+    private EventDto event;
     //private UserDto creator;
 
     private int rewardPoints;

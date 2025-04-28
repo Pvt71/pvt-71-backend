@@ -24,9 +24,9 @@ public class ChallengeEntity {
     private LocalDateTime endDate;
     private String name;
 
-    //@ManyToOne
-    //@JoinColumn(name = "placeholder", nullable = false)
-    //private EventEntity event;
+    @ManyToOne
+    @JoinColumn(name = "event_id", nullable = false)
+    private EventEntity event;
 
     //@ManyToOne
     //@JoinColumn(name = "creator_email", nullable = false)

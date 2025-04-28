@@ -1,10 +1,12 @@
 package com.pvt.project71.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -30,9 +32,9 @@ public class EventEntity {
 //    @JoinColumn(name = "user_id")
 //    private UserEntity userEntity;
 
-//    @OneToMany(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "challenge_id")
-//    private ChallengeEntity challengeEntity;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "event")
+    @JsonIgnore //ignorerar listan när Entity görs till Json
+    private List<ChallengeEntity> challenges;
 
     @Override
     public boolean equals(Object o) {

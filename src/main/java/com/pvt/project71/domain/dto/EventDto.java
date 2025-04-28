@@ -1,12 +1,14 @@
 package com.pvt.project71.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.pvt.project71.domain.entities.ChallengeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -24,7 +26,7 @@ public class EventDto {
     private LocalDateTime endDate;
 
 //  private UserEntity userEntity;
-//  private ChallengeEntity challengeEntity;
+    //private List<ChallengeEntity> challenges;
 
 
 }
