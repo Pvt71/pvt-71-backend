@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,7 +33,7 @@ public class UserEntity {
     //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
     //private List<Score> scores;
 
-    //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Challenge> challenges;
+    @OneToMany(mappedBy = "creator", fetch = FetchType.EAGER)
+    private List<ChallengeEntity> challenges;
 
 }

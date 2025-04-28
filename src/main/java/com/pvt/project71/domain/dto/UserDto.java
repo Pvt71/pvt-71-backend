@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,6 +31,6 @@ public class UserDto {
     //När events/scores/challenges finns:
     //private List<Event> events;
     //private List<Score> scores;
-    //private List<Challenge> challenges;
+    private List<ChallengeDto> challenges;
 
 }

@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
-public class UserControllerIntegrationTests {
+public class UserControllerTests {
 
     private MockMvc mockMvc;
 
@@ -35,7 +35,7 @@ public class UserControllerIntegrationTests {
     private UserService userService;
 
     @Autowired
-    public UserControllerIntegrationTests(MockMvc mockMvc, UserService userService){
+    public UserControllerTests(MockMvc mockMvc, UserService userService){
         this.mockMvc = mockMvc;
         this.objectMapper = new ObjectMapper();
         this.userService = userService;
