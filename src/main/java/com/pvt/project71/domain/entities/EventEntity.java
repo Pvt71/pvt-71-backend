@@ -1,10 +1,12 @@
 package com.pvt.project71.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Data

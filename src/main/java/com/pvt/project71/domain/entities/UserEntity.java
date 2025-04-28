@@ -1,11 +1,14 @@
 package com.pvt.project71.domain.entities;
 
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -24,12 +27,12 @@ public class UserEntity {
 
     private String profilePictureUrl;
 
+    private String password;
     //När events/scores/challenges finns:
     //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
     //private List<Event> events;
 
-    //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Score> scores;
+
 
     //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
     //private List<Challenge> challenges;
