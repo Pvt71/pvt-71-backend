@@ -1,6 +1,7 @@
 package com.pvt.project71;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeService;
@@ -50,6 +51,16 @@ public class ChallengeTests {
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isCreated());
     }
+    @Test
+    public void testCreatingAChallengeWithLessPointsThan1Gives404() throws Exception{
+        ChallengeDto testChallenge = TestDataUtil.createChallengeDtoA();
+        testChallenge.setRewardPoints(0);
+        String challengeJson = objectMapper.writeValueAsString(testChallenge);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
+                .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
 
     @Test
     public void testCreatingAChallengeAndRetrievingIt() throws Exception{
@@ -172,4 +183,6 @@ public class ChallengeTests {
         mockMvc.perform(MockMvcRequestBuilders.put("/challenges/1").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
+
+
 }
