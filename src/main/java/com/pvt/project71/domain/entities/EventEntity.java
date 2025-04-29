@@ -18,7 +18,7 @@ import java.util.Objects;
 public class EventEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "events_id_seq")
+    @GeneratedValue(generator = "IDENTITY")
     private long id;
 
     private String name;
