@@ -5,6 +5,7 @@ import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -49,5 +50,10 @@ public class ChallengeServiceImpl implements ChallengeService {
 
             return challengeRepository.save(existing);
         }).orElseThrow(() -> new RuntimeException("Challenge doesnt exist"));
+    }
+
+    @Override
+    public List<ChallengeEntity> getChallengesByUserEmail(String email) {
+        return challengeRepository.findByCreatorEmail(email);
     }
 }

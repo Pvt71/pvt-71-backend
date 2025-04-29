@@ -1,10 +1,10 @@
 package com.pvt.project71.services.serviceimpl;
 
-import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService {
 
     //CRUD - Read (many)
     @Override
+    @Transactional
     public List<UserEntity> findAll() {
         return StreamSupport.stream(userRepository
                         .findAll()
@@ -39,6 +40,7 @@ public class UserServiceImpl implements UserService {
 
     //CRUD - Read (one)
     @Override
+    @Transactional
     public Optional<UserEntity> findOne(String email) {
         return userRepository.findById(email);
     }
@@ -68,6 +70,4 @@ public class UserServiceImpl implements UserService {
     public boolean isExists(String email) {
         return userRepository.existsById(email);
     }
-
-
 }

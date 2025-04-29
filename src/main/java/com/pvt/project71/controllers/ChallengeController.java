@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 public class ChallengeController {
@@ -65,5 +67,15 @@ public class ChallengeController {
         ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
         ChallengeEntity updatedChallenge = challengeService.save(challengeEntity);
         return  new ResponseEntity<>(challengeMapper.mapTo(updatedChallenge), HttpStatus.OK);
+    }
+
+    // challenges from a user through /challenges?user=email
+    @GetMapping("/challenges")
+    public ResponseEntity<List<ChallengeDto>> getChallengesByCreatorEmail(@RequestParam("user") String email) {
+        List<ChallengeEntity> challenges = challengeService.getChallengesByUserEmail(email);
+        List<ChallengeDto> dtos = challenges.stream()
+                .map(challengeMapper::mapTo)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 }

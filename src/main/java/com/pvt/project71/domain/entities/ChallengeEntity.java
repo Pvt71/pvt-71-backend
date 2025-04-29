@@ -28,8 +28,8 @@ public class ChallengeEntity {
     //@JoinColumn(name = "placeholder", nullable = false)
     //private EventEntity event;
 
-    @ManyToOne
-    @JoinColumn(name = "email", nullable = false)
+    @ManyToOne()
+    @JoinColumn(name = "creator_email", nullable = false)
     private UserEntity creator;
 
     private int rewardPoints;

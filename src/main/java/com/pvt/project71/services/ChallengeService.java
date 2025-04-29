@@ -3,6 +3,7 @@ package com.pvt.project71.services;
 import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ChallengeService {
@@ -13,4 +14,6 @@ public interface ChallengeService {
     void delete(Integer id);
 
     ChallengeEntity partialUpdate(Integer id, ChallengeEntity challengeEntity);
+
+    List<ChallengeEntity> getChallengesByUserEmail(String email);
 }

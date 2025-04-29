@@ -2,8 +2,10 @@ package com.pvt.project71;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pvt.project71.domain.entities.ChallengeEntity;
+import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeService;
+import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +33,8 @@ public class ChallengeTests {
     @Autowired
     private ChallengeService challengeService;
     @Autowired
+    private UserService userService;
+    @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
@@ -45,6 +49,11 @@ public class ChallengeTests {
     @Test
     public void testCreatingAChallengeReturns201() throws Exception{
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
+
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+        testChallenge.setCreator(testUser);
+
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
@@ -54,6 +63,11 @@ public class ChallengeTests {
     @Test
     public void testCreatingAChallengeAndRetrievingIt() throws Exception{
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
+
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+        testChallenge.setCreator(testUser);
+
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
@@ -68,6 +82,11 @@ public class ChallengeTests {
     @Test
     public void testGetExistingChallengeGive200()throws Exception {
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
+
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+        testChallenge.setCreator(testUser);
+
         ChallengeEntity saved = challengeService.save(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges/" + saved.getId()).contentType(MediaType.APPLICATION_JSON))
@@ -77,6 +96,11 @@ public class ChallengeTests {
     @Test
     public void testGetExistingChallengeReturnsChallenge()throws Exception {
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
+
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+        testChallenge.setCreator(testUser);
+
         ChallengeEntity saved = challengeService.save(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges/"  + saved.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
@@ -101,6 +125,11 @@ public class ChallengeTests {
     @Test
     public void testDeletingGives204WhenChallengeExists() throws Exception {
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
+
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+        testChallenge.setCreator(testUser);
+
         challengeService.save(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/1").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
@@ -110,7 +139,12 @@ public class ChallengeTests {
     public void testPartialUpdateGives200OnExistingChallenge() throws  Exception {
         ChallengeEntity testChallengeA = TestDataUtil.createChallengeEnitityA();
         ChallengeEntity testChallengeB = TestDataUtil.createChallengeEnitityB();
+
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
+        testChallengeA.setCreator(testUser);
         challengeService.save(testChallengeA);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/challenges/1").contentType(MediaType.APPLICATION_JSON)
@@ -121,6 +155,13 @@ public class ChallengeTests {
     public void testPartialUpdateReturnsUpdatedValuesOnExistingChallenge() throws  Exception {
         ChallengeEntity testChallengeA = TestDataUtil.createChallengeEnitityA();
         ChallengeEntity testChallengeB = TestDataUtil.createChallengeEnitityB();
+
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+
+        testChallengeA.setCreator(testUser);
+        testChallengeB.setCreator(testUser);
+
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
         challengeService.save(testChallengeA);
 
@@ -143,6 +184,13 @@ public class ChallengeTests {
     public void testFullUpdateGives200OnExistingChallenge() throws  Exception {
         ChallengeEntity testChallengeA = TestDataUtil.createChallengeEnitityA();
         ChallengeEntity testChallengeB = TestDataUtil.createChallengeEnitityB();
+
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+
+        testChallengeA.setCreator(testUser);
+        testChallengeB.setCreator(testUser);
+
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
         challengeService.save(testChallengeA);
 
@@ -154,7 +202,14 @@ public class ChallengeTests {
     public void testFullUpdateReturnsUpdatedValuesOnExistingChallenge() throws  Exception {
         ChallengeEntity testChallengeA = TestDataUtil.createChallengeEnitityA();
         ChallengeEntity testChallengeB = TestDataUtil.createChallengeEnitityB();
-        String challengeJson = objectMapper.writeValueAsString(testChallengeB);
+
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+
+        testChallengeA.setCreator(testUser);
+        testChallengeB.setCreator(testUser);
+
+        String challengeJson = objectMapper.writeValueAsString(testChallengeB);;
         challengeService.save(testChallengeA);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/challenges/1").contentType(MediaType.APPLICATION_JSON)
