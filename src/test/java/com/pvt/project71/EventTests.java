@@ -1,10 +1,12 @@
 package com.pvt.project71;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pvt.project71.domain.dto.EventDto;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.services.EventService;
+import jakarta.validation.constraints.AssertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+
+import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,14 +64,14 @@ public class EventTests {
 
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(eventJson))
                 .andExpect(
                         MockMvcResultMatchers.status().isCreated());
     }
 
     @Test
-    public void testThatCreateEventSuccessfullyReturnsSavedEvent () throws Exception {
+    public void testThatCreateEventSuccessfullyReturnsSavedEvent() throws Exception {
 
         EventEntity eventEntity = TestDataUtil.createTestEventEntityA(null);
         eventEntity.setId(0);
@@ -75,14 +79,14 @@ public class EventTests {
 
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/events")
-                .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(eventJson)
         ).andExpect(
-            MockMvcResultMatchers.jsonPath("$.id").isNumber()
+                MockMvcResultMatchers.jsonPath("$.id").isNumber()
         ).andExpect(
-            MockMvcResultMatchers.jsonPath("$.name").value("TestEventA")
+                MockMvcResultMatchers.jsonPath("$.name").value("TestEventA")
         );
-}
+    }
 
     @Test
     public void testThatListEventsReturnsOk() throws Exception {
@@ -99,7 +103,7 @@ public class EventTests {
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/events")
-                    .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$[1].id").isNumber()
         ).andExpect(
@@ -232,7 +236,7 @@ public class EventTests {
     }
 
     @Test
-    public void testThatDeleteTaskReturnsHttpStatus204IfUserExist () throws Exception {
+    public void testThatDeleteTaskReturnsHttpStatus204IfUserExist() throws Exception {
         //EventEntity testProjectA = TestDataUtil.createTestEventEntityA(TestDataUtil.createTestUserEntityA());
         EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA(null);
         EventEntity savedTestEvent = eventService.save(testEventEntityA);
@@ -244,11 +248,48 @@ public class EventTests {
     }
 
     @Test
-    public void testThatDeleteProjectReturnsHttpStatus204IfUserDontExist () throws Exception {
+    public void testThatDeleteProjectReturnsHttpStatus204IfUserDontExist() throws Exception {
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/events/999")
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    @Test
+    public void testThatPartialUpdateEndDateThrowsExceptionWhenIllegalDateLATE() throws Exception {
+        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA(null);
+        EventEntity savedTestEvent = eventService.save(testEventEntityA);
+
+        EventDto eventDto = TestDataUtil.createTestEventDtoA(null);
+        eventDto.setEndDate(LocalDateTime.now().plusDays(366)); // Illegal date
+        String eventDtoJson = objectMapper.writeValueAsString(eventDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/events/" + savedTestEvent.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(eventDtoJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest() // Expecting 400 Bad Request
+        );
+    }
+
+    @Test
+    public void testThatPartialUpdateEndDateThrowsExceptionWhenIllegalDateEARLY() throws Exception {
+        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA(null);
+        EventEntity savedTestEvent = eventService.save(testEventEntityA);
+
+        EventDto eventDto = TestDataUtil.createTestEventDtoA(null);
+        eventDto.setEndDate(LocalDateTime.now().minusDays(1)); // Illegal date
+        String eventDtoJson = objectMapper.writeValueAsString(eventDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/events/" + savedTestEvent.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(eventDtoJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest() // Expecting 400 Bad Request
+        );
+    }
 }
+
+
