@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.services.JWTService;
 import com.pvt.project71.services.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,15 +50,21 @@ public class SecurityConfig {
         this.rsaKeyProperties = rsaKeyProperties;
     }
 
-    @Bean
-    public InMemoryUserDetailsManager user() {
-        return new InMemoryUserDetailsManager(
-                User.withUsername("jo")
-                        .password("{noop}pass")
-                        .authorities("read")
-                        .build()
-        );
-    }
+
+// Might be useful for further http oauth testing
+    /**
+     *
+     *   @Bean
+     *   * {
+     *         return new InMemoryUserDetailsManager(
+     *                 User.withUsername("jo")
+     *                         .password("{noop}pass")
+     *                         .authorities("read")
+     *                         .build()
+     *         );
+     *     }
+     * @return
+     */
     @Bean
     JwtDecoder jwtDecoder() {
 
@@ -65,20 +72,24 @@ public class SecurityConfig {
     }
     @Bean
     JwtEncoder jwtEncoder() {
+        //Encryption, thank god for tutorials
         JWK jwk = new RSAKey.Builder(rsaKeyProperties.publicKey()).privateKey(rsaKeyProperties.privateKey()).build();
         JWKSource<SecurityContext> jwkSource = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwkSource);
     }
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JWTService jwtService) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/test", "/", "/login").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+                .oauth2Login(oauth -> oauth
+                        .successHandler(new OAuthSuccessHandler(jwtService))
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(Customizer.withDefaults())
                 .build();
     }
 
