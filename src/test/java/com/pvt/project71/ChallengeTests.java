@@ -5,6 +5,7 @@ import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeService;
+import com.pvt.project71.services.EventService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,8 @@ public class ChallengeTests {
     private ObjectMapper objectMapper;
     @Autowired
     private ChallengeRepository challengeRepository;
+    @Autowired
+    private EventService eventService;
 
     @AfterEach
     public void cleanup() {
@@ -90,7 +93,7 @@ public class ChallengeTests {
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
         ChallengeEntity saved = challengeService.save(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges/"  + saved.getId()).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(saved.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("A"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallenge.getDescription()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallenge.getRewardPoints()))
@@ -112,8 +115,8 @@ public class ChallengeTests {
     @Test
     public void testDeletingGives204WhenChallengeExists() throws Exception {
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
-        challengeService.save(testChallenge);
-        mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/1").contentType(MediaType.APPLICATION_JSON))
+        ChallengeEntity saved = challengeService.save(testChallenge);
+        mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/ + " + saved.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
@@ -122,9 +125,9 @@ public class ChallengeTests {
         ChallengeEntity testChallengeA = TestDataUtil.createChallengeEnitityA();
         ChallengeEntity testChallengeB = TestDataUtil.createChallengeEnitityB();
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
-        challengeService.save(testChallengeA);
+        ChallengeEntity saved = challengeService.save(testChallengeA);
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/challenges/1").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(MockMvcRequestBuilders.patch("/challenges/" + saved.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -133,9 +136,9 @@ public class ChallengeTests {
         ChallengeEntity testChallengeA = TestDataUtil.createChallengeEnitityA();
         ChallengeEntity testChallengeB = TestDataUtil.createChallengeEnitityB();
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
-        challengeService.save(testChallengeA);
+        ChallengeEntity saved = challengeService.save(testChallengeA);
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/challenges/1").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(MockMvcRequestBuilders.patch("/challenges/" + saved.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson)).andExpect(MockMvcResultMatchers.jsonPath("$.name").value(testChallengeB.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallengeB.getDescription()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallengeB.getRewardPoints()));
@@ -155,9 +158,9 @@ public class ChallengeTests {
         ChallengeEntity testChallengeA = TestDataUtil.createChallengeEnitityA();
         ChallengeEntity testChallengeB = TestDataUtil.createChallengeEnitityB();
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
-        challengeService.save(testChallengeA);
+        ChallengeEntity saved = challengeService.save(testChallengeA);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/challenges/1").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(MockMvcRequestBuilders.put("/challenges/" + saved.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -166,9 +169,9 @@ public class ChallengeTests {
         ChallengeEntity testChallengeA = TestDataUtil.createChallengeEnitityA();
         ChallengeEntity testChallengeB = TestDataUtil.createChallengeEnitityB();
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
-        challengeService.save(testChallengeA);
+        ChallengeEntity saved = challengeService.save(testChallengeA);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/challenges/1").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(MockMvcRequestBuilders.put("/challenges/" + saved.getId()).contentType(MediaType.APPLICATION_JSON)
                         .content(challengeJson)).andExpect(MockMvcResultMatchers.jsonPath("$.name").value(testChallengeB.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallengeB.getDescription()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallengeB.getRewardPoints()));
