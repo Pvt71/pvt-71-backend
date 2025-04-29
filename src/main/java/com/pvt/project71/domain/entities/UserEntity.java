@@ -28,7 +28,6 @@ public class UserEntity {
 
     private String profilePictureUrl;
 
-    private String password;
     //När events/scores/challenges finns:
     //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
     //private List<Event> events;

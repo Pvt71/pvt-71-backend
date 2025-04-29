@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pvt.project71.domain.dto.EventDto;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.services.EventService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,21 +27,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
-@ActiveProfiles("local")
+@ActiveProfiles("test")
 
 public class EventControllerTests {
-
+    @Autowired
     private EventService eventService;
+    @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    public EventControllerTests(MockMvc mockMvc, EventService eventService) {
-        this.eventService = eventService;
-        this.mockMvc = mockMvc;
-    }
-    @BeforeEach
+    @AfterEach
     public void clearDatabase() {
         eventService.findAll().forEach(event -> eventService.delete(event.getId()));
     }
