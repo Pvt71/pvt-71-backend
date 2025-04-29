@@ -14,7 +14,6 @@ public class ChallengeDto {
     private Integer id;
     @NotBlank
     private String name;
-    @Future
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDate;
     private EventDto event;

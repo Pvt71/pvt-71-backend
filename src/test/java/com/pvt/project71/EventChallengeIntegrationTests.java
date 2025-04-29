@@ -21,6 +21,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAmount;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -99,5 +102,27 @@ public class EventChallengeIntegrationTests {
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson)).andExpect(status().isNotFound());
+    }
+    @Test
+    public void testCreatingChallengeThatEndsBeforeMINDURATIONGives400() throws Exception {
+        ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
+        testChallenge.setEndDate(LocalDateTime.now());
+        String challengeJson = objectMapper.writeValueAsString(testChallenge);
+        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
+                .content(challengeJson)).andExpect(status().isBadRequest());
+    }
+    @Test
+    public void testCreatingChallengeToEventThatEndsAfterTheEventShouldGive400() throws Exception {
+        EventEntity testEvent = TestDataUtil.createTestEventEntityA(null);
+        String eventJson = objectMapper.writeValueAsString(testEvent);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
+                .content(eventJson));
+        ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
+        testChallenge.setEvent(eventService.findOne(2L).get());
+        testChallenge.setEndDate(testChallenge.getEvent().getEndDate().plusHours(1));
+        String challengeJson = objectMapper.writeValueAsString(testChallenge);
+        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
+                .content(challengeJson)).andExpect(status().isBadRequest());
     }
 }
