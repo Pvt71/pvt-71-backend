@@ -2,6 +2,7 @@ package com.pvt.project71.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.pvt.project71.domain.TimeStamps;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -28,9 +29,10 @@ public class EventEntity {
 
     private String description;
 
-    @Future(message = "End date must be in the future")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDate;
+    @Embedded
+    private TimeStamps dates;
 
 //    @ManyToMany(cascade = CascadeType.ALL)
 //    @JoinColumn(name = "admin_id")

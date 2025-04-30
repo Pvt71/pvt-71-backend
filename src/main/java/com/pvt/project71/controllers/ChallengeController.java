@@ -1,5 +1,6 @@
 package com.pvt.project71.controllers;
 
+import com.pvt.project71.domain.TimeStamps;
 import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.mappers.Mapper;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -28,12 +30,13 @@ public class ChallengeController {
 
     @PostMapping(path = "/challenges")
     public ResponseEntity<ChallengeDto> createChallenge(@Valid @RequestBody ChallengeDto challengeDto) {
-        try {
-            ChallengeEntity savedChallengeEntity = challengeService.save(challengeMapper.mapFrom(challengeDto));
-            return new ResponseEntity<>(challengeMapper.mapTo(savedChallengeEntity), HttpStatus.CREATED);
-        } catch (NoSuchElementException noSuchElementException) {
-            return new ResponseEntity<ChallengeDto>(HttpStatus.NOT_FOUND);
+        if (challengeDto.getDates() == null) {
+            return new ResponseEntity<ChallengeDto>(HttpStatus.BAD_REQUEST);
         }
+        challengeDto.getDates().setCreatedAt(LocalDateTime.now());
+        challengeDto.getDates().setUpdatedAt(LocalDateTime.now());
+        ChallengeEntity savedChallengeEntity = challengeService.save(challengeMapper.mapFrom(challengeDto));
+        return new ResponseEntity<>(challengeMapper.mapTo(savedChallengeEntity), HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/challenges/{id}")
@@ -56,9 +59,15 @@ public class ChallengeController {
 
     @PatchMapping(path = "/challenges/{id}")
     public ResponseEntity<ChallengeDto> partialUpdate(@PathVariable("id") Integer id, @RequestBody ChallengeDto challengeDto) {
-        if (challengeService.find(id).isEmpty()) {
+        Optional<ChallengeEntity> found = challengeService.find(id);
+        if (found.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } if (challengeDto.getDates() == null) {
+            challengeDto.setDates(new TimeStamps());
         }
+        challengeDto.getDates().setUpdatedAt(LocalDateTime.now());
+        challengeDto.getDates().setCreatedAt(found.get().getDates().getCreatedAt());
+
         challengeDto.setId(id);
         ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
         ChallengeEntity updatedChallenge = challengeService.partialUpdate(id, challengeEntity);
@@ -67,9 +76,15 @@ public class ChallengeController {
 
     @PutMapping(path = "/challenges/{id}")
     public ResponseEntity<ChallengeDto> fullUpdate(@PathVariable("id") Integer id, @RequestBody ChallengeDto challengeDto) {
-        if (challengeService.find(id).isEmpty()) {
+        Optional<ChallengeEntity> found = challengeService.find(id);
+        if (found.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } if (challengeDto.getDates() == null) {
+            return new ResponseEntity<ChallengeDto>(HttpStatus.BAD_REQUEST);
         }
+        challengeDto.getDates().setCreatedAt(found.get().getDates().getCreatedAt());
+        challengeDto.getDates().setUpdatedAt(LocalDateTime.now());
+
         challengeDto.setId(id);
         ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
         ChallengeEntity updatedChallenge = challengeService.save(challengeEntity);

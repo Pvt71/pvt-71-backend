@@ -39,7 +39,7 @@ public class ChallengeServiceImpl implements ChallengeService {
      */
     @Override
     @Transactional
-    public ChallengeEntity save(ChallengeEntity challengeEntity) throws NoSuchElementException {
+    public ChallengeEntity save(ChallengeEntity challengeEntity) {
         //TODO: Lägga in logik så att man inte kan ge för mycket poäng
         //TODO: Ska fixa så att om inte en event passeras igenom får den standard event här innan det sparas
         if (challengeEntity.getEvent() == null) {
@@ -55,7 +55,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
         Optional<EventEntity> eventEntity = eventService.findOne(challengeEntity.getEvent().getId());
         if (eventEntity.isEmpty()) {
-            throw new NoSuchElementException();
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event can not be found");
         } if (!checkValidDate(challengeEntity, eventEntity.get())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Challenge date is not valid");
         }

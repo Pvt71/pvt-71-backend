@@ -1,6 +1,7 @@
 package com.pvt.project71;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.pvt.project71.domain.TimeStamps;
 import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.ChallengeEntity;
@@ -13,22 +14,26 @@ import java.time.LocalDateTime;
 public class TestDataUtil {
     private TestDataUtil() {}
     private static final LocalDateTime TEST_TIME = LocalDateTime.of(2025, 10, 27, 16, 30, 0);
+    public static TimeStamps createTimeStampForTest() {
+        return TimeStamps.builder().endsAt(TEST_TIME)
+                .build();
+    }
     // "2025-10-27T16:30" test tiden som man kan ta och jämföra med.
     public static ChallengeEntity createChallengeEnitityA() {
-        return  ChallengeEntity.builder().endDate(TEST_TIME).name("A").description("First Letter of the alphabet")
+        return  ChallengeEntity.builder().endDate(TEST_TIME).dates(createTimeStampForTest()).name("A").description("First Letter of the alphabet")
                 .rewardPoints(1000).build();
     }
     public static ChallengeDto createChallengeDtoA() {
         return  ChallengeDto.builder().endDate(TEST_TIME).name("A").description("First Letter of the alphabet")
-                .rewardPoints(1000).build();
+                .dates(createTimeStampForTest()).rewardPoints(1000).build();
     }
     public static ChallengeEntity createChallengeEnitityB() {
         return  ChallengeEntity.builder().endDate(TEST_TIME).name("B").description("Not the First Letter of the alphabet")
-                .rewardPoints(110).build();
+                .dates(createTimeStampForTest()).rewardPoints(110).build();
     }
     public static ChallengeDto createChallengeDtoB() {
         return  ChallengeDto.builder().endDate(TEST_TIME).name("B").description("Not the First Letter of the alphabet")
-                .rewardPoints(110).build();
+                .dates(createTimeStampForTest()).rewardPoints(110).build();
     }
 
 
@@ -81,6 +86,7 @@ public class TestDataUtil {
                 .name("TestEventA")
                 .description("TestDescription")
                 .endDate(TEST_TIME)
+                .dates(createTimeStampForTest())
                 .build();
     }
     public static EventDto createTestEventDtoA() {
@@ -88,6 +94,7 @@ public class TestDataUtil {
                 .name("TestEventA")
                 .description("TestDescription")
                 .endDate(TEST_TIME)
+                .dates(createTimeStampForTest())
                 .build();
     }
     public static EventEntity createTestEventEntityB() {
@@ -95,6 +102,7 @@ public class TestDataUtil {
                 .name("TestEventB")
                 .description("TestDescription")
                 .endDate(TEST_TIME)
+                .dates(createTimeStampForTest())
                 .build();
     }
     public static EventDto createTestEventDtoB() {
@@ -102,6 +110,7 @@ public class TestDataUtil {
                 .name("TestEventB")
                 .description("TestDescription")
                 .endDate(TEST_TIME)
+                .dates(createTimeStampForTest())
                 .build();
     }
 }
