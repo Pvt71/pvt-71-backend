@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -186,6 +187,13 @@ public class ChallengeTests {
         mockMvc.perform(MockMvcRequestBuilders.put("/challenges/1").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
+    @Test
+    public void testGetAllWithNoQueryInputsReturnsChallenges() throws Exception {
+        ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
+        ChallengeEntity saved = challengeService.save(testChallenge);
 
+        mockMvc.perform(MockMvcRequestBuilders.get("/challenges")).andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(saved.getName()));
+    }
 
 }

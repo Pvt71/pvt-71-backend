@@ -13,14 +13,14 @@ public interface EventService {
 
     List<EventEntity> findAll();
 
-    Optional<EventEntity> findOne(Long id);
+    Optional<EventEntity> findOne(Integer id);
 
-    boolean isExists(Long id);
+    boolean isExists(Integer id);
 
-    EventEntity partialUpdate(Long id, EventEntity eventEntity) throws ResponseStatusException;
+    EventEntity partialUpdate(Integer id, EventEntity eventEntity) throws ResponseStatusException;
 
 
-    void delete(Long id);
+    void delete(Integer id);
 
     EventEntity getDefaultEvent();
 }

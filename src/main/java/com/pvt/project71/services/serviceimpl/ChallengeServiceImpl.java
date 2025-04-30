@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -89,6 +91,16 @@ public class ChallengeServiceImpl implements ChallengeService {
 
             return challengeRepository.save(existing);
         }).orElseThrow(() ->new RuntimeException("Challenge Doesnt Exist"));
+    }
+
+    @Override
+    public List<ChallengeEntity> getChallenges(String email, Integer eventId) {
+        if (eventId != null) {
+            return challengeRepository.findChallengeEntitiesByEvent_Id(eventId);
+        }
+        List<ChallengeEntity> toReturn = new ArrayList<>();
+        challengeRepository.findAll().forEach(toReturn::add);
+        return toReturn;
     }
     private boolean checkValidDate(ChallengeEntity challengeEntity, EventEntity eventEntity) {
         if (eventEntity.getId() == 1) {

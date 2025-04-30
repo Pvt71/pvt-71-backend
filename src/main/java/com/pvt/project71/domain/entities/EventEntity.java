@@ -21,7 +21,7 @@ public class EventEntity {
 
     @Id
     @GeneratedValue(generator = "IDENTITY")
-    private long id;
+    private Integer id;
 
     @NotBlank
     private String name;

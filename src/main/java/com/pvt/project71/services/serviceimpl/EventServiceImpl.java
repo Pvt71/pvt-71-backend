@@ -53,17 +53,17 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public Optional<EventEntity> findOne(Long id) {
+    public Optional<EventEntity> findOne(Integer id) {
         return eventRepository.findById(id);
     }
 
     @Override
-    public boolean isExists(Long id) {
+    public boolean isExists(Integer id) {
         return eventRepository.existsById(id);
     }
 
     @Override
-    public EventEntity partialUpdate(Long id, EventEntity eventEntity) throws ResponseStatusException {
+    public EventEntity partialUpdate(Integer id, EventEntity eventEntity) throws ResponseStatusException {
         eventEntity.setId(id);
         if (eventEntity.getEndDate() != null && !checkValidDate(eventEntity)){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event date is not valid!");
@@ -77,14 +77,14 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Integer id) {
         eventRepository.deleteById(id);
     }
 
     @Override
     @Transactional
     public EventEntity getDefaultEvent() {
-        Optional<EventEntity> defaultEvent = findOne(1L);
+        Optional<EventEntity> defaultEvent = findOne(1);
         if (defaultEvent.isEmpty()) {
             return eventRepository.save(EventEntity.builder().name("Default").challenges(new ArrayList<>()).build());
         }

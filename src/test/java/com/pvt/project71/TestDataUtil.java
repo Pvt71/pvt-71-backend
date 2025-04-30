@@ -76,28 +76,28 @@ public class TestDataUtil {
                 .profilePictureUrl("testUrl2")
                 .build();
     }
-    public static EventEntity createTestEventEntityA(EventEntity eventEntity) {
+    public static EventEntity createTestEventEntityA() {
         return EventEntity.builder()
                 .name("TestEventA")
                 .description("TestDescription")
                 .endDate(TEST_TIME)
                 .build();
     }
-    public static EventDto createTestEventDtoA(EventEntity eventEntity) {
+    public static EventDto createTestEventDtoA() {
         return EventDto.builder()
                 .name("TestEventA")
                 .description("TestDescription")
                 .endDate(TEST_TIME)
                 .build();
     }
-    public static EventEntity createTestEventEntityB(EventEntity eventEntity) {
+    public static EventEntity createTestEventEntityB() {
         return EventEntity.builder()
                 .name("TestEventB")
                 .description("TestDescription")
                 .endDate(TEST_TIME)
                 .build();
     }
-    public static EventDto createTestEventDtoB(EventEntity eventEntity) {
+    public static EventDto createTestEventDtoB() {
         return EventDto.builder()
                 .name("TestEventB")
                 .description("TestDescription")

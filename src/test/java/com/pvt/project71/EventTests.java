@@ -59,7 +59,7 @@ public class EventTests {
     @Test
     public void testThatCreateEventReturnsCreated() throws Exception {
         // Assert that the response status is 201 Created
-        EventEntity testEvent = TestDataUtil.createTestEventEntityA(null);
+        EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
 
@@ -73,7 +73,7 @@ public class EventTests {
     @Test
     public void testThatCreateEventSuccessfullyReturnsSavedEvent() throws Exception {
 
-        EventEntity eventEntity = TestDataUtil.createTestEventEntityA(null);
+        EventEntity eventEntity = TestDataUtil.createTestEventEntityA();
         eventEntity.setId(0);
         String eventJson = objectMapper.writeValueAsString(eventEntity);
 
@@ -98,7 +98,7 @@ public class EventTests {
     @Test
     public void testThatListEventsReturnsListOfEvents() throws Exception {
         // Assert that the response contains a list of events
-        EventEntity testEventA = TestDataUtil.createTestEventEntityA(null);
+        EventEntity testEventA = TestDataUtil.createTestEventEntityA();
         eventService.save(testEventA);
 
         mockMvc.perform(
@@ -113,7 +113,7 @@ public class EventTests {
 
     @Test
     public void testThatGetEventReturnsHttpStatus200IfEventExists() throws Exception {
-        EventEntity testEvent = TestDataUtil.createTestEventEntityA(null);
+        EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         eventService.save(testEvent);
 
         mockMvc.perform(
@@ -132,7 +132,7 @@ public class EventTests {
 
     @Test
     public void testThatGetEventReturnsEventIfEventExists() throws Exception {
-        EventEntity testEvent = TestDataUtil.createTestEventEntityA(null);
+        EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         eventService.save(testEvent);
 
         mockMvc.perform(
@@ -147,7 +147,7 @@ public class EventTests {
 
     @Test
     public void testThatFullUpdateEventReturnsHttpStatus404WhenNoEventExists() throws Exception {
-        EventDto testEvent = TestDataUtil.createTestEventDtoA(null);
+        EventDto testEvent = TestDataUtil.createTestEventDtoA();
         String eventJson = objectMapper.writeValueAsString(testEvent);
         mockMvc.perform(
                 MockMvcRequestBuilders.put("/events/99")
@@ -160,10 +160,10 @@ public class EventTests {
 
     @Test
     public void testThatFullUpdateEventReturnsHttpStatus200WhenEventExists() throws Exception {
-        EventEntity testEventEntity = TestDataUtil.createTestEventEntityA(null);
+        EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
         EventEntity savedEvent = eventService.save(testEventEntity);
 
-        EventDto testEventDto = TestDataUtil.createTestEventDtoA(savedEvent);
+        EventDto testEventDto = TestDataUtil.createTestEventDtoA();
         String eventJson = objectMapper.writeValueAsString(testEventDto);
         mockMvc.perform(
                 MockMvcRequestBuilders.put("/events/" + savedEvent.getId())
@@ -176,10 +176,10 @@ public class EventTests {
 
     @Test
     public void testThatFullUpdateUpdatesExistingEvent() throws Exception {
-        EventEntity testEventEntity = TestDataUtil.createTestEventEntityA(null);
+        EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
         EventEntity savedEvent = eventService.save(testEventEntity);
 
-        EventDto testEventDto = TestDataUtil.createTestEventDtoA(null);
+        EventDto testEventDto = TestDataUtil.createTestEventDtoA();
         testEventDto.setId(savedEvent.getId());
 
         String eventUpdateJson = objectMapper.writeValueAsString(testEventDto);
@@ -199,11 +199,11 @@ public class EventTests {
     @Test
     public void testThatPartialUpdateEventReturnsHttpStatus200IfUserExists() throws Exception {
         //EventEntity testProjectA = TestDataUtil.createTestEventEntityA(TestDataUtil.createTestUserEntityA());
-        EventEntity testProjectA = TestDataUtil.createTestEventEntityA(null);
+        EventEntity testProjectA = TestDataUtil.createTestEventEntityA();
         EventEntity savedTestEvent = eventService.save(testProjectA);
 
         //EventDto eventDto = TestDataUtil.createTestEventDtoA(TestDataUtil.createTestUserEntityA());
-        EventDto eventDto = TestDataUtil.createTestEventDtoA(null);
+        EventDto eventDto = TestDataUtil.createTestEventDtoA();
         String eventDtoJson = objectMapper.writeValueAsString(eventDto);
 
         mockMvc.perform(
@@ -216,11 +216,11 @@ public class EventTests {
     @Test
     public void testThatPartialUpdateEventUpdatesExistingUser() throws Exception {
         //EventEntity testProjectA = TestDataUtil.createTestEventEntityA(TestDataUtil.createTestUserEntityA());
-        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA(null);
+        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
         EventEntity savedTestEvent = eventService.save(testEventEntityA);
 
         //EventDto eventDto = TestDataUtil.createTestEventDtoA(TestDataUtil.createTestUserEntityA());
-        EventDto eventDto = TestDataUtil.createTestEventDtoA(null);
+        EventDto eventDto = TestDataUtil.createTestEventDtoA();
         eventDto.setName("UPDATED");
         String eventDtoJson = objectMapper.writeValueAsString(eventDto);
 
@@ -238,7 +238,7 @@ public class EventTests {
     @Test
     public void testThatDeleteTaskReturnsHttpStatus204IfUserExist() throws Exception {
         //EventEntity testProjectA = TestDataUtil.createTestEventEntityA(TestDataUtil.createTestUserEntityA());
-        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA(null);
+        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
         EventEntity savedTestEvent = eventService.save(testEventEntityA);
 
         mockMvc.perform(
@@ -257,10 +257,10 @@ public class EventTests {
 
     @Test
     public void testThatPartialUpdateEndDateThrowsExceptionWhenIllegalDateLATE() throws Exception {
-        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA(null);
+        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
         EventEntity savedTestEvent = eventService.save(testEventEntityA);
 
-        EventDto eventDto = TestDataUtil.createTestEventDtoA(null);
+        EventDto eventDto = TestDataUtil.createTestEventDtoA();
         eventDto.setEndDate(LocalDateTime.now().plusDays(366)); // Illegal date
         String eventDtoJson = objectMapper.writeValueAsString(eventDto);
 
@@ -275,10 +275,10 @@ public class EventTests {
 
     @Test
     public void testThatPartialUpdateEndDateThrowsExceptionWhenIllegalDateEARLY() throws Exception {
-        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA(null);
+        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
         EventEntity savedTestEvent = eventService.save(testEventEntityA);
 
-        EventDto eventDto = TestDataUtil.createTestEventDtoA(null);
+        EventDto eventDto = TestDataUtil.createTestEventDtoA();
         eventDto.setEndDate(LocalDateTime.now().minusDays(1)); // Illegal date
         String eventDtoJson = objectMapper.writeValueAsString(eventDto);
 

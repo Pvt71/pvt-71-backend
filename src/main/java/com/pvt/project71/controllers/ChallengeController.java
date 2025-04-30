@@ -9,8 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 public class ChallengeController {
@@ -71,5 +73,14 @@ public class ChallengeController {
         ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
         ChallengeEntity updatedChallenge = challengeService.save(challengeEntity);
         return  new ResponseEntity<>(challengeMapper.mapTo(updatedChallenge), HttpStatus.OK);
+    }
+    @GetMapping("/challenges")
+    public ResponseEntity<List<ChallengeDto>> getChallenges(@RequestParam(value = "user", required = false) String email,
+                                                                          @RequestParam(value = "event", required = false) Integer eventId) {
+        List<ChallengeEntity> challenges = challengeService.getChallenges(email, eventId);
+        List<ChallengeDto> dtos = challenges.stream()
+                .map(challengeMapper::mapTo)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 }
