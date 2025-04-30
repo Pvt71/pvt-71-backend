@@ -94,6 +94,17 @@ public class EventServiceImpl implements EventService {
         return defaultEvent.get();
     }
 
+    /**
+     * Laddar in Lazyloaded relationer
+     */
+    @Override
+    @Transactional
+    public EventEntity loadTheLazy(EventEntity toLoad) {
+        EventEntity eventEntity = eventRepository.findById(toLoad.getId()).get();
+        eventEntity.getChallenges().isEmpty();
+        return eventEntity;
+    }
+
     private boolean checkValidDate(EventEntity eventEntity) {
         return eventEntity.getEndDate().isAfter(LocalDateTime.now().plus(MIN_DURATION_HOURS))
                 && eventEntity.getEndDate().isBefore(LocalDateTime.now().plus(MAX_DURATION_DAYS));

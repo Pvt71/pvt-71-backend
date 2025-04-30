@@ -95,14 +95,13 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public List<ChallengeEntity> getChallengesByUserEmail(String email) {
-        return challengeRepository.findByCreatorEmail(email);
-    }
-
-    @Override
     public List<ChallengeEntity> getChallenges(String email, Integer eventId) {
-        if (eventId != null) {
+        if (eventId != null && email != null) {
+            return challengeRepository.findByCreatorEmailAndEventId(email, eventId);
+        } else if (eventId != null) {
             return challengeRepository.findChallengeEntitiesByEvent_Id(eventId);
+        } else if (email != null) {
+            return challengeRepository.findByCreatorEmail(email);
         }
         List<ChallengeEntity> toReturn = new ArrayList<>();
         challengeRepository.findAll().forEach(toReturn::add);

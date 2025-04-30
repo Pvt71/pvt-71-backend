@@ -144,7 +144,7 @@ public class UserChallengesIntegrationTest {
 
         ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
         challengeEntity.setCreator(userEntity);
-        challengeService.save(challengeEntity);
+        challengeEntity = challengeService.save(challengeEntity);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/challenges")
@@ -155,7 +155,7 @@ public class UserChallengesIntegrationTest {
                 MockMvcResultMatchers.jsonPath("$.size()").value(1)
         );
 
-        challengeService.delete(1);
+        challengeService.delete(challengeEntity.getId());
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/challenges")

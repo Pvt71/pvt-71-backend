@@ -1,10 +1,13 @@
 package com.pvt.project71;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeService;
+import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -142,7 +145,7 @@ public class ChallengeTests {
         testChallenge.setCreator(testUser);
 
         challengeService.save(testChallenge);
-        mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/1").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/1").contentType(MediaType.APPLICATION_JSON));
         ChallengeEntity saved = challengeService.save(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/ + " + saved.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
@@ -216,8 +219,6 @@ public class ChallengeTests {
     public void testFullUpdateReturnsUpdatedValuesOnExistingChallenge() throws  Exception {
         ChallengeEntity testChallengeA = TestDataUtil.createChallengeEnitityA();
         ChallengeEntity testChallengeB = TestDataUtil.createChallengeEnitityB();
-        String challengeJson = objectMapper.writeValueAsString(testChallengeB);
-        ChallengeEntity saved = challengeService.save(testChallengeA);
 
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
         userService.save(testUser);
@@ -226,7 +227,7 @@ public class ChallengeTests {
         testChallengeB.setCreator(testUser);
 
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);;
-        challengeService.save(testChallengeA);
+        ChallengeEntity saved = challengeService.save(testChallengeA);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/challenges/" + saved.getId()).contentType(MediaType.APPLICATION_JSON)
                         .content(challengeJson)).andExpect(MockMvcResultMatchers.jsonPath("$.name").value(testChallengeB.getName()))
@@ -246,6 +247,11 @@ public class ChallengeTests {
     @Test
     public void testGetAllWithNoQueryInputsReturnsChallenges() throws Exception {
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+
+        testChallenge.setCreator(testUser);
+
         ChallengeEntity saved = challengeService.save(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges")).andExpect(MockMvcResultMatchers.status().isOk())

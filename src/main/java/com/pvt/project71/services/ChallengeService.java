@@ -17,7 +17,5 @@ public interface ChallengeService {
 
     ChallengeEntity partialUpdate(Integer id, ChallengeEntity challengeEntity);
 
-    List<ChallengeEntity> getChallengesByUserEmail(String email);
-
     List<ChallengeEntity> getChallenges(String email, Integer eventId);
 }

@@ -24,6 +24,5 @@ public class ChallengeDto {
     //private EventDto event;
     private UserDto creator;
 
-    private int rewardPoints;
     private String description;
 }

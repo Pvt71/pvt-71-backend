@@ -76,15 +76,6 @@ public class ChallengeController {
         return  new ResponseEntity<>(challengeMapper.mapTo(updatedChallenge), HttpStatus.OK);
     }
 
-    // challenges from a user through /challenges?user=email
-    @GetMapping("/challenges")
-    public ResponseEntity<List<ChallengeDto>> getChallengesByCreatorEmail(@RequestParam("user") String email) {
-        List<ChallengeEntity> challenges = challengeService.getChallengesByUserEmail(email);
-        List<ChallengeDto> dtos = challenges.stream()
-                .map(challengeMapper::mapTo)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
-    }
     @GetMapping("/challenges")
     public ResponseEntity<List<ChallengeDto>> getChallenges(@RequestParam(value = "user", required = false) String email,
                                                                           @RequestParam(value = "eventId", required = false) Integer eventId) {

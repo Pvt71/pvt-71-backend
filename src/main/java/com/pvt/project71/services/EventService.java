@@ -23,4 +23,6 @@ public interface EventService {
     void delete(Integer id);
 
     EventEntity getDefaultEvent();
+
+    EventEntity loadTheLazy(EventEntity toLoad);
 }
