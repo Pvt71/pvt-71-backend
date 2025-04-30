@@ -35,11 +35,14 @@ public class EventServiceImpl implements EventService {
         if (eventEntity.getChallenges() == null) {
             eventEntity.setChallenges(new ArrayList<>());
         }
-        if (eventEntity.getId() == 1 || checkValidDate(eventEntity)){ //Default event ignoreras att göra date check
+        if (eventEntity.getId() == null) {
+            if (checkValidDate(eventEntity)) {
+                return eventRepository.save(eventEntity);
+            }
+        } else if (eventEntity.getId() == 1 || checkValidDate(eventEntity)){ //Default event ignoreras att göra date check
             return eventRepository.save(eventEntity);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event date is not valid!");
         }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event date is not valid!");
     }
 
     @Override

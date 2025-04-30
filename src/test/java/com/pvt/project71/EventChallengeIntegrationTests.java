@@ -135,7 +135,6 @@ public class EventChallengeIntegrationTests {
     @Test
     public void testGetChallengesByEventId() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
-
         ChallengeEntity testChallengeA = TestDataUtil.createChallengeEnitityA();
         ChallengeEntity testChallengeB = TestDataUtil.createChallengeEnitityB();
 
@@ -146,6 +145,7 @@ public class EventChallengeIntegrationTests {
         testChallengeA.setEvent(testEvent);
         testChallengeB.setEvent(testEvent);
         eventService.save(testEvent);
+
 
         challengeService.save(testChallengeA);
         challengeService.save(testChallengeB);

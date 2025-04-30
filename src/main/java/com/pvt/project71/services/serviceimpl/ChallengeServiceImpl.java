@@ -102,6 +102,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         challengeRepository.findAll().forEach(toReturn::add);
         return toReturn;
     }
+
     private boolean checkValidDate(ChallengeEntity challengeEntity, EventEntity eventEntity) {
         if (eventEntity.getId() == 1) {
             return challengeEntity.getEndDate().isAfter(LocalDateTime.now().plus(MIN_DURATION)) &&

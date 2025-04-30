@@ -74,7 +74,6 @@ public class EventTests {
     public void testThatCreateEventSuccessfullyReturnsSavedEvent() throws Exception {
 
         EventEntity eventEntity = TestDataUtil.createTestEventEntityA();
-        eventEntity.setId(0);
         String eventJson = objectMapper.writeValueAsString(eventEntity);
 
         mockMvc.perform(

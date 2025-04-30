@@ -76,7 +76,7 @@ public class ChallengeController {
     }
     @GetMapping("/challenges")
     public ResponseEntity<List<ChallengeDto>> getChallenges(@RequestParam(value = "user", required = false) String email,
-                                                                          @RequestParam(value = "event", required = false) Integer eventId) {
+                                                                          @RequestParam(value = "eventId", required = false) Integer eventId) {
         List<ChallengeEntity> challenges = challengeService.getChallenges(email, eventId);
         List<ChallengeDto> dtos = challenges.stream()
                 .map(challengeMapper::mapTo)
