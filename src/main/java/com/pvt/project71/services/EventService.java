@@ -2,6 +2,7 @@ package com.pvt.project71.services;
 
 import com.pvt.project71.domain.entities.EventEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,12 +13,14 @@ public interface EventService {
 
     List<EventEntity> findAll();
 
-    Optional<EventEntity> findOne(Long id);
+    Optional<EventEntity> findOne(Integer id);
 
-    boolean isExists(Long id);
+    boolean isExists(Integer id);
 
-    EventEntity partialUpdate(Long id, EventEntity eventEntity);
+    EventEntity partialUpdate(Integer id, EventEntity eventEntity) throws ResponseStatusException;
 
 
-    void delete(Long id);
+    void delete(Integer id);
+
+    EventEntity getDefaultEvent();
 }

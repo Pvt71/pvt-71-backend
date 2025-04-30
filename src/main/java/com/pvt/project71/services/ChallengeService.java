@@ -4,10 +4,12 @@ import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 
 import java.util.List;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public interface ChallengeService {
-    ChallengeEntity save(ChallengeEntity challengeEntity);
+    ChallengeEntity save(ChallengeEntity challengeEntity) throws NoSuchElementException;
 
     Optional<ChallengeEntity> find(Integer id);
 
@@ -16,4 +18,6 @@ public interface ChallengeService {
     ChallengeEntity partialUpdate(Integer id, ChallengeEntity challengeEntity);
 
     List<ChallengeEntity> getChallengesByUserEmail(String email);
+
+    List<ChallengeEntity> getChallenges(String email, Integer eventId);
 }

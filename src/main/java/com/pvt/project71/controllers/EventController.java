@@ -42,7 +42,7 @@ public class EventController {
     }
 
     @GetMapping(path = "/events/{id}")
-    public ResponseEntity<EventDto> getEvent(@PathVariable("id") Long id) {
+    public ResponseEntity<EventDto> getEvent(@PathVariable("id") Integer id) {
         Optional<EventEntity> foundEvent = eventService.findOne(id);
         return foundEvent.map(eventEntity -> {
             EventDto eventDto = eventMapper.mapTo(eventEntity);
@@ -52,7 +52,7 @@ public class EventController {
 
     @PutMapping(path = "/events/{id}")
     public ResponseEntity<EventDto> fullUpdateEvent(
-            @PathVariable("id") Long id,
+            @PathVariable("id") Integer id,
             @RequestBody EventDto eventDto) {
 
         if (!eventService.isExists(id)) {
@@ -70,7 +70,7 @@ public class EventController {
 
     @PatchMapping(path = "/events/{id}")
     public ResponseEntity<EventDto> partialUpdateEvent(
-            @PathVariable("id") Long id,
+            @PathVariable("id") Integer id,
             @RequestBody EventDto eventDto) {
 
         if (!eventService.isExists(id)) {
@@ -84,7 +84,7 @@ public class EventController {
 
     @DeleteMapping(path = "/events/{id}")
     public ResponseEntity deleteEvent(
-            @PathVariable("id") Long id) {
+            @PathVariable("id") Integer id) {
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

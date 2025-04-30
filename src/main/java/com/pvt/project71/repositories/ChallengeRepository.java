@@ -11,4 +11,5 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
 
     List<ChallengeEntity> findByCreatorEmail(String email);
 
+    List<ChallengeEntity> findChallengeEntitiesByEvent_Id(Integer id);
 }

@@ -1,10 +1,14 @@
 package com.pvt.project71.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -16,23 +20,29 @@ import java.util.Objects;
 public class EventEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "events_id_seq")
-    private long id;
+    @GeneratedValue(generator = "IDENTITY")
+    private Integer id;
 
+    @NotBlank
     private String name;
 
     private String description;
 
+    @Future(message = "End date must be in the future")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDate;
 
 //    @ManyToMany(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "user_id")
-//    private UserEntity userEntity;
+//    @JoinColumn(name = "admin_id")
+//    private List<UserEntity> adminUserEntity;
 
-//    @OneToMany(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "challenge_id")
-//    private ChallengeEntity challengeEntity;
+//    @ManyToMany(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "user_id")
+//    private List<UserEntity> userEntity;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "event")
+    @JsonIgnore //ignorerar listan när Entity görs till Json
+    private List<ChallengeEntity> challenges;
 
     @Override
     public boolean equals(Object o) {
