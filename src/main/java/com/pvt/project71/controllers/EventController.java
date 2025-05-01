@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,6 +28,9 @@ public class EventController {
 
     @PostMapping(path = "/events")
     public ResponseEntity<EventDto> createEvent(@RequestBody EventDto event) {
+        if (event.getDates() == null) {
+            return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
+        }
         EventEntity eventEntity = eventMapper.mapFrom(event);
         EventEntity savedEvent = eventService.save(eventEntity);
         return new ResponseEntity<>(eventMapper.mapTo(savedEvent), HttpStatus.CREATED);
@@ -60,6 +64,8 @@ public class EventController {
         }
 
         eventDto.setId(id);
+        eventDto.setDates(eventService.findOne(id).get().getDates());
+        eventDto.getDates().setUpdatedAt(LocalDateTime.now());
         EventEntity eventEntity = eventMapper.mapFrom(eventDto);
         EventEntity savedEventEntity = eventService.save(eventEntity);
         return new ResponseEntity<>(

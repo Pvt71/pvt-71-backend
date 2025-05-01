@@ -24,6 +24,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.LocalDateTime;
+
 @SpringBootTest
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")

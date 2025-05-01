@@ -255,25 +255,7 @@ public class EventTests {
     }
 
     @Test
-    public void testThatPartialUpdateEndDateThrowsExceptionWhenIllegalDateLATE() throws Exception {
-        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
-        EventEntity savedTestEvent = eventService.save(testEventEntityA);
-
-        EventDto eventDto = TestDataUtil.createTestEventDtoA();
-        eventDto.setEndDate(LocalDateTime.now().plusDays(366)); // Illegal date
-        String eventDtoJson = objectMapper.writeValueAsString(eventDto);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.patch("/events/" + savedTestEvent.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(eventDtoJson)
-        ).andExpect(
-                MockMvcResultMatchers.status().isBadRequest() // Expecting 400 Bad Request
-        );
-    }
-
-    @Test
-    public void testThatPartialUpdateEndDateThrowsExceptionWhenIllegalDateEARLY() throws Exception {
+    public void testThatPartialUpdateEndDateIsIgnored() throws Exception {
         EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
         EventEntity savedTestEvent = eventService.save(testEventEntityA);
 
@@ -286,7 +268,7 @@ public class EventTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(eventDtoJson)
         ).andExpect(
-                MockMvcResultMatchers.status().isBadRequest() // Expecting 400 Bad Request
+                MockMvcResultMatchers.status().isOk() // Expecting 400 Bad Request
         );
     }
 }

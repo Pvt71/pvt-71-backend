@@ -9,8 +9,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public interface ChallengeService {
-    ChallengeEntity save(ChallengeEntity challengeEntity) throws NoSuchElementException;
-
+    ChallengeEntity save(ChallengeEntity challengeEntity);
     Optional<ChallengeEntity> find(Integer id);
 
     void delete(Integer id);
@@ -18,4 +17,5 @@ public interface ChallengeService {
     ChallengeEntity partialUpdate(Integer id, ChallengeEntity challengeEntity);
 
     List<ChallengeEntity> getChallenges(String email, Integer eventId);
+
 }

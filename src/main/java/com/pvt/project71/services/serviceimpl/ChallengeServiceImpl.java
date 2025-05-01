@@ -5,24 +5,25 @@ import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
+import org.modelmapper.internal.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class ChallengeServiceImpl implements ChallengeService {
 
     private static final Duration MIN_DURATION = Duration.ofMinutes(5);
     private static final Duration MAX_DURATION = Duration.ofDays(365);
+
+    //Denna är plus på events startTime om event inte börjat än
+    private static final Duration MAX_PRE_CREATION_TIME = Duration.ofDays(12);
 
     private ChallengeRepository challengeRepository;
     private EventService eventService;
@@ -40,12 +41,15 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     @Transactional
     public ChallengeEntity save(ChallengeEntity challengeEntity) {
-        //TODO: Lägga in logik så att man inte kan ge för mycket poäng
-        //TODO: Ska fixa så att om inte en event passeras igenom får den standard event här innan det sparas
         if (challengeEntity.getEvent() == null) {
             EventEntity defaultEvent = eventService.getDefaultEvent();
-            if (!checkValidDate(challengeEntity, defaultEvent)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Challenge date is not valid");
+            if (challengeEntity.getDates().getCreatedAt() == null) {
+                challengeEntity.getDates().setCreatedAt(LocalDateTime.now());
+                challengeEntity.getDates().setUpdatedAt(challengeEntity.getDates().getCreatedAt());
+            } if (challengeEntity.getDates().getStartsAt() == null) {
+                challengeEntity.getDates().setStartsAt(challengeEntity.getDates().getCreatedAt());
+            } if (!checkValidDate(challengeEntity, defaultEvent)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Challenge dates is not valid");
             }
             challengeEntity.setEvent(defaultEvent);
             challengeEntity = challengeRepository.save(challengeEntity);
@@ -56,15 +60,29 @@ public class ChallengeServiceImpl implements ChallengeService {
         Optional<EventEntity> eventEntity = eventService.findOne(challengeEntity.getEvent().getId());
         if (eventEntity.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event can not be found");
-        } if (!checkValidDate(challengeEntity, eventEntity.get())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Challenge date is not valid");
         }
+        if (challengeEntity.getDates().getCreatedAt() == null) {
+            challengeEntity.getDates().setCreatedAt(LocalDateTime.now());
+            challengeEntity.getDates().setUpdatedAt(challengeEntity.getDates().getCreatedAt());
+        }
+        if (challengeEntity.getDates().getStartsAt() == null) {
+            if (!eventEntity.get().getDates().getStartsAt().equals(eventEntity.get().getDates().getCreatedAt())) {
+                challengeEntity.getDates().setStartsAt(challengeEntity.getDates().getCreatedAt());
+            } else {
+                challengeEntity.getDates().setStartsAt(eventEntity.get().getDates().getStartsAt());
+            }
+        } if (!checkValidDate(challengeEntity, eventEntity.get())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Challenge dates is not valid");
+        }
+
         challengeEntity.setEvent(eventEntity.get());
         challengeEntity = challengeRepository.save(challengeEntity);
         eventEntity.get().getChallenges().add(challengeEntity);
+        eventEntity.get().getDates().setUpdatedAt(LocalDateTime.now());
         eventService.save(eventEntity.get());
         return challengeEntity;
     }
+
 
     @Override
     public Optional<ChallengeEntity> find(Integer id) {
@@ -81,15 +99,12 @@ public class ChallengeServiceImpl implements ChallengeService {
         Optional<ChallengeEntity> found = challengeRepository.findById(challengeEntity.getId());
         if (found.isEmpty()) {
             throw new RuntimeException("Challenge Doesnt Exist");
-        } if (challengeEntity.getEndDate() != null && !checkValidDate(challengeEntity, found.get().getEvent())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Challenge date is not valid");
         }
+        found.get().getDates().setUpdatedAt(LocalDateTime.now());
         return found.map(existing -> {
             Optional.ofNullable(challengeEntity.getName()).ifPresent(existing::setName);
             Optional.ofNullable(challengeEntity.getDescription()).ifPresent(existing::setDescription);
-            Optional.ofNullable(challengeEntity.getEndDate()).ifPresent(existing::setEndDate);
             Optional.ofNullable(challengeEntity.getRewardPoints()).ifPresent(existing::setRewardPoints);
-
             return challengeRepository.save(existing);
         }).orElseThrow(() ->new RuntimeException("Challenge Doesnt Exist"));
     }
@@ -107,14 +122,30 @@ public class ChallengeServiceImpl implements ChallengeService {
         challengeRepository.findAll().forEach(toReturn::add);
         return toReturn;
     }
-
+    //TODO: SKRIVA OM med TimeStamps
     private boolean checkValidDate(ChallengeEntity challengeEntity, EventEntity eventEntity) {
-        if (eventEntity.getId() == 1) {
-            return challengeEntity.getEndDate().isAfter(LocalDateTime.now().plus(MIN_DURATION)) &&
-                    challengeEntity.getEndDate().isBefore(LocalDateTime.now().plus(MAX_DURATION));
+        if (!challengeEntity.getDates().getUpdatedAt().equals(challengeEntity.getDates().getCreatedAt())) {
+            return true;
+        } if (challengeEntity.getDates().getStartsAt().plus(MAX_DURATION).isBefore(challengeEntity.getDates().getEndsAt())) {
+            return false;
         }
-        return challengeEntity.getEndDate().isAfter(LocalDateTime.now().plus(MIN_DURATION)) &&
-                challengeEntity.getEndDate().compareTo(eventEntity.getEndDate()) < 1;
+        if (challengeEntity.getDates().getStartsAt().plus(MIN_DURATION).isAfter(challengeEntity.getDates().getEndsAt())) {
+            return false;
+        }
+        if (eventEntity.getId() == 1) {
+            return challengeEntity.getDates().getStartsAt().isEqual(challengeEntity.getDates().getCreatedAt()) ||
+                    challengeEntity.getDates().getStartsAt().isBefore(challengeEntity.getDates().getCreatedAt().plus(MAX_PRE_CREATION_TIME));
+        }
+        if (eventEntity.getDates().getStartsAt().isAfter(LocalDateTime.now())) {
+            if (challengeEntity.getDates().getStartsAt().isAfter(eventEntity.getDates().getStartsAt().plus(MAX_PRE_CREATION_TIME))) {
+                return false;
+            }
+        } else if (challengeEntity.getDates().getStartsAt().isAfter(challengeEntity.getDates().getCreatedAt().plus(MAX_PRE_CREATION_TIME))) {
+            return false;
+        }
+        return challengeEntity.getDates().getEndsAt().compareTo(eventEntity.getDates().getEndsAt()) <1 &&
+                !challengeEntity.getDates().getStartsAt().isBefore(eventEntity.getDates().getStartsAt());
     }
+
 
 }

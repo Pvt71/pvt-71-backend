@@ -32,9 +32,13 @@ public class ChallengeController {
     public ResponseEntity<ChallengeDto> createChallenge(@Valid @RequestBody ChallengeDto challengeDto) {
         if (challengeDto.getDates() == null) {
             return new ResponseEntity<ChallengeDto>(HttpStatus.BAD_REQUEST);
+        } if (challengeDto.getDates().getEndsAt() == null) {
+            return new ResponseEntity<ChallengeDto>(HttpStatus.BAD_REQUEST);
         }
-        challengeDto.getDates().setCreatedAt(LocalDateTime.now());
-        challengeDto.getDates().setUpdatedAt(LocalDateTime.now());
+        if (challengeDto.getDates().getStartsAt() != null && challengeDto.getDates().getStartsAt().isBefore(LocalDateTime.now())) {
+            return new ResponseEntity<ChallengeDto>(HttpStatus.BAD_REQUEST); //Om start börjar innan nu
+        }
+
         ChallengeEntity savedChallengeEntity = challengeService.save(challengeMapper.mapFrom(challengeDto));
         return new ResponseEntity<>(challengeMapper.mapTo(savedChallengeEntity), HttpStatus.CREATED);
     }
@@ -62,14 +66,10 @@ public class ChallengeController {
         Optional<ChallengeEntity> found = challengeService.find(id);
         if (found.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (challengeDto.getDates() == null) {
-            challengeDto.setDates(new TimeStamps());
         }
-        challengeDto.getDates().setUpdatedAt(LocalDateTime.now());
-        challengeDto.getDates().setCreatedAt(found.get().getDates().getCreatedAt());
-
         challengeDto.setId(id);
         ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
+        challengeEntity.setEvent(found.get().getEvent());
         ChallengeEntity updatedChallenge = challengeService.partialUpdate(id, challengeEntity);
         return new ResponseEntity<>(challengeMapper.mapTo(updatedChallenge), HttpStatus.OK);
     }
@@ -79,14 +79,12 @@ public class ChallengeController {
         Optional<ChallengeEntity> found = challengeService.find(id);
         if (found.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (challengeDto.getDates() == null) {
-            return new ResponseEntity<ChallengeDto>(HttpStatus.BAD_REQUEST);
         }
-        challengeDto.getDates().setCreatedAt(found.get().getDates().getCreatedAt());
+        challengeDto.setDates(found.get().getDates());
         challengeDto.getDates().setUpdatedAt(LocalDateTime.now());
-
         challengeDto.setId(id);
         ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
+        challengeEntity.setEvent(found.get().getEvent());
         ChallengeEntity updatedChallenge = challengeService.save(challengeEntity);
         return  new ResponseEntity<>(challengeMapper.mapTo(updatedChallenge), HttpStatus.OK);
     }

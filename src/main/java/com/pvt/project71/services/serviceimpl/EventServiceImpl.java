@@ -1,5 +1,6 @@
 package com.pvt.project71.services.serviceimpl;
 
+import com.pvt.project71.domain.TimeStamps;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.services.EventService;
@@ -34,6 +35,11 @@ public class EventServiceImpl implements EventService {
         getDefaultEvent();//Ser till att default alltid finns först som event med id 1.
         if (eventEntity.getChallenges() == null) {
             eventEntity.setChallenges(new ArrayList<>());
+        } if (eventEntity.getDates().getCreatedAt() == null) {
+            eventEntity.getDates().setCreatedAt(LocalDateTime.now());
+            eventEntity.getDates().setUpdatedAt(eventEntity.getDates().getCreatedAt());
+        }if (eventEntity.getDates().getStartsAt() == null) {
+            eventEntity.getDates().setStartsAt(eventEntity.getDates().getCreatedAt());
         }
         if (eventEntity.getId() == null) {
             if (checkValidDate(eventEntity)) {
@@ -68,12 +74,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventEntity partialUpdate(Integer id, EventEntity eventEntity) throws ResponseStatusException {
         eventEntity.setId(id);
-        if (eventEntity.getEndDate() != null && !checkValidDate(eventEntity)){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event date is not valid!");
-        }
+        eventEntity.getDates().setUpdatedAt(LocalDateTime.now());
+        eventEntity.getDates().setUpdatedAt(LocalDateTime.now());
         return eventRepository.findById(id).map(existingEvent -> {
             Optional.ofNullable(eventEntity.getName()).ifPresent(existingEvent::setName);
-            Optional.ofNullable(eventEntity.getEndDate()).ifPresent(existingEvent::setEndDate);
             Optional.ofNullable(eventEntity.getDescription()).ifPresent(existingEvent::setDescription);
             return eventRepository.save(existingEvent);
         }).orElseThrow(() -> new RuntimeException("Event does not exist!"));
@@ -89,7 +93,9 @@ public class EventServiceImpl implements EventService {
     public EventEntity getDefaultEvent() {
         Optional<EventEntity> defaultEvent = findOne(1);
         if (defaultEvent.isEmpty()) {
-            return eventRepository.save(EventEntity.builder().name("Default").challenges(new ArrayList<>()).build());
+            return eventRepository.save(EventEntity.builder().name("Default").challenges(new ArrayList<>())
+                    .dates(TimeStamps.builder().startsAt(LocalDateTime.now()).createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now()).build()).build());
         }
         return defaultEvent.get();
     }
@@ -106,6 +112,9 @@ public class EventServiceImpl implements EventService {
     }
 
     private boolean checkValidDate(EventEntity eventEntity) {
+        if (!eventEntity.getDates().getCreatedAt().equals(eventEntity.getDates().getUpdatedAt())) {
+            return  true;
+        }
         return eventEntity.getEndDate().isAfter(LocalDateTime.now().plus(MIN_DURATION_HOURS))
                 && eventEntity.getEndDate().isBefore(LocalDateTime.now().plus(MAX_DURATION_DAYS));
     }
