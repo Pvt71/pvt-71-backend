@@ -20,9 +20,6 @@ public class EventDto {
 
     private String description;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime endDate;
-    //@NonNull
     private TimeStamps dates;
 
 

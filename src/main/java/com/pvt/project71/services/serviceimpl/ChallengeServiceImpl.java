@@ -66,7 +66,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             challengeEntity.getDates().setUpdatedAt(challengeEntity.getDates().getCreatedAt());
         }
         if (challengeEntity.getDates().getStartsAt() == null) {
-            if (!eventEntity.get().getDates().getStartsAt().equals(eventEntity.get().getDates().getCreatedAt())) {
+            if (eventEntity.get().getDates().getStartsAt().equals(eventEntity.get().getDates().getCreatedAt())) {
                 challengeEntity.getDates().setStartsAt(challengeEntity.getDates().getCreatedAt());
             } else {
                 challengeEntity.getDates().setStartsAt(eventEntity.get().getDates().getStartsAt());
@@ -122,19 +122,17 @@ public class ChallengeServiceImpl implements ChallengeService {
         challengeRepository.findAll().forEach(toReturn::add);
         return toReturn;
     }
-    //TODO: SKRIVA OM med TimeStamps
+
     private boolean checkValidDate(ChallengeEntity challengeEntity, EventEntity eventEntity) {
         if (!challengeEntity.getDates().getUpdatedAt().equals(challengeEntity.getDates().getCreatedAt())) {
             return true;
         } if (challengeEntity.getDates().getStartsAt().plus(MAX_DURATION).isBefore(challengeEntity.getDates().getEndsAt())) {
             return false;
-        }
-        if (challengeEntity.getDates().getStartsAt().plus(MIN_DURATION).isAfter(challengeEntity.getDates().getEndsAt())) {
+        } if (challengeEntity.getDates().getStartsAt().plus(MIN_DURATION).isAfter(challengeEntity.getDates().getEndsAt())) {
             return false;
-        }
-        if (eventEntity.getId() == 1) {
-            return challengeEntity.getDates().getStartsAt().isEqual(challengeEntity.getDates().getCreatedAt()) ||
-                    challengeEntity.getDates().getStartsAt().isBefore(challengeEntity.getDates().getCreatedAt().plus(MAX_PRE_CREATION_TIME));
+        } if (eventEntity.getId() == 1) {
+            return !challengeEntity.getDates().getStartsAt().isBefore(challengeEntity.getDates().getCreatedAt()) &&
+                    !challengeEntity.getDates().getCreatedAt().plus(MAX_PRE_CREATION_TIME).isBefore(challengeEntity.getDates().getStartsAt());
         }
         if (eventEntity.getDates().getStartsAt().isAfter(LocalDateTime.now())) {
             if (challengeEntity.getDates().getStartsAt().isAfter(eventEntity.getDates().getStartsAt().plus(MAX_PRE_CREATION_TIME))) {

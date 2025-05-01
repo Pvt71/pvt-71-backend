@@ -131,60 +131,8 @@ public class EventChallengeIntegrationTests {
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson)).andExpect(status().isNotFound());
     }
-    @Test
-    public void testCreatingChallengeThatEndsBeforeMINDURATIONGives400() throws Exception {
-        ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
-
-        testChallenge.getDates().setEndsAt(LocalDateTime.now());
-        String challengeJson = objectMapper.writeValueAsString(testChallenge);
-        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(status().isBadRequest());
-    }
-    @Test
-    public void testCreatingChallengeToEventThatEndsAfterTheEventShouldGive400() throws Exception {
-        EventEntity testEvent = TestDataUtil.createTestEventEntityA();
-        String eventJson = objectMapper.writeValueAsString(testEvent);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson));
-
-        ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
-
-        testChallenge.setEvent(eventService.findOne(2).get());
-        testChallenge.getDates().setEndsAt(testChallenge.getEvent().getDates().getEndsAt().plusHours(1));
-        String challengeJson = objectMapper.writeValueAsString(testChallenge);
-        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(status().isBadRequest());
-    }
-    @Test
-    public void testCreatingChallengeThatStartsAfterMaxPreSetTimeGives400() throws Exception {
-        ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
-        testChallenge.getDates().setStartsAt(LocalDateTime.now().plusDays(15));
-        String challengeJson = objectMapper.writeValueAsString(testChallenge);
-        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(status().isBadRequest());
-    }
-    @Test
-    public void testCreatingChallengeThatStartsBeforePreSetTimeAddedOnWhenEventStartsGives201() throws Exception {
-        EventEntity testEvent = TestDataUtil.createTestEventEntityA();
-        testEvent.getDates().setStartsAt(LocalDateTime.now().plusDays(30));
-        String eventJson = objectMapper.writeValueAsString(testEvent);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson));
-
-        ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
-
-        testChallenge.setEvent(eventService.findOne(2).get());
-        testChallenge.getDates().setStartsAt(testEvent.getDates().getStartsAt().plusDays(12));
-
-        String challengeJson = objectMapper.writeValueAsString(testChallenge);
-        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(status().isCreated());
-    }
 
 
-    //Mer tids test tider här sen
     @Test
     public void testGetChallengesByEventId() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();

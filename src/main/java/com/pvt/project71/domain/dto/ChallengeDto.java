@@ -17,7 +17,6 @@ public class ChallengeDto {
     private String name;
     @NonNull
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime endDate;
     //@NonNull
     private TimeStamps dates;
 

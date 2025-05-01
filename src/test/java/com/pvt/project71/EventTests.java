@@ -254,23 +254,7 @@ public class EventTests {
         ).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
-    @Test
-    public void testThatPartialUpdateEndDateIsIgnored() throws Exception {
-        EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
-        EventEntity savedTestEvent = eventService.save(testEventEntityA);
 
-        EventDto eventDto = TestDataUtil.createTestEventDtoA();
-        eventDto.setEndDate(LocalDateTime.now().minusDays(1)); // Illegal date
-        String eventDtoJson = objectMapper.writeValueAsString(eventDto);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.patch("/events/" + savedTestEvent.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(eventDtoJson)
-        ).andExpect(
-                MockMvcResultMatchers.status().isOk() // Expecting 400 Bad Request
-        );
-    }
 }
 
 

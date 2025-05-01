@@ -20,19 +20,19 @@ public class TestDataUtil {
     }
     // "2025-10-27T16:30" test tiden som man kan ta och jämföra med.
     public static ChallengeEntity createChallengeEnitityA() {
-        return  ChallengeEntity.builder().endDate(TEST_TIME).dates(createTimeStampForTest()).name("A").description("First Letter of the alphabet")
+        return  ChallengeEntity.builder().dates(createTimeStampForTest()).name("A").description("First Letter of the alphabet")
                 .rewardPoints(1000).build();
     }
     public static ChallengeDto createChallengeDtoA() {
-        return  ChallengeDto.builder().endDate(TEST_TIME).name("A").description("First Letter of the alphabet")
+        return  ChallengeDto.builder().name("A").description("First Letter of the alphabet")
                 .dates(createTimeStampForTest()).rewardPoints(1000).build();
     }
     public static ChallengeEntity createChallengeEnitityB() {
-        return  ChallengeEntity.builder().endDate(TEST_TIME).name("B").description("Not the First Letter of the alphabet")
+        return  ChallengeEntity.builder().name("B").description("Not the First Letter of the alphabet")
                 .dates(createTimeStampForTest()).rewardPoints(110).build();
     }
     public static ChallengeDto createChallengeDtoB() {
-        return  ChallengeDto.builder().endDate(TEST_TIME).name("B").description("Not the First Letter of the alphabet")
+        return  ChallengeDto.builder().name("B").description("Not the First Letter of the alphabet")
                 .dates(createTimeStampForTest()).rewardPoints(110).build();
     }
 
@@ -85,7 +85,6 @@ public class TestDataUtil {
         return EventEntity.builder()
                 .name("TestEventA")
                 .description("TestDescription")
-                .endDate(TEST_TIME)
                 .dates(createTimeStampForTest())
                 .build();
     }
@@ -93,7 +92,6 @@ public class TestDataUtil {
         return EventDto.builder()
                 .name("TestEventA")
                 .description("TestDescription")
-                .endDate(TEST_TIME)
                 .dates(createTimeStampForTest())
                 .build();
     }
@@ -101,7 +99,6 @@ public class TestDataUtil {
         return EventEntity.builder()
                 .name("TestEventB")
                 .description("TestDescription")
-                .endDate(TEST_TIME)
                 .dates(createTimeStampForTest())
                 .build();
     }
@@ -109,7 +106,6 @@ public class TestDataUtil {
         return EventDto.builder()
                 .name("TestEventB")
                 .description("TestDescription")
-                .endDate(TEST_TIME)
                 .dates(createTimeStampForTest())
                 .build();
     }

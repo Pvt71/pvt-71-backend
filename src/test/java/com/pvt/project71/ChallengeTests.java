@@ -90,8 +90,7 @@ public class ChallengeTests {
                 .content(challengeJson)).andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("A"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallenge.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallenge.getRewardPoints()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.endDate").value("2025-10-27T16:30"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallenge.getRewardPoints()));
 
     }
 
@@ -122,8 +121,7 @@ public class ChallengeTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(saved.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("A"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallenge.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallenge.getRewardPoints()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.endDate").value("2025-10-27T16:30"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallenge.getRewardPoints()));
     }
 
     @Test

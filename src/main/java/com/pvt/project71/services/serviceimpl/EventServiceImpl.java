@@ -22,7 +22,7 @@ import java.util.stream.StreamSupport;
 public class EventServiceImpl implements EventService {
 
     private EventRepository eventRepository;
-
+    private static final Duration MAX_PRE_CREATION_TIME = Duration.ofDays(30);
     private static final Duration MIN_DURATION_HOURS = Duration.ofHours(24);
     private static final Duration MAX_DURATION_DAYS = Duration.ofDays(365);
 
@@ -41,6 +41,7 @@ public class EventServiceImpl implements EventService {
         }if (eventEntity.getDates().getStartsAt() == null) {
             eventEntity.getDates().setStartsAt(eventEntity.getDates().getCreatedAt());
         }
+
         if (eventEntity.getId() == null) {
             if (checkValidDate(eventEntity)) {
                 return eventRepository.save(eventEntity);
@@ -113,9 +114,12 @@ public class EventServiceImpl implements EventService {
 
     private boolean checkValidDate(EventEntity eventEntity) {
         if (!eventEntity.getDates().getCreatedAt().equals(eventEntity.getDates().getUpdatedAt())) {
-            return  true;
-        }
-        return eventEntity.getEndDate().isAfter(LocalDateTime.now().plus(MIN_DURATION_HOURS))
-                && eventEntity.getEndDate().isBefore(LocalDateTime.now().plus(MAX_DURATION_DAYS));
+            return true;
+        } if (eventEntity.getDates().getStartsAt().isBefore(eventEntity.getDates().getCreatedAt())) {
+            return false;
+        } if (eventEntity.getDates().getCreatedAt().plus(MAX_PRE_CREATION_TIME).isBefore(eventEntity.getDates().getStartsAt())) {
+            return false;
+        } return !eventEntity.getDates().getStartsAt().plus(MAX_DURATION_DAYS).isBefore(eventEntity.getDates().getEndsAt())
+                && !eventEntity.getDates().getStartsAt().plus(MIN_DURATION_HOURS).isAfter(eventEntity.getDates().getEndsAt());
     }
 }

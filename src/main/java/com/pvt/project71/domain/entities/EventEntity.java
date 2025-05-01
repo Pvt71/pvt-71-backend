@@ -29,8 +29,6 @@ public class EventEntity {
 
     private String description;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime endDate;
     @Embedded
     private TimeStamps dates;
 
