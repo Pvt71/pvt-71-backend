@@ -66,10 +66,16 @@ public class TimeStampTests {
         testChallenge.setCreator(testUser);
         return testChallenge;
     }
+    private UserEntity fixAndSaveUser() {
+        return userService.save(TestDataUtil.createValidTestUserEntity());
+    }
     @Test
     public void testThatPartialUpdateEndDateIsIgnored() throws Exception {
         EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
-        EventEntity savedTestEvent = eventService.save(testEventEntityA);
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+        testEventEntityA.getAdminUsers().add(testUser);
+        EventEntity savedTestEvent = eventService.save(testEventEntityA, testUser);
 
         EventDto eventDto = TestDataUtil.createTestEventDtoA();
         eventDto.getDates().setEndsAt(LocalDateTime.now().minusDays(1)); // Illegal date
@@ -95,6 +101,9 @@ public class TimeStampTests {
     @Test
     public void testCreatingChallengeToEventThatEndsAfterTheEventShouldGive400() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
+        UserEntity user = fixAndSaveUser();
+        userService.makeAdmin(user, testEvent);
+        testEvent.getAdminUsers().add(user);
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
@@ -120,6 +129,11 @@ public class TimeStampTests {
     public void testCreatingChallengeThatStartsBeforePreSetTimeAddedOnWhenEventStartsGives201() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         testEvent.getDates().setStartsAt(LocalDateTime.now().plusDays(30));
+
+        UserEntity user = fixAndSaveUser();
+        userService.makeAdmin(user, testEvent);
+        testEvent.getAdminUsers().add(user);
+
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
@@ -138,6 +152,11 @@ public class TimeStampTests {
     public void testStartingEventLaterAndStartChallengeBeforeEventGives400() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         testEvent.getDates().setStartsAt(LocalDateTime.now().plusDays(30));
+
+        UserEntity user = fixAndSaveUser();
+        userService.makeAdmin(user, testEvent);
+        testEvent.getAdminUsers().add(user);
+
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
@@ -156,6 +175,11 @@ public class TimeStampTests {
     public void testStartingEventLaterAndAddChallengeWithNullStartTimeGivesEventStartTime() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         testEvent.getDates().setStartsAt(LocalDateTime.now().plusDays(30));
+
+        UserEntity user = fixAndSaveUser();
+        userService.makeAdmin(user, testEvent);
+        testEvent.getAdminUsers().add(user);
+
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
@@ -176,6 +200,11 @@ public class TimeStampTests {
     public void testAddingChallengeToEventChangesEventsUpdatedAtTime() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         testEvent.getDates().setStartsAt(LocalDateTime.now().plusDays(30));
+
+        UserEntity user = fixAndSaveUser();
+        userService.makeAdmin(user, testEvent);
+        testEvent.getAdminUsers().add(user);
+
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
@@ -195,6 +224,11 @@ public class TimeStampTests {
     public void testCreatingEventThatStartsBeforeNowGives400() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         testEvent.getDates().setStartsAt(LocalDateTime.now().minusDays(1));
+
+        UserEntity user = fixAndSaveUser();
+        userService.makeAdmin(user, testEvent);
+        testEvent.getAdminUsers().add(user);
+
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)

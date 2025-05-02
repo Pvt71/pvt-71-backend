@@ -3,14 +3,19 @@ package com.pvt.project71.controllers;
 import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.dto.EventDto;
 import com.pvt.project71.domain.entities.EventEntity;
+import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.mappers.Mapper;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,16 +24,18 @@ import java.util.stream.Collectors;
 public class EventController {
 
     private EventService eventService;
+    private UserService userService;
 
     private Mapper<EventEntity, EventDto> eventMapper;
 
-    public EventController(EventService eventService, Mapper<EventEntity, EventDto> eventMapper) {
+    public EventController(EventService eventService, UserService userService, Mapper<EventEntity, EventDto> eventMapper) {
         this.eventService = eventService;
+        this.userService = userService;
         this.eventMapper = eventMapper;
     }
 
     @PostMapping(path = "/events")
-    public ResponseEntity<EventDto> createEvent(@RequestBody EventDto event) {
+    public ResponseEntity<EventDto> createEvent(@RequestBody EventDto event, @AuthenticationPrincipal Jwt userToken) {
         if (event.getDates() == null) {
             return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
         }if (event.getDates().getEndsAt() == null) {
@@ -36,7 +43,16 @@ public class EventController {
         }
         event.getDates().setCreatedAt(null);
         EventEntity eventEntity = eventMapper.mapFrom(event);
-        EventEntity savedEvent = eventService.save(eventEntity);
+
+        //Optional<UserEntity> creator = userService.findOne(userToken.getClaimAsString("email"));
+        Optional<UserEntity> creator = userService.findOne("Test@test.com"); //TODO: Ska bort sen
+        if (creator.isEmpty()) {
+            return new ResponseEntity<EventDto>(HttpStatus.NOT_FOUND);
+        }
+        userService.makeAdmin(creator.get(), eventEntity);
+        eventEntity.setAdminUsers(new ArrayList<>());
+        eventEntity.getAdminUsers().add(creator.get());
+        EventEntity savedEvent = eventService.save(eventEntity, creator.get());
         return new ResponseEntity<>(eventMapper.mapTo(savedEvent), HttpStatus.CREATED);
     }
 
@@ -61,17 +77,24 @@ public class EventController {
     @PutMapping(path = "/events/{id}")
     public ResponseEntity<EventDto> fullUpdateEvent(
             @PathVariable("id") Integer id,
-            @RequestBody EventDto eventDto) {
+            @RequestBody EventDto eventDto,
+            @AuthenticationPrincipal Jwt userToken) {
 
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
+        //Optional<UserEntity> user = userService.findOne(userToken.getClaimAsString("email"));
+        Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        EventEntity found = eventService.findOne(id).get();
         eventDto.setId(id);
-        eventDto.setDates(eventService.findOne(id).get().getDates());
+        eventDto.setDates(found.getDates());
         eventDto.getDates().setUpdatedAt(LocalDateTime.now());
         EventEntity eventEntity = eventMapper.mapFrom(eventDto);
-        EventEntity savedEventEntity = eventService.save(eventEntity);
+        eventEntity.setAdminUsers(found.getAdminUsers());
+        EventEntity savedEventEntity = eventService.save(eventEntity, user.get());
         return new ResponseEntity<>(
                 eventMapper.mapTo(savedEventEntity),
                 HttpStatus.OK

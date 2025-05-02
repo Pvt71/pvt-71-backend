@@ -10,6 +10,7 @@ import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.dto.EventDto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 public class TestDataUtil {
     private TestDataUtil() {}
@@ -86,6 +87,7 @@ public class TestDataUtil {
                 .name("TestEventA")
                 .description("TestDescription")
                 .dates(createTimeStampForTest())
+                .adminUsers(new ArrayList<>())
                 .build();
     }
     public static EventDto createTestEventDtoA() {
@@ -93,6 +95,7 @@ public class TestDataUtil {
                 .name("TestEventA")
                 .description("TestDescription")
                 .dates(createTimeStampForTest())
+                .adminUsers(new ArrayList<>())
                 .build();
     }
     public static EventEntity createTestEventEntityB() {
@@ -100,6 +103,7 @@ public class TestDataUtil {
                 .name("TestEventB")
                 .description("TestDescription")
                 .dates(createTimeStampForTest())
+                .adminUsers(new ArrayList<>())
                 .build();
     }
     public static EventDto createTestEventDtoB() {
@@ -107,6 +111,7 @@ public class TestDataUtil {
                 .name("TestEventB")
                 .description("TestDescription")
                 .dates(createTimeStampForTest())
+                .adminUsers(new ArrayList<>())
                 .build();
     }
 }

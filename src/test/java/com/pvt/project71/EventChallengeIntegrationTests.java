@@ -69,11 +69,15 @@ public class EventChallengeIntegrationTests {
         testChallenge.setCreator(testUser);
         return testChallenge;
     }
+    private UserEntity fixAndSaveUser() {
+        return userService.save(TestDataUtil.createValidTestUserEntity());
+    }
 
     @Test
     //@Transactional
     public void testCreatingChallengeWithoutASpecifiedEventShouldGetDefaultEvent() throws Exception {
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
+        fixAndSaveUser();
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson)).andExpect(status().isCreated())
@@ -83,6 +87,7 @@ public class EventChallengeIntegrationTests {
     public void testCreatingChallengeWithoutASpecifiedEventAndRetrieveChallengeViaTheEvent() throws Exception {
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
+        fixAndSaveUser();
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson));
         assertFalse(eventService.loadTheLazy(eventService.getDefaultEvent()).getChallenges().isEmpty());
@@ -93,7 +98,7 @@ public class EventChallengeIntegrationTests {
     public void testAddingChallengeToCustomEventWorks() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         String eventJson = objectMapper.writeValueAsString(testEvent);
-
+        fixAndSaveUser();
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
                 .content(eventJson));
 
@@ -108,6 +113,9 @@ public class EventChallengeIntegrationTests {
     @Test
     public void testAddingChallengeToCustomEventAndRetrievingItViaEvent() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
+        fixAndSaveUser();
+        //userService.makeAdmin(user, testEvent);
+        //testEvent.getAdminUsers().add(user);
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +154,8 @@ public class EventChallengeIntegrationTests {
 
         testChallengeA.setEvent(testEvent);
         testChallengeB.setEvent(testEvent);
-        eventService.save(testEvent);
+        testEvent.getAdminUsers().add(testChallengeA.getCreator());
+        eventService.save(testEvent, testChallengeA.getCreator());
 
 
         challengeService.save(testChallengeA);
@@ -168,7 +177,8 @@ public class EventChallengeIntegrationTests {
         ChallengeEntity testChallengeA = setUpChallengeEntityAWithUser();
 
         testChallengeA.setEvent(testEvent);
-        eventService.save(testEvent);
+        testEvent.getAdminUsers().add(testChallengeA.getCreator());
+        eventService.save(testEvent, testChallengeA.getCreator());
         challengeService.save(testChallengeA);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/events/{id}", testEvent.getId()))

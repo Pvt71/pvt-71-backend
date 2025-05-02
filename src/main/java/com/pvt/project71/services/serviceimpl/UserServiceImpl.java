@@ -1,11 +1,13 @@
 package com.pvt.project71.services.serviceimpl;
 
+import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,6 +26,9 @@ public class UserServiceImpl implements UserService {
     //CRUD - Create & Update (full)
     @Override
     public UserEntity save(UserEntity user) {
+        if (user.getEvents() == null) {
+            user.setEvents(new ArrayList<>());
+        }
         return userRepository.save(user);
     }
 
@@ -77,5 +82,14 @@ public class UserServiceImpl implements UserService {
         UserEntity toReturn = userRepository.findById(user.getEmail()).get();
         toReturn.getChallenges().isEmpty();
         return toReturn;
+    }
+
+    @Override
+    @Transactional
+    public UserEntity makeAdmin(UserEntity user, EventEntity event) {
+        if (!event.getAdminUsers().contains(user)) {
+            user.getEvents().add(event);
+        }
+        return userRepository.save(user);
     }
 }

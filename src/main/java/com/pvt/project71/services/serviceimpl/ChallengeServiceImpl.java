@@ -55,7 +55,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             challengeEntity.setEvent(defaultEvent);
             challengeEntity = challengeRepository.save(challengeEntity);
             defaultEvent.getChallenges().add(challengeEntity);
-            eventService.save(defaultEvent);
+            eventService.save(defaultEvent, null);
             return challengeEntity;
         }
         Optional<EventEntity> eventEntity = eventService.findOne(challengeEntity.getEvent().getId());
@@ -83,7 +83,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         challengeEntity = challengeRepository.save(challengeEntity);
         eventEntity.get().getChallenges().add(challengeEntity);
         eventEntity.get().getDates().setUpdatedAt(LocalDateTime.now());
-        eventService.save(eventEntity.get());
+        eventService.save(eventEntity.get(), challengeEntity.getCreator());
         return challengeEntity;
     }
 

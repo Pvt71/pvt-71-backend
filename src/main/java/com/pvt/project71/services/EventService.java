@@ -1,6 +1,7 @@
 package com.pvt.project71.services;
 
 import com.pvt.project71.domain.entities.EventEntity;
+import com.pvt.project71.domain.entities.UserEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -9,7 +10,7 @@ import java.util.Optional;
 
 @Service
 public interface EventService {
-    EventEntity save(EventEntity event);
+    EventEntity save(EventEntity event, UserEntity user);
 
     List<EventEntity> findAll();
 

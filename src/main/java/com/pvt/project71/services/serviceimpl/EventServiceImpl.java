@@ -2,6 +2,7 @@ package com.pvt.project71.services.serviceimpl;
 
 import com.pvt.project71.domain.TimeStamps;
 import com.pvt.project71.domain.entities.EventEntity;
+import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.services.EventService;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventEntity save(EventEntity eventEntity) {
+    public EventEntity save(EventEntity eventEntity, UserEntity user) {
         getDefaultEvent();//Ser till att default alltid finns först som event med id 1.
         if (eventEntity.getChallenges() == null) {
             eventEntity.setChallenges(new ArrayList<>());
@@ -40,6 +41,10 @@ public class EventServiceImpl implements EventService {
             eventEntity.getDates().setUpdatedAt(eventEntity.getDates().getCreatedAt());
         }if (eventEntity.getDates().getStartsAt() == null) {
             eventEntity.getDates().setStartsAt(eventEntity.getDates().getCreatedAt());
+        }
+
+        if (!isAnAdmin(eventEntity, user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not an admin");
         }
 
         if (eventEntity.getId() == null) {
@@ -121,5 +126,11 @@ public class EventServiceImpl implements EventService {
             return false;
         } return !eventEntity.getDates().getStartsAt().plus(MAX_DURATION_DAYS).isBefore(eventEntity.getDates().getEndsAt())
                 && !eventEntity.getDates().getStartsAt().plus(MIN_DURATION_HOURS).isAfter(eventEntity.getDates().getEndsAt());
+    }
+    private boolean isAnAdmin(EventEntity eventEntity, UserEntity userEntity) {
+        //Kollar om eventEntity har userEntity som admin så länge eventId inte är 1 för då är alla tillåtna att lägga till
+        //Vi behöver inte tänka på om att all ahar admin för default event för man får inte updatera något, bara lägga till och jobba på sina
+        //egna challenges
+        return (eventEntity.getId() != null && eventEntity.getId() == 1) || eventEntity.getAdminUsers().contains(userEntity);
     }
 }

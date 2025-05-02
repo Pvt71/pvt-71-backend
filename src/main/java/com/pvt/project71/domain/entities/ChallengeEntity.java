@@ -28,7 +28,7 @@ public class ChallengeEntity {
     @JoinColumn(name = "event_id", nullable = false)
     private EventEntity event;
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "creator_email", nullable = false)
     private UserEntity creator;
 

@@ -4,7 +4,10 @@ package com.pvt.project71;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pvt.project71.domain.dto.EventDto;
 import com.pvt.project71.domain.entities.EventEntity;
+import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +27,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,9 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
-
-
-
 public class EventTests {
 
     @Autowired
@@ -45,6 +46,10 @@ public class EventTests {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
 
 //    @BeforeEach
 //    public void clearDatabase() {
@@ -53,14 +58,17 @@ public class EventTests {
     @AfterEach
     public void clearDatabase() {
         eventService.findAll().forEach(event -> eventService.delete(event.getId()));
+        userRepository.deleteAll();
     }
-
+    private UserEntity fixAndSaveUser() {
+        return userService.save(TestDataUtil.createValidTestUserEntity());
+    }
     @Test
     public void testThatCreateEventReturnsCreated() throws Exception {
         // Assert that the response status is 201 Created
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         String eventJson = objectMapper.writeValueAsString(testEvent);
-
+        fixAndSaveUser();
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -71,10 +79,9 @@ public class EventTests {
 
     @Test
     public void testThatCreateEventSuccessfullyReturnsSavedEvent() throws Exception {
-
         EventEntity eventEntity = TestDataUtil.createTestEventEntityA();
         String eventJson = objectMapper.writeValueAsString(eventEntity);
-
+        fixAndSaveUser();
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -97,7 +104,10 @@ public class EventTests {
     public void testThatListEventsReturnsListOfEvents() throws Exception {
         // Assert that the response contains a list of events
         EventEntity testEventA = TestDataUtil.createTestEventEntityA();
-        eventService.save(testEventA);
+        UserEntity user = fixAndSaveUser();
+        userService.makeAdmin(user, testEventA);
+        testEventA.getAdminUsers().add(user);
+        eventService.save(testEventA, user);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/events")
@@ -112,7 +122,9 @@ public class EventTests {
     @Test
     public void testThatGetEventReturnsHttpStatus200IfEventExists() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
-        eventService.save(testEvent);
+        UserEntity user = fixAndSaveUser();
+        testEvent.getAdminUsers().add(user);
+        eventService.save(testEvent, user);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/events/1")
@@ -130,8 +142,11 @@ public class EventTests {
 
     @Test
     public void testThatGetEventReturnsEventIfEventExists() throws Exception {
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
-        eventService.save(testEvent);
+        testEvent.getAdminUsers().add(user);
+        userService.makeAdmin(user, testEvent);
+        eventService.save(testEvent, user);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/events/2")
@@ -159,7 +174,10 @@ public class EventTests {
     @Test
     public void testThatFullUpdateEventReturnsHttpStatus200WhenEventExists() throws Exception {
         EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
-        EventEntity savedEvent = eventService.save(testEventEntity);
+        UserEntity user = fixAndSaveUser();
+        testEventEntity.getAdminUsers().add(user);
+        userService.makeAdmin(user, testEventEntity);
+        EventEntity savedEvent = eventService.save(testEventEntity, user);
 
         EventDto testEventDto = TestDataUtil.createTestEventDtoA();
         String eventJson = objectMapper.writeValueAsString(testEventDto);
@@ -175,7 +193,10 @@ public class EventTests {
     @Test
     public void testThatFullUpdateUpdatesExistingEvent() throws Exception {
         EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
-        EventEntity savedEvent = eventService.save(testEventEntity);
+        UserEntity user = fixAndSaveUser();
+        testEventEntity.getAdminUsers().add(user);
+        userService.makeAdmin(user, testEventEntity);
+        EventEntity savedEvent = eventService.save(testEventEntity, user);
 
         EventDto testEventDto = TestDataUtil.createTestEventDtoA();
         testEventDto.setId(savedEvent.getId());
@@ -198,7 +219,10 @@ public class EventTests {
     public void testThatPartialUpdateEventReturnsHttpStatus200IfUserExists() throws Exception {
         //EventEntity testProjectA = TestDataUtil.createTestEventEntityA(TestDataUtil.createTestUserEntityA());
         EventEntity testProjectA = TestDataUtil.createTestEventEntityA();
-        EventEntity savedTestEvent = eventService.save(testProjectA);
+        UserEntity user = fixAndSaveUser();
+        testProjectA.getAdminUsers().add(user);
+        userService.makeAdmin(user, testProjectA);
+        EventEntity savedTestEvent = eventService.save(testProjectA, user);
 
         //EventDto eventDto = TestDataUtil.createTestEventDtoA(TestDataUtil.createTestUserEntityA());
         EventDto eventDto = TestDataUtil.createTestEventDtoA();
@@ -215,7 +239,11 @@ public class EventTests {
     public void testThatPartialUpdateEventUpdatesExistingUser() throws Exception {
         //EventEntity testProjectA = TestDataUtil.createTestEventEntityA(TestDataUtil.createTestUserEntityA());
         EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
-        EventEntity savedTestEvent = eventService.save(testEventEntityA);
+        UserEntity user = fixAndSaveUser();
+        testEventEntityA.getAdminUsers().add(user);
+        userService.makeAdmin(user, testEventEntityA);
+        EventEntity savedTestEvent = eventService.save(testEventEntityA, user);
+
 
         //EventDto eventDto = TestDataUtil.createTestEventDtoA(TestDataUtil.createTestUserEntityA());
         EventDto eventDto = TestDataUtil.createTestEventDtoA();
@@ -237,7 +265,10 @@ public class EventTests {
     public void testThatDeleteTaskReturnsHttpStatus204IfUserExist() throws Exception {
         //EventEntity testProjectA = TestDataUtil.createTestEventEntityA(TestDataUtil.createTestUserEntityA());
         EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
-        EventEntity savedTestEvent = eventService.save(testEventEntityA);
+        UserEntity user = fixAndSaveUser();
+        testEventEntityA.getAdminUsers().add(user);
+        userService.makeAdmin(user, testEventEntityA);
+        EventEntity savedTestEvent = eventService.save(testEventEntityA, user);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/events/" + savedTestEvent.getId())

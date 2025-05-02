@@ -33,7 +33,7 @@ public class EventEntity {
     @Embedded
     private TimeStamps dates;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
     @JoinTable(
             name = "event_admins", // join table name
             joinColumns = @JoinColumn(name = "event_id"), // owning side
