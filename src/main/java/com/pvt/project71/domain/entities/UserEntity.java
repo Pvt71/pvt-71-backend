@@ -36,7 +36,7 @@ public class UserEntity {
 
 
 
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private List<ChallengeEntity> challenges;
 
 }

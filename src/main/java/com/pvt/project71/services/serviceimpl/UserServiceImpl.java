@@ -1,6 +1,8 @@
 package com.pvt.project71.services.serviceimpl;
 
+import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.UserService;
 import org.springframework.stereotype.Service;
@@ -17,8 +19,11 @@ public class UserServiceImpl implements UserService {
     //Contains the database functionality
     private UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository){
+    private ChallengeRepository challengeRepository;
+
+    public UserServiceImpl(UserRepository userRepository, ChallengeRepository challengeRepository) {
         this.userRepository = userRepository;
+        this.challengeRepository = challengeRepository;
     }
 
     //CRUD - Create & Update (full)
@@ -63,6 +68,13 @@ public class UserServiceImpl implements UserService {
     // CRUD - Delete
     @Override
     public void delete(String email) {
+        List<ChallengeEntity> challenges = challengeRepository.findByCreatorEmail(email);
+
+        for(ChallengeEntity challengeEntity : challenges){
+            challengeEntity.setCreator(null);
+            challengeRepository.save(challengeEntity);
+        }
+
         userRepository.deleteById(email);
     }
 

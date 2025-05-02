@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -188,6 +189,24 @@ public class UserChallengesIntegrationTest {
             ).andExpect(
                     MockMvcResultMatchers.jsonPath("$.size()").value(0)
             );
+    }
+
+    @Test
+    public void testUserDoesNotDeleteChallenge() throws Exception {
+        UserEntity userEntity = TestDataUtil.createValidTestUserEntity();
+        userService.save(userEntity);
+
+        ChallengeEntity challengeEntityA = TestDataUtil.createChallengeEnitityA();
+        challengeEntityA.setCreator(userEntity);
+        challengeService.save(challengeEntityA);
+
+        userService.delete(userEntity.getEmail());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/challenges/"  + challengeEntityA.getId()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(challengeEntityA.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("A"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(challengeEntityA.getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(challengeEntityA.getRewardPoints()));
     }
 
 

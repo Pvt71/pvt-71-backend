@@ -29,7 +29,7 @@ public class ChallengeEntity {
     private EventEntity event;
 
     @ManyToOne()
-    @JoinColumn(name = "creator_email", nullable = false)
+    @JoinColumn(name = "creator_email")
     private UserEntity creator;
 
     private int rewardPoints;
