@@ -1,5 +1,6 @@
 package com.pvt.project71.controllers;
 
+import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.dto.EventDto;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.mappers.Mapper;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,6 +29,12 @@ public class EventController {
 
     @PostMapping(path = "/events")
     public ResponseEntity<EventDto> createEvent(@RequestBody EventDto event) {
+        if (event.getDates() == null) {
+            return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
+        }if (event.getDates().getEndsAt() == null) {
+            return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
+        }
+        event.getDates().setCreatedAt(null);
         EventEntity eventEntity = eventMapper.mapFrom(event);
         EventEntity savedEvent = eventService.save(eventEntity);
         return new ResponseEntity<>(eventMapper.mapTo(savedEvent), HttpStatus.CREATED);
@@ -42,7 +50,7 @@ public class EventController {
     }
 
     @GetMapping(path = "/events/{id}")
-    public ResponseEntity<EventDto> getEvent(@PathVariable("id") Long id) {
+    public ResponseEntity<EventDto> getEvent(@PathVariable("id") Integer id) {
         Optional<EventEntity> foundEvent = eventService.findOne(id);
         return foundEvent.map(eventEntity -> {
             EventDto eventDto = eventMapper.mapTo(eventEntity);
@@ -52,7 +60,7 @@ public class EventController {
 
     @PutMapping(path = "/events/{id}")
     public ResponseEntity<EventDto> fullUpdateEvent(
-            @PathVariable("id") Long id,
+            @PathVariable("id") Integer id,
             @RequestBody EventDto eventDto) {
 
         if (!eventService.isExists(id)) {
@@ -60,6 +68,8 @@ public class EventController {
         }
 
         eventDto.setId(id);
+        eventDto.setDates(eventService.findOne(id).get().getDates());
+        eventDto.getDates().setUpdatedAt(LocalDateTime.now());
         EventEntity eventEntity = eventMapper.mapFrom(eventDto);
         EventEntity savedEventEntity = eventService.save(eventEntity);
         return new ResponseEntity<>(
@@ -70,7 +80,7 @@ public class EventController {
 
     @PatchMapping(path = "/events/{id}")
     public ResponseEntity<EventDto> partialUpdateEvent(
-            @PathVariable("id") Long id,
+            @PathVariable("id") Integer id,
             @RequestBody EventDto eventDto) {
 
         if (!eventService.isExists(id)) {
@@ -84,7 +94,7 @@ public class EventController {
 
     @DeleteMapping(path = "/events/{id}")
     public ResponseEntity deleteEvent(
-            @PathVariable("id") Long id) {
+            @PathVariable("id") Integer id) {
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

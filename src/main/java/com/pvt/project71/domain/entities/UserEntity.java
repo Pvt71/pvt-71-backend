@@ -11,6 +11,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,13 +31,12 @@ public class UserEntity {
 
     private String profilePictureUrl;
 
-    //När events/scores/challenges finns:
-    //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Event> events;
+    @ManyToMany(mappedBy = "adminUsers", cascade = CascadeType.ALL)
+    private List<EventEntity> events;
 
 
 
-    //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Challenge> challenges;
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ChallengeEntity> challenges;
 
 }
