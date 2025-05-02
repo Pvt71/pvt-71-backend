@@ -28,7 +28,11 @@ public class EventEntity {
 
     private String description;
 
-    @Future(message = "End date must be in the future")
+    private String bannerUrl;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime startDate;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDate;
 

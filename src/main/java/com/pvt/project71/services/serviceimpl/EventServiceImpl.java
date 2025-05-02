@@ -76,7 +76,7 @@ public class EventServiceImpl implements EventService {
             Optional.ofNullable(eventEntity.getEndDate()).ifPresent(existingEvent::setEndDate);
             Optional.ofNullable(eventEntity.getDescription()).ifPresent(existingEvent::setDescription);
             return eventRepository.save(existingEvent);
-        }).orElseThrow(() -> new RuntimeException("Event does not exist!"));
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event does not exist!"));
     }
 
     @Override
@@ -95,7 +95,13 @@ public class EventServiceImpl implements EventService {
     }
 
     private boolean checkValidDate(EventEntity eventEntity) {
-        return eventEntity.getEndDate().isAfter(LocalDateTime.now().plus(MIN_DURATION_HOURS))
-                && eventEntity.getEndDate().isBefore(LocalDateTime.now().plus(MAX_DURATION_DAYS));
+        LocalDateTime startDate = eventEntity.getStartDate();
+        LocalDateTime endDate = eventEntity.getEndDate();
+        if (startDate == null || endDate == null) {
+            return false;
+        }
+        return !endDate.isBefore(startDate)
+                && !endDate.isBefore(startDate.plus(MIN_DURATION_HOURS))
+                && !endDate.isAfter(startDate.plus(MAX_DURATION_DAYS));
     }
 }

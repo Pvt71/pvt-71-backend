@@ -20,7 +20,12 @@ public class EventDto {
 
     private String name;
 
+    private String bannerUrl;
+
     private String description;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime startDate;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDate;

@@ -7,6 +7,8 @@ com\pvt\project71\Project71Application.class
 com\pvt\project71\services\serviceimpl\ChallengeServiceImpl.class
 com\pvt\project71\domain\dto\UserDto.class
 com\pvt\project71\controllers\ChallengeController.class
+com\pvt\project71\services\serviceimpl\FileStorageServiceImpl.class
+com\pvt\project71\services\FileStorageService.class
 com\pvt\project71\config\SecurityConfig.class
 com\pvt\project71\services\UserService.class
 com\pvt\project71\services\EventService.class
@@ -18,6 +20,7 @@ com\pvt\project71\domain\entities\EventEntity$EventEntityBuilder.class
 com\pvt\project71\mappers\Mapper.class
 com\pvt\project71\MainController.class
 com\pvt\project71\repositories\EventRepository.class
+com\pvt\project71\controllers\FileUploadController.class
 com\pvt\project71\controllers\ProfileViewController.class
 com\pvt\project71\mappers\mapperimpl\ChallengeMapper.class
 com\pvt\project71\domain\dto\ChallengeDto.class

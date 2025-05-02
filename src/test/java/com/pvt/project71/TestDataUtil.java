@@ -80,6 +80,7 @@ public class TestDataUtil {
         return EventEntity.builder()
                 .name("TestEventA")
                 .description("TestDescription")
+                .startDate(LocalDateTime.now())
                 .endDate(TEST_TIME)
                 .build();
     }
@@ -87,6 +88,7 @@ public class TestDataUtil {
         return EventDto.builder()
                 .name("TestEventA")
                 .description("TestDescription")
+                .startDate(LocalDateTime.now())
                 .endDate(TEST_TIME)
                 .build();
     }
@@ -94,6 +96,7 @@ public class TestDataUtil {
         return EventEntity.builder()
                 .name("TestEventB")
                 .description("TestDescription")
+                .startDate(LocalDateTime.now())
                 .endDate(TEST_TIME)
                 .build();
     }
@@ -101,6 +104,7 @@ public class TestDataUtil {
         return EventDto.builder()
                 .name("TestEventB")
                 .description("TestDescription")
+                .startDate(LocalDateTime.now())
                 .endDate(TEST_TIME)
                 .build();
     }

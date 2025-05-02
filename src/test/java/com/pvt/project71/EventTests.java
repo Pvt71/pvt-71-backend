@@ -1,12 +1,10 @@
 package com.pvt.project71;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pvt.project71.domain.dto.EventDto;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.services.EventService;
-import jakarta.validation.constraints.AssertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
