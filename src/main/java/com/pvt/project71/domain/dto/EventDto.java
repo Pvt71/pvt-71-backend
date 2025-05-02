@@ -18,6 +18,8 @@ public class EventDto {
 
     private String name;
 
+    private String bannerUrl;
+
     private String description;
 
     private TimeStamps dates;

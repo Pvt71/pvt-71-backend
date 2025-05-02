@@ -81,7 +81,7 @@ public class EventServiceImpl implements EventService {
             Optional.ofNullable(eventEntity.getName()).ifPresent(existingEvent::setName);
             Optional.ofNullable(eventEntity.getDescription()).ifPresent(existingEvent::setDescription);
             return eventRepository.save(existingEvent);
-        }).orElseThrow(() -> new RuntimeException("Event does not exist!"));
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event does not exist!"));
     }
 
     @Override

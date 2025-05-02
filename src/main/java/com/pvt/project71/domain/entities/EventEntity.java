@@ -28,7 +28,7 @@ public class EventEntity {
     private String name;
 
     private String description;
-
+    private String bannerUrl;
     @Embedded
     private TimeStamps dates;
 
