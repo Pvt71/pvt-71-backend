@@ -70,4 +70,12 @@ public class UserServiceImpl implements UserService {
     public boolean isExists(String email) {
         return userRepository.existsById(email);
     }
+
+    @Override
+    @Transactional
+    public UserEntity loadTheLazy(UserEntity user) {
+        UserEntity toReturn = userRepository.findById(user.getEmail()).get();
+        toReturn.getChallenges().isEmpty();
+        return toReturn;
+    }
 }

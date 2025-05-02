@@ -3,6 +3,7 @@ package com.pvt.project71.domain.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pvt.project71.domain.TimeStamps;
 import com.pvt.project71.domain.entities.ChallengeEntity;
+import com.pvt.project71.domain.entities.UserEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -24,9 +25,7 @@ public class EventDto {
 
     private TimeStamps dates;
 
-
-//  private UserEntity userEntity;
-    //private List<ChallengeEntity> challenges;
+    private List<UserDto> adminUsers;
 
 
 }

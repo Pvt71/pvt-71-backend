@@ -32,13 +32,14 @@ public class EventEntity {
     @Embedded
     private TimeStamps dates;
 
-//    @ManyToMany(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "admin_id")
-//    private List<UserEntity> adminUserEntity;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "event_admins", // join table name
+            joinColumns = @JoinColumn(name = "event_id"), // owning side
+            inverseJoinColumns = @JoinColumn(name = "user_id") // the other side
+    )
+    private List<UserEntity> adminUsers;
 
-//    @ManyToMany(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "user_id")
-//    private List<UserEntity> userEntity;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "event")
     @JsonIgnore //ignorerar listan när Entity görs till Json

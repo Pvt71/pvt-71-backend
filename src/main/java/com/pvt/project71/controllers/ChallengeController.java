@@ -8,6 +8,7 @@ import com.pvt.project71.services.ChallengeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -62,7 +63,9 @@ public class ChallengeController {
     }
 
     @PatchMapping(path = "/challenges/{id}")
-    public ResponseEntity<ChallengeDto> partialUpdate(@PathVariable("id") Integer id, @RequestBody ChallengeDto challengeDto) {
+    public ResponseEntity<ChallengeDto> partialUpdate(
+            @PathVariable("id") Integer id,
+            @RequestBody ChallengeDto challengeDto) {
         Optional<ChallengeEntity> found = challengeService.find(id);
         if (found.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

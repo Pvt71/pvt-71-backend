@@ -2,6 +2,7 @@ package com.pvt.project71.services.serviceimpl;
 
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.EventEntity;
+import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
@@ -76,6 +77,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
 
         challengeEntity.setEvent(eventEntity.get());
+//        if (!checkValidAdmin(challengeEntity, challengeEntity.getCreator())) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid admin");
+//        }
         challengeEntity = challengeRepository.save(challengeEntity);
         eventEntity.get().getChallenges().add(challengeEntity);
         eventEntity.get().getDates().setUpdatedAt(LocalDateTime.now());
@@ -100,6 +104,9 @@ public class ChallengeServiceImpl implements ChallengeService {
         if (found.isEmpty()) {
             throw new RuntimeException("Challenge Doesnt Exist");
         }
+//        if (checkValidAdmin(found.get(), found.get().getCreator())) {
+//            throw new RuntimeException("Challenge Doesnt Exist");
+//        }
         found.get().getDates().setUpdatedAt(LocalDateTime.now());
         return found.map(existing -> {
             Optional.ofNullable(challengeEntity.getName()).ifPresent(existing::setName);
@@ -145,5 +152,11 @@ public class ChallengeServiceImpl implements ChallengeService {
                 !challengeEntity.getDates().getStartsAt().isBefore(eventEntity.getDates().getStartsAt());
     }
 
+//    private boolean checkValidAdmin(ChallengeEntity challengeEntity, UserEntity userEntity) {
+//        if (challengeEntity.getEvent().getId() == 1) {
+//            return challengeEntity.getCreator().getEmail().equals(userEntity.getEmail());
+//        }
+//        return challengeEntity.getEvent().getAdminUsers().contains(userEntity);
+//    }
 
 }

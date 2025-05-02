@@ -1,5 +1,6 @@
 package com.pvt.project71.domain.dto;
 
+import com.pvt.project71.domain.entities.EventEntity;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -27,4 +28,5 @@ public class UserDto {
     private String school;
 
     private String profilePictureUrl;
+
 }

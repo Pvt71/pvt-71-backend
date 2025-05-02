@@ -23,4 +23,5 @@ public interface    UserService {
     void delete(String email);
 
     boolean isExists(String email);
+    UserEntity loadTheLazy(UserEntity user);
 }

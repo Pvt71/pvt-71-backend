@@ -27,9 +27,8 @@ public class UserEntity {
 
     private String profilePictureUrl;
 
-    //När events/scores/challenges finns:
-    //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Event> events;
+    @ManyToMany(mappedBy = "adminUsers", cascade = CascadeType.ALL)
+    private List<EventEntity> events;
 
     //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
     //private List<Score> scores;

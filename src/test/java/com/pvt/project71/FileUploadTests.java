@@ -59,7 +59,7 @@ public class FileUploadTests {
 
     @Test
     public void testThatUploadOfTooLargeImageReturnsBadRequest() throws Exception {
-        byte[] largeFile = new byte[11 * 1024 * 1024]; // 6 MB
+        byte[] largeFile = new byte[11 * 1024 * 1024]; //11MB
         MockMultipartFile file = new MockMultipartFile(
                 "file", "big.jpg", "image/jpeg", largeFile);
 
