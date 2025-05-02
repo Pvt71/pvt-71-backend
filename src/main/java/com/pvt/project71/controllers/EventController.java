@@ -1,5 +1,6 @@
 package com.pvt.project71.controllers;
 
+import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.dto.EventDto;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.mappers.Mapper;
@@ -30,7 +31,10 @@ public class EventController {
     public ResponseEntity<EventDto> createEvent(@RequestBody EventDto event) {
         if (event.getDates() == null) {
             return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
+        }if (event.getDates().getEndsAt() == null) {
+            return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
         }
+        event.getDates().setCreatedAt(null);
         EventEntity eventEntity = eventMapper.mapFrom(event);
         EventEntity savedEvent = eventService.save(eventEntity);
         return new ResponseEntity<>(eventMapper.mapTo(savedEvent), HttpStatus.CREATED);

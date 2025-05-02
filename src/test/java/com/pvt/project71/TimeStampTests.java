@@ -191,4 +191,22 @@ public class TimeStampTests {
         testEvent = eventService.loadTheLazy(eventService.findOne(2).get());
         assertNotEquals(oldUpdatedAt, testEvent.getDates().getUpdatedAt());
     }
+    @Test
+    public void testCreatingEventThatStartsBeforeNowGives400() throws Exception {
+        EventEntity testEvent = TestDataUtil.createTestEventEntityA();
+        testEvent.getDates().setStartsAt(LocalDateTime.now().minusDays(1));
+        String eventJson = objectMapper.writeValueAsString(testEvent);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
+                .content(eventJson)).andExpect(status().isBadRequest());
+    }
+    @Test
+    public void testCreatingChallengeThatStartsBeforeNowGives400() throws Exception {
+        ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
+        testChallenge.getDates().setStartsAt(LocalDateTime.now().minusDays(1));
+        String challengeJson = objectMapper.writeValueAsString(testChallenge);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
+                .content(challengeJson)).andExpect(status().isBadRequest());
+    }
 }

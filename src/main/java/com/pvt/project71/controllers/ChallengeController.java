@@ -38,7 +38,7 @@ public class ChallengeController {
         if (challengeDto.getDates().getStartsAt() != null && challengeDto.getDates().getStartsAt().isBefore(LocalDateTime.now())) {
             return new ResponseEntity<ChallengeDto>(HttpStatus.BAD_REQUEST); //Om start börjar innan nu
         }
-
+        challengeDto.getDates().setCreatedAt(null);
         ChallengeEntity savedChallengeEntity = challengeService.save(challengeMapper.mapFrom(challengeDto));
         return new ResponseEntity<>(challengeMapper.mapTo(savedChallengeEntity), HttpStatus.CREATED);
     }
