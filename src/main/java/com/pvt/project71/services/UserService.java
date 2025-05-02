@@ -26,4 +26,5 @@ public interface    UserService {
     boolean isExists(String email);
     UserEntity loadTheLazy(UserEntity user);
     UserEntity makeAdmin(UserEntity user, EventEntity event);
+    UserEntity removeAdmin(UserEntity user, EventEntity event);
 }

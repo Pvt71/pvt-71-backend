@@ -26,4 +26,9 @@ public interface EventService {
     EventEntity getDefaultEvent();
 
     EventEntity loadTheLazy(EventEntity toLoad);
+
+    EventEntity addAdmin(EventEntity eventEntity, UserEntity toAdd, UserEntity userAddingThem);
+
+    EventEntity removeAdmin(EventEntity eventEntity, UserEntity toRemove);
+
 }

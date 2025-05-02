@@ -1,6 +1,5 @@
 package com.pvt.project71.controllers;
 
-import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.dto.EventDto;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
@@ -82,6 +81,8 @@ public class EventController {
 
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } if (id == 1) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
         }
         //Optional<UserEntity> user = userService.findOne(userToken.getClaimAsString("email"));
         Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
@@ -108,6 +109,8 @@ public class EventController {
 
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } if (id == 1) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
         }
 
         EventEntity eventEntity = eventMapper.mapFrom(eventDto);
@@ -123,6 +126,52 @@ public class EventController {
         }
         eventService.delete(id);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+
+    //Admin för events
+    @PatchMapping(path = "/events/{id}/admins/add/{email}")
+    public ResponseEntity<EventDto> addAdminToEvent(@PathVariable("id") Integer id,
+                                                    @PathVariable("email") String email,
+                                                    @AuthenticationPrincipal Jwt userToken) {
+        if (!eventService.isExists(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } if (id == 1) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
+        }
+        Optional<UserEntity> toAdd = userService.findOne(email);
+        EventEntity eventEntity = eventService.findOne(id).get();
+        if (toAdd.isEmpty()) {
+            return new ResponseEntity<EventDto>(HttpStatus.NOT_FOUND);
+        } if (eventEntity.getAdminUsers().contains(toAdd)) {
+            return new ResponseEntity<EventDto>(HttpStatus.CONFLICT);
+        }
+        //Optional<UserEntity> user = userService.findOne(userToken.getClaimAsString("email"));
+        Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
+        if (user.isEmpty()) {
+            return new ResponseEntity<EventDto>(HttpStatus.NOT_FOUND);
+        }
+        eventEntity = eventService.addAdmin(eventEntity, toAdd.get(), user.get());
+        return new ResponseEntity<>(eventMapper.mapTo(eventEntity), HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/events/{id}/admins/leave")
+    public ResponseEntity<EventDto> leaveEventAsAdmin(@PathVariable("id") Integer id,
+                                                      @AuthenticationPrincipal Jwt userToken) {
+        if (!eventService.isExists(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } if (id == 1) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
+        }
+        EventEntity eventEntity = eventService.findOne(id).get();
+
+        //Optional<UserEntity> user = userService.findOne(userToken.getClaimAsString("email"));
+        Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
+        if (user.isEmpty()) {
+            return new ResponseEntity<EventDto>(HttpStatus.NOT_FOUND);
+        }
+        eventEntity = eventService.removeAdmin(eventEntity, user.get());
+        return new ResponseEntity<>(eventMapper.mapTo(eventEntity), HttpStatus.OK);
     }
 
 }

@@ -29,6 +29,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -142,7 +144,7 @@ public class EventTests {
 
     @Test
     public void testThatGetEventReturnsEventIfEventExists() throws Exception {
-        UserEntity user = TestDataUtil.createValidTestUserEntity();
+        UserEntity user = fixAndSaveUser();
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         testEvent.getAdminUsers().add(user);
         userService.makeAdmin(user, testEvent);
@@ -284,7 +286,42 @@ public class EventTests {
         ).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    //ADmin tests
+    @Test
+    public void testAddingANewAdminWorkAndItExistsViaUserServicesToo() throws Exception {
+        EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
+        UserEntity user = fixAndSaveUser();
+        testEventEntity.getAdminUsers().add(user);
+        userService.makeAdmin(user, testEventEntity);
+        EventEntity savedEvent = eventService.save(testEventEntity, user);
 
+        UserEntity userB = TestDataUtil.createValidTestUserEntity();
+        userB.setEmail("test2@test.com");
+        userB = userService.save(userB);
+        mockMvc.perform(MockMvcRequestBuilders.patch("/events/" + savedEvent.getId() + "/admins/add/" + userB.getEmail()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.adminUsers[1]").exists());
+
+        assertEquals(savedEvent, userService.loadTheLazy(userB).getEvents().get(0));
+
+    }
+    @Test
+    public void testRemovingAdminWorks() throws Exception {
+        EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
+        UserEntity user = fixAndSaveUser();
+        testEventEntity.getAdminUsers().add(user);
+        userService.makeAdmin(user, testEventEntity);
+        EventEntity savedEvent = eventService.save(testEventEntity, user);
+
+        UserEntity userB = TestDataUtil.createValidTestUserEntity();
+        userB.setEmail("test2@test.com");
+        userB = userService.save(userB);
+        savedEvent = eventService.addAdmin(savedEvent, userB, user);
+        mockMvc.perform(MockMvcRequestBuilders.patch("/events/" + savedEvent.getId() + "/admins/leave"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.adminUsers[1]").doesNotExist());
+
+        assertEquals(0, userService.loadTheLazy(user).getEvents().size());
+
+    }
 }
 
 
