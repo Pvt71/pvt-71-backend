@@ -8,6 +8,8 @@ import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.dto.EventDto;
+import com.pvt.project71.domain.entities.score.ScoreEntity;
+import com.pvt.project71.domain.entities.score.ScoreId;
 
 import java.time.LocalDateTime;
 
@@ -45,6 +47,23 @@ public class TestDataUtil {
                 .profilePictureUrl("testUrl")
                 .build();
     }
+    public static UserEntity createValidTestUserEntityB(){
+        return UserEntity.builder()
+                .email("TestB@test.com")
+                .username("TestNameB")
+                .school("TestSchoolB")
+                .profilePictureUrl("testUrl")
+                .build();
+    }
+    //event must be saved in the database as its primary key is auto gen
+    //DO NOT forget to cleanup
+    public static ScoreEntity createValidScoreEntity(UserEntity user, EventEntity event){
+        return ScoreEntity.builder()
+                .scoreId(ScoreId.builder().user(user).event(event).build())
+                .score(100)
+                .build();
+    }
+
 
     public static UserEntity createInvalidTestUserEntity(){
         return UserEntity.builder()
@@ -109,6 +128,8 @@ public class TestDataUtil {
                 .dates(createTimeStampForTest())
                 .build();
     }
+
+
 }
 
     
