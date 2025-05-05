@@ -28,9 +28,10 @@ public class ScoreServiceImpl implements ScoreService {
         this.eventService = eventService;
     }
 
+
     @Override
     public Optional<ScoreEntity> create(ScoreDto scoreDto) {
-        Optional<UserEntity> userOpt = userService.findOne(scoreDto.getUserEmail() );
+        Optional<UserEntity> userOpt = userService.findOne(scoreDto.getUserDto().getEmail() );
         Optional<EventEntity> eventOpt = eventService.findOne(scoreDto.getEventId());
         //Check if user and event are valid
         if (userOpt.isEmpty() || eventOpt.isEmpty())
@@ -50,26 +51,30 @@ public class ScoreServiceImpl implements ScoreService {
     }
 
     @Override
-    public Optional<ScoreEntity> findOne(String email, int eventId) {
-        ScoreId scoreId = ScoreId.builder()
-                .user(userService.findOne(email).get())
-                .event(eventService.findOne(eventId).get())
-                .build();
-        return  findOne(scoreId);
-    }
-
-    @Override
-    public Optional<List<ScoreEntity>> findAllByUser(String email) {
-        List<ScoreEntity> scores = scoreRepository.findAllByScoreIdUserEmail(email);
+    public Optional<List<ScoreEntity>> findAllByUser(UserEntity userEntity) {
+        List<ScoreEntity> scores = scoreRepository.findAllByScoreIdUserEmail(userEntity.getEmail());
         return scores.isEmpty() ? Optional.empty() : Optional.of(scores);
     }
-
-
 
     @Override
     public Optional<List<ScoreEntity>> findAllByEvent(int eventId) {
         List<ScoreEntity> scores = scoreRepository.findAllByScoreIdEventId(eventId);
         return scores.isEmpty() ? Optional.empty() : Optional.of(scores);
+    }
+
+    @Override
+    public Optional<ScoreEntity> addPoints(ScoreId scoreId, int amount) {
+        Optional<ScoreEntity>  scoreOpt =  findOne(scoreId);
+        if (scoreOpt.isEmpty())
+              return Optional.empty();
+        ScoreEntity scoreEntity = scoreOpt.get();
+        scoreEntity.setScore(scoreEntity.getScore()+amount);
+        return Optional.of(scoreRepository.save(scoreEntity));
+    }
+
+    @Override
+    public Optional<ScoreEntity> subtractPoints(ScoreId scoreId, int amount) {
+        return addPoints(scoreId,-amount);
     }
 
 

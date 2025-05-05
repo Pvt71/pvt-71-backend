@@ -13,8 +13,8 @@ public class ScoreDto {
     @Positive(message = "Score must be a positive integer")
     private int score;
     //Score belongs to
-    @Email(message = "Invalid email format.")
-    @NotBlank(message = "Email is required.")
-    private String userEmail;
-    private int  eventId;
+    @NonNull
+    private UserDto userDto;
+    @NonNull
+    private int eventId;
 }

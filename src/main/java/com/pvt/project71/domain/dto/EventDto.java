@@ -25,7 +25,5 @@ public class EventDto {
 
     private TimeStamps dates;
 
-    private List<UserDto> adminUsers;
-
 
 }

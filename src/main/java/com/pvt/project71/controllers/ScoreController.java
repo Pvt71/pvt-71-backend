@@ -5,8 +5,10 @@ import com.pvt.project71.domain.dto.ScoreDto;
 import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.domain.entities.score.ScoreId;
 import com.pvt.project71.mappers.mapperimpl.ScoreMapper;
+import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.JWTService;
 import com.pvt.project71.services.ScoreService;
+import com.pvt.project71.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -23,10 +25,15 @@ import java.util.stream.Collectors;
 public class ScoreController {
     private final ScoreService scoreService;
     private final JWTService jwtService;
+    private final UserService userService;
+    private final EventService eventService;
     private final ScoreMapper scoreMapper;
-    public ScoreController(ScoreService scoreService, JWTService jwtService, ScoreMapper scoreMapper) {
+
+    public ScoreController(ScoreService scoreService, JWTService jwtService, UserService userService, EventService eventService, ScoreMapper scoreMapper) {
         this.scoreService = scoreService;
         this.jwtService = jwtService;
+        this.userService = userService;
+        this.eventService = eventService;
         this.scoreMapper = scoreMapper;
     }
 
@@ -45,22 +52,26 @@ public class ScoreController {
     //as (user,event) maps to one score.
     @GetMapping("/scores/{email}/{eventId}")
     public ResponseEntity<ScoreDto> getScore(@NotBlank @Email @PathVariable String email, @PathVariable int eventId) {
-        Optional<ScoreEntity> scoreOpt = scoreService.findOne(email,eventId);
+        //Feels a bit odd to do thias as ScoreService#findOne checks by email and eventid
+        ScoreId scoreId = ScoreId.builder().user(userService.findOne(email).get())
+                .event(eventService.findOne(eventId).get()).build();
+        Optional<ScoreEntity> scoreOpt = scoreService.findOne(scoreId);
         if (scoreOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(scoreMapper.mapTo(scoreOpt.get()),HttpStatus.OK);
     }
     //All scores that belong to a user
-    @GetMapping("/scores/users/r{email}")
+    @GetMapping("/scores/users/{email}")
     public ResponseEntity<List<ScoreDto>> getAllUserScores(@NotBlank @Email @PathVariable String email) {
-        Optional<List<ScoreEntity>> scoreOpt = scoreService.findAllByUser(email);
+        Optional<List<ScoreEntity>> scoreOpt = scoreService.findAllByUser(userService.findOne(email).get());
         if (scoreOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         List<ScoreDto> scores = scoreOpt.get().stream().map(scoreMapper::mapTo).toList();
         return new ResponseEntity<>(scores,HttpStatus.OK);
     }
+    //Get ALL scores related to an event
     @GetMapping("/scores/events/{eventId}")
-    public ResponseEntity<List<ScoreDto>> getAllEventScores(@PathVariable int  eventId) {
+    public ResponseEntity<List<ScoreDto>> getAllUserScores(@PathVariable int eventId) {
         Optional<List<ScoreEntity>> scoreOpt = scoreService.findAllByEvent(eventId);
         if (scoreOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
