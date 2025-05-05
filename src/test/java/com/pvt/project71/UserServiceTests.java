@@ -1,8 +1,10 @@
 package com.pvt.project71;
 
 import com.pvt.project71.domain.entities.ChallengeEntity;
+import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.services.ChallengeService;
+import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +36,9 @@ public class UserServiceTests {
 
     @Autowired
     private ChallengeService challengeService;
+
+    @Autowired
+    private EventService eventService;
 
     @Test
     public void testSaveSavesValidUser(){
@@ -95,6 +100,21 @@ public class UserServiceTests {
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
         testChallenge.setCreator(testUser);
         challengeService.save(testChallenge);
+
+        userService.delete(testUser.getEmail());
+
+        List<UserEntity> users = userService.findAll();
+        assertEquals(0, users.size());
+    }
+
+    @Test
+    public void testDeleteDeleteUsersWithEventsAsAdmin(){
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+
+        EventEntity testEvent = TestDataUtil.createTestEventEntityA();
+        testEvent.setAdminUsers(List.of(testUser));
+        eventService.save(testEvent);
 
         userService.delete(testUser.getEmail());
 

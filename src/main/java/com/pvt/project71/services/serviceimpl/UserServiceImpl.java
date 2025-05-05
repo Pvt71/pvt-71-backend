@@ -1,8 +1,10 @@
 package com.pvt.project71.services.serviceimpl;
 
 import com.pvt.project71.domain.entities.ChallengeEntity;
+import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
+import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.UserService;
 import org.springframework.stereotype.Service;
@@ -16,14 +18,16 @@ import java.util.stream.StreamSupport;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private final EventRepository eventRepository;
     //Contains the database functionality
     private UserRepository userRepository;
 
     private ChallengeRepository challengeRepository;
 
-    public UserServiceImpl(UserRepository userRepository, ChallengeRepository challengeRepository) {
+    public UserServiceImpl(UserRepository userRepository, ChallengeRepository challengeRepository, EventRepository eventRepository) {
         this.userRepository = userRepository;
         this.challengeRepository = challengeRepository;
+        this.eventRepository = eventRepository;
     }
 
     //CRUD - Create & Update (full)
@@ -79,12 +83,18 @@ public class UserServiceImpl implements UserService {
         if(email == null || email.isBlank())
             throw new IllegalArgumentException("Email cannot be null or blank");
 
-        List<ChallengeEntity> challenges = challengeRepository.findByCreatorEmail(email);
-
-        for(ChallengeEntity challengeEntity : challenges){
-            challengeEntity.setCreator(null);
-            challengeRepository.save(challengeEntity);
+        // To be able to delete users that are admins in events
+        Optional<UserEntity> user = userRepository.findById(email);
+        if(user.isPresent()) {
+            for (EventEntity event : user.get().getEvents()) {
+                if(event.getAdminUsers() != null) {
+                    event.getAdminUsers().remove(user.get());
+                    eventRepository.save(event);
+                }
+            }
+            user.get().getEvents().clear();
         }
+
 
         userRepository.deleteById(email);
     }

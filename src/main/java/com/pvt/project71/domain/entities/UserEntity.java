@@ -31,12 +31,10 @@ public class UserEntity {
 
     private String profilePictureUrl;
 
-    @ManyToMany(mappedBy = "adminUsers", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "adminUsers", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     private List<EventEntity> events;
 
-
-
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
     private List<ChallengeEntity> challenges;
 
 }
