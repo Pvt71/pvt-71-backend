@@ -64,9 +64,12 @@ public class ScoreServiceImpl implements ScoreService {
         return scores.isEmpty() ? Optional.empty() : Optional.of(scores);
     }
 
+
+
     @Override
     public Optional<List<ScoreEntity>> findAllByEvent(int eventId) {
-        return Optional.empty();
+        List<ScoreEntity> scores = scoreRepository.findAllByScoreIdEventId(eventId);
+        return scores.isEmpty() ? Optional.empty() : Optional.of(scores);
     }
 
 

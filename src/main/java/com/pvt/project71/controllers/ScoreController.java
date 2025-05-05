@@ -51,9 +51,17 @@ public class ScoreController {
         return new ResponseEntity<>(scoreMapper.mapTo(scoreOpt.get()),HttpStatus.OK);
     }
     //All scores that belong to a user
-    @GetMapping("/scores/{email}")
+    @GetMapping("/scores/users/r{email}")
     public ResponseEntity<List<ScoreDto>> getAllUserScores(@NotBlank @Email @PathVariable String email) {
         Optional<List<ScoreEntity>> scoreOpt = scoreService.findAllByUser(email);
+        if (scoreOpt.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        List<ScoreDto> scores = scoreOpt.get().stream().map(scoreMapper::mapTo).toList();
+        return new ResponseEntity<>(scores,HttpStatus.OK);
+    }
+    @GetMapping("/scores/events/{eventId}")
+    public ResponseEntity<List<ScoreDto>> getAllEventScores(@PathVariable int  eventId) {
+        Optional<List<ScoreEntity>> scoreOpt = scoreService.findAllByEvent(eventId);
         if (scoreOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         List<ScoreDto> scores = scoreOpt.get().stream().map(scoreMapper::mapTo).toList();

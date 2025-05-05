@@ -104,14 +104,17 @@ public class ScoreTest {
     }
     @Test
     public void testGetAllScoresByValidUserReturnsOk() throws Exception {
-        ScoreEntity scoreEntityA = TestDataUtil.createValidScoreEntity(user,event);
-        //EventEntity needs to be saved for auto id to be generated
-       EventEntity eventB = eventRepository.save(TestDataUtil.createTestEventEntityB());
-        ScoreEntity scoreEntityB = TestDataUtil.createValidScoreEntity(user,eventB);
-
-        scoreRepository.save(scoreEntityA);
-        scoreRepository.save(scoreEntityB);
-        mockMvc.perform(MockMvcRequestBuilders.get("/scores/" + user.getEmail())
+        ScoreEntity validScoreEntity = TestDataUtil.createValidScoreEntity(user,event);
+        scoreRepository.save(validScoreEntity);
+        mockMvc.perform(MockMvcRequestBuilders.get("/scores/users/" + user.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpectAll(MockMvcResultMatchers.status().isOk());
+    }
+    @Test
+    public void testGetAllScoresByValidEventReturnsOk() throws Exception {
+        ScoreEntity validScoreEntity = TestDataUtil.createValidScoreEntity(user,event);
+        scoreRepository.save(validScoreEntity);
+        mockMvc.perform(MockMvcRequestBuilders.get("/scores/events/" + event.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpectAll(MockMvcResultMatchers.status().isOk());
     }
@@ -125,13 +128,13 @@ public class ScoreTest {
         scoreRepository.save(scoreEntityB);
         List<ScoreDto> scores = Arrays.asList(scoreMapper.mapTo(scoreEntityA),scoreMapper.mapTo(scoreEntityB));
         String scoresJson = objectMapper.writeValueAsString(scores);
-        mockMvc.perform(MockMvcRequestBuilders.get("/scores/" + user.getEmail()).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.get("/scores/users/" + user.getEmail()).contentType(MediaType.APPLICATION_JSON))
                 .andExpectAll(MockMvcResultMatchers.status().isOk()
                 , MockMvcResultMatchers.content().json(scoresJson));
     }
     @Test
     public void testGetAllScoresByInalidUserReturnsNotFound() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/scores/" + user.getEmail()).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.get("/scores/users/" + user.getEmail()).contentType(MediaType.APPLICATION_JSON))
                 .andExpectAll(MockMvcResultMatchers.status().isNotFound());
     }
     @Test

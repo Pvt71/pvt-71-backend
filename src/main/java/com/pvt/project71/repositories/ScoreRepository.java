@@ -1,5 +1,6 @@
 package com.pvt.project71.repositories;
 
+import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.domain.entities.score.ScoreId;
 import org.springframework.data.jpa.repository.Query;
@@ -12,5 +13,6 @@ import java.util.List;
 public interface ScoreRepository extends CrudRepository<ScoreEntity, ScoreId> {
 
       List<ScoreEntity> findAllByScoreIdUserEmail(String email);
+      List<ScoreEntity> findAllByScoreIdEventId(int eventId);
 
 }
