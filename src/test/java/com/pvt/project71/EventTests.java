@@ -299,8 +299,10 @@ public class EventTests {
         userB.setEmail("test2@test.com");
         userB = userService.save(userB);
         mockMvc.perform(MockMvcRequestBuilders.patch("/events/" + savedEvent.getId() + "/admins/add/" + userB.getEmail()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.adminUsers[1]").exists());
+                .andExpect(status().isOk());
+        savedEvent = eventService.findOne(savedEvent.getId()).get();
 
+        assertEquals(2, savedEvent.getAdminUsers().size());
         assertEquals(savedEvent, userService.loadTheLazy(userB).getEvents().get(0));
 
     }
@@ -317,8 +319,10 @@ public class EventTests {
         userB = userService.save(userB);
         savedEvent = eventService.addAdmin(savedEvent, userB, user);
         mockMvc.perform(MockMvcRequestBuilders.patch("/events/" + savedEvent.getId() + "/admins/leave"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.adminUsers[1]").doesNotExist());
+                .andExpect(status().isOk());
 
+        savedEvent = eventService.findOne(savedEvent.getId()).get();
+        assertEquals(1, savedEvent.getAdminUsers().size());
         assertEquals(0, userService.loadTheLazy(user).getEvents().size());
 
     }

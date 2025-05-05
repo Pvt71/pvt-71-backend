@@ -95,7 +95,6 @@ public class TestDataUtil {
                 .name("TestEventA")
                 .description("TestDescription")
                 .dates(createTimeStampForTest())
-                .adminUsers(new ArrayList<>())
                 .build();
     }
     public static EventEntity createTestEventEntityB() {
@@ -111,7 +110,6 @@ public class TestDataUtil {
                 .name("TestEventB")
                 .description("TestDescription")
                 .dates(createTimeStampForTest())
-                .adminUsers(new ArrayList<>())
                 .build();
     }
 }
