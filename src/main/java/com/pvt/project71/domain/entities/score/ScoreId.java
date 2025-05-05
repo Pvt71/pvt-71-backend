@@ -22,7 +22,7 @@ public class ScoreId implements Serializable {
     @JoinColumn(name = "email", nullable = false)
     private UserEntity user;
     @ManyToOne
-    @JoinColumn(name = "id",nullable = false)
+    @JoinColumn(name = "eventId",nullable = false)
     private EventEntity event;
 
 }
