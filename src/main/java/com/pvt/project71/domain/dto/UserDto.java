@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-
 public class UserDto {
 
     //@Email checks if email is in the format of something@domain.com

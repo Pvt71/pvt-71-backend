@@ -1,7 +1,7 @@
-package com.pvt.project71.config;
+package com.pvt.project71.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pvt.project71.services.JWTService; // import your service
+import com.pvt.project71.services.JwtService; // import your service
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -11,14 +11,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final JWTService jwtService;
+    private final JwtService jwtService;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    public OAuthSuccessHandler(JWTService jwtService) {
+    private static final String JSON_TYPE = "application/json";
+    public OAuthSuccessHandler(JwtService jwtService) {
         this.jwtService = jwtService;
     }
 
@@ -29,9 +30,9 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
-        String token = jwtService.generateToken(authentication);
-        //Send JWT
-        response.setContentType("application/json");
+        String token = jwtService.generateToken(authentication, 1, ChronoUnit.HOURS).getTokenValue();
+        //Send JWT back to OAuth2 process
+        response.setContentType(JSON_TYPE);
         objectMapper.writeValue(response.getWriter(), Map.of("token", token));
     }
 }
