@@ -39,12 +39,14 @@ public class EventController {
             return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
         }if (event.getDates().getEndsAt() == null) {
             return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
+        } if (userToken == null) {
+            return new ResponseEntity<EventDto>(HttpStatus.FORBIDDEN);
         }
         event.getDates().setCreatedAt(null);
         EventEntity eventEntity = eventMapper.mapFrom(event);
 
-        //Optional<UserEntity> creator = userService.findOne(userToken.getClaimAsString("email"));
-        Optional<UserEntity> creator = userService.findOne("Test@test.com"); //TODO: Ska bort sen
+        Optional<UserEntity> creator = userService.findOne(userToken.getSubject());
+        //Optional<UserEntity> creator = userService.findOne("Test@test.com"); //TODO: Ska bort sen
         if (creator.isEmpty()) {
             return new ResponseEntity<EventDto>(HttpStatus.NOT_FOUND);
         }
@@ -81,11 +83,11 @@ public class EventController {
 
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (id == 1) {
+        } if (id == 1 || userToken == null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
         }
-        //Optional<UserEntity> user = userService.findOne(userToken.getClaimAsString("email"));
-        Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        //Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
         if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -105,26 +107,37 @@ public class EventController {
     @PatchMapping(path = "/events/{id}")
     public ResponseEntity<EventDto> partialUpdateEvent(
             @PathVariable("id") Integer id,
-            @RequestBody EventDto eventDto) {
+            @RequestBody EventDto eventDto,
+            @AuthenticationPrincipal Jwt userToken) {
 
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (id == 1) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
+        } if (id == 1 || userToken == null) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         EventEntity eventEntity = eventMapper.mapFrom(eventDto);
-        EventEntity updatedEventEntity = eventService.partialUpdate(id, eventEntity);
+        EventEntity updatedEventEntity = eventService.partialUpdate(id, eventEntity, user.get());
         return new ResponseEntity<>(eventMapper.mapTo(updatedEventEntity), HttpStatus.OK);
     }
 
     @DeleteMapping(path = "/events/{id}")
     public ResponseEntity deleteEvent(
-            @PathVariable("id") Integer id) {
+            @PathVariable("id") Integer id,
+            @AuthenticationPrincipal Jwt userToken) {
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } if (id == 1 || userToken == null) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        eventService.delete(id);
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        eventService.delete(id, user.get());
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 

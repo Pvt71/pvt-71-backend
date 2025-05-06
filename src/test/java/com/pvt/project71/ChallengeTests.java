@@ -5,10 +5,13 @@ import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
+import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -25,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -46,19 +51,32 @@ public class ChallengeTests {
     private ChallengeRepository challengeRepository;
     @Autowired
     private EventService eventService;
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
+    private JwtService jwtService;
 
     @AfterEach
     public void cleanup() {
         challengeRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+    @BeforeEach
+    public void setUp() {
+        fixAndSaveUser();
     }
 
+    private Jwt getUserToken() {
+        return jwtService.mockOauth2(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
+    }
+    private UserEntity fixAndSaveUser() {
+        return userService.save(TestDataUtil.createValidTestUserEntity());
+    }
     @Test
     public void testCreatingAChallengeReturns201() throws Exception{
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
 
-        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
-        userService.save(testUser);
-        testChallenge.setCreator(testUser);
+        testChallenge.setCreator(fixAndSaveUser());
 
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 

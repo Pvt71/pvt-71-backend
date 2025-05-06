@@ -6,6 +6,7 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.UserService;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +36,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventEntity save(EventEntity eventEntity, UserEntity user) {
+    public EventEntity save(EventEntity eventEntity, UserEntity doneBy) {
         getDefaultEvent();//Ser till att default alltid finns först som event med id 1.
         if (eventEntity.getChallenges() == null) {
             eventEntity.setChallenges(new ArrayList<>());
@@ -46,7 +47,7 @@ public class EventServiceImpl implements EventService {
             eventEntity.getDates().setStartsAt(eventEntity.getDates().getCreatedAt());
         }
 
-        if (!isAnAdmin(eventEntity, user)) {
+        if (!isAnAdmin(eventEntity, doneBy)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not an admin");
         }
 
@@ -81,7 +82,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventEntity partialUpdate(Integer id, EventEntity eventEntity) throws ResponseStatusException {
+    public EventEntity partialUpdate(Integer id, EventEntity eventEntity, UserEntity doneBy) throws ResponseStatusException {
         eventEntity.setId(id);
         eventEntity.getDates().setUpdatedAt(LocalDateTime.now());
         eventEntity.getDates().setUpdatedAt(LocalDateTime.now());
@@ -93,7 +94,10 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void delete(Integer id) {
+    public void delete(Integer id, UserEntity doneBy) {
+        if (!isAnAdmin(eventRepository.findById(id).get(), doneBy)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not an Admin");
+        }
         eventRepository.deleteById(id);
     }
 
@@ -156,7 +160,7 @@ public class EventServiceImpl implements EventService {
 
     private boolean isAnAdmin(EventEntity eventEntity, UserEntity userEntity) {
         //Kollar om eventEntity har userEntity som admin så länge eventId inte är 1 för då är alla tillåtna att lägga till
-        //Vi behöver inte tänka på om att all ahar admin för default event för man får inte updatera något, bara lägga till och jobba på sina
+        //Vi behöver inte tänka på om att alla har admin för default event för man får inte updatera något, bara lägga till och jobba på sina
         //egna challenges
         return (eventEntity.getId() != null && eventEntity.getId() == 1) || eventEntity.getAdminUsers().contains(userEntity);
     }

@@ -5,11 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pvt.project71.domain.dto.EventDto;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -25,13 +27,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -52,16 +54,24 @@ public class EventTests {
     @Autowired
     private UserService userService;
     @Autowired
+    private EventRepository eventRepository;
+    @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtService jwtService;
 
 //    @BeforeEach
 //    public void clearDatabase() {
 //        eventService.findAll().forEach(event -> eventService.delete(event.getId()));
 //    }
+
     @AfterEach
     public void clearDatabase() {
-        eventService.findAll().forEach(event -> eventService.delete(event.getId()));
+        eventRepository.deleteAll();
         userRepository.deleteAll();
+    }
+    private Jwt getUserToken() {
+        return jwtService.mockOauth2(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
     }
     private UserEntity fixAndSaveUser() {
         return userService.save(TestDataUtil.createValidTestUserEntity());
@@ -75,7 +85,9 @@ public class EventTests {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(eventJson))
+                        .content(eventJson)
+                        .with(jwt().jwt(getUserToken()))
+        )
                 .andExpect(
                         MockMvcResultMatchers.status().isCreated());
     }
@@ -89,6 +101,7 @@ public class EventTests {
                 MockMvcRequestBuilders.post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(eventJson)
+                        .with(jwt().jwt(getUserToken()))
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.id").isNumber()
         ).andExpect(
@@ -154,6 +167,7 @@ public class EventTests {
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/events/2")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken()))
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.id").isNumber()
         ).andExpect(
@@ -169,6 +183,7 @@ public class EventTests {
                 MockMvcRequestBuilders.put("/events/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(eventJson)
+                        .with(jwt().jwt(getUserToken()))
         ).andExpect(
                 MockMvcResultMatchers.status().isNotFound()
         );
@@ -188,6 +203,7 @@ public class EventTests {
                 MockMvcRequestBuilders.put("/events/" + savedEvent.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(eventJson)
+                        .with(jwt().jwt(getUserToken()))
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
         );
@@ -211,6 +227,7 @@ public class EventTests {
                 MockMvcRequestBuilders.put("/events/" + savedEvent.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(eventUpdateJson)
+                        .with(jwt().jwt(getUserToken()))
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.id").value(savedEvent.getId())
         ).andExpect(
@@ -235,6 +252,7 @@ public class EventTests {
                 MockMvcRequestBuilders.patch("/events/" + savedTestEvent.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(eventDtoJson)
+                        .with(jwt().jwt(getUserToken()))
         ).andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -257,6 +275,7 @@ public class EventTests {
                 MockMvcRequestBuilders.patch("/events/" + savedTestEvent.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(eventDtoJson)
+                        .with(jwt().jwt(getUserToken()))
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.id").value(savedTestEvent.getId())
         ).andExpect(
@@ -276,6 +295,7 @@ public class EventTests {
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/events/" + savedTestEvent.getId())
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken()))
         ).andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
@@ -284,6 +304,7 @@ public class EventTests {
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/events/999")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken()))
         ).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
@@ -299,7 +320,8 @@ public class EventTests {
         UserEntity userB = TestDataUtil.createValidTestUserEntity();
         userB.setEmail("test2@test.com");
         userB = userService.save(userB);
-        mockMvc.perform(MockMvcRequestBuilders.patch("/events/" + savedEvent.getId() + "/admins/add/" + userB.getEmail()))
+        mockMvc.perform(MockMvcRequestBuilders.patch("/events/" + savedEvent.getId() + "/admins/add/" + userB.getEmail())
+                        .with(jwt().jwt(getUserToken())))
                 .andExpect(status().isOk());
         savedEvent = eventService.findOne(savedEvent.getId()).get();
 
@@ -319,13 +341,27 @@ public class EventTests {
         userB.setEmail("test2@test.com");
         userB = userService.save(userB);
         savedEvent = eventService.addAdmin(savedEvent, userB, user);
-        mockMvc.perform(MockMvcRequestBuilders.patch("/events/" + savedEvent.getId() + "/admins/leave"))
+        mockMvc.perform(MockMvcRequestBuilders.patch("/events/" + savedEvent.getId() + "/admins/leave")
+                        .with(jwt().jwt(getUserToken())))
                 .andExpect(status().isOk());
 
         savedEvent = eventService.findOne(savedEvent.getId()).get();
         assertEquals(1, savedEvent.getAdminUsers().size());
         assertEquals(0, userService.loadTheLazy(user).getEvents().size());
 
+    }
+    @Test
+    public void testRemovingEventShouldRemoveItFromTheAdminUsersListAndUserShouldPersist() throws Exception {
+        EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
+        UserEntity user = fixAndSaveUser();
+        testEventEntity.getAdminUsers().add(user);
+        userService.makeAdmin(user, testEventEntity);
+        EventEntity savedEvent = eventService.save(testEventEntity, user);
+        mockMvc.perform(MockMvcRequestBuilders.delete("/events/" + savedEvent.getId())
+                .with(jwt().jwt(getUserToken())));
+        Optional<UserEntity> found = userService.findOne(user.getEmail());
+        assertTrue(found.isPresent());
+        assertTrue(userService.loadTheLazy(found.get()).getEvents().isEmpty());
     }
 }
 

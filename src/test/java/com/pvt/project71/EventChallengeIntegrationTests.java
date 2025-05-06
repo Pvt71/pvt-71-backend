@@ -9,6 +9,7 @@ import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -25,8 +27,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -51,6 +55,8 @@ public class EventChallengeIntegrationTests {
     private EventRepository eventRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private JwtService jwtService;
 
     /**
      * Skapar UserEntity och sparar den i repository
@@ -73,6 +79,9 @@ public class EventChallengeIntegrationTests {
     private UserEntity fixAndSaveUser() {
         return userService.save(TestDataUtil.createValidTestUserEntity());
     }
+    private Jwt getUserToken() {
+        return jwtService.mockOauth2(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
+    }
     @AfterEach
     public void cleanup() {
         eventRepository.deleteAll();
@@ -86,7 +95,7 @@ public class EventChallengeIntegrationTests {
         fixAndSaveUser();
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(status().isCreated())
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.event.id").value(1));
     }
     @Test
@@ -106,14 +115,15 @@ public class EventChallengeIntegrationTests {
         String eventJson = objectMapper.writeValueAsString(testEvent);
         UserEntity user = fixAndSaveUser();
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson));
+                .content(eventJson)
+                .with(jwt().jwt(getUserToken())));
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
         testChallenge.setEvent(eventService.findOne(2).get());
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(status().isCreated())
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.event.id").value(2L));
     }
     @Test
@@ -125,7 +135,7 @@ public class EventChallengeIntegrationTests {
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson));
+                .content(eventJson).with(jwt().jwt(getUserToken())));
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
@@ -133,8 +143,31 @@ public class EventChallengeIntegrationTests {
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(status().isCreated());
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated());
         assertFalse(eventService.loadTheLazy(eventService.findOne(2).get()).getChallenges().isEmpty());
+    }
+    @Test
+    public void testAddingChallengeToCustomEventButWithANonAdminUserGives403() throws Exception {
+        EventEntity testEvent = TestDataUtil.createTestEventEntityA();
+        fixAndSaveUser();
+        //userService.makeAdmin(user, testEvent);
+        //testEvent.getAdminUsers().add(user);
+        String eventJson = objectMapper.writeValueAsString(testEvent);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
+                .content(eventJson).with(jwt().jwt(getUserToken())));
+
+        ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();//setUpChallengeEntityAWithUser();
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        testUser.setEmail("Gooby@gmail.com");
+        userService.save(testUser);
+        testChallenge.setCreator(testUser);
+        testChallenge.setEvent(eventService.findOne(2).get());
+        String challengeJson = objectMapper.writeValueAsString(testChallenge);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isForbidden());
+
     }
     @Test
     public void testAddingChallengeToNonExistingEventShouldGive404() throws Exception {
@@ -143,7 +176,7 @@ public class EventChallengeIntegrationTests {
         testChallenge.setEvent(EventEntity.builder().id(4).build());
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(status().isNotFound());
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isNotFound());
     }
 
 
@@ -187,7 +220,7 @@ public class EventChallengeIntegrationTests {
         eventService.save(testEvent, testChallengeA.getCreator());
         challengeService.save(testChallengeA);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/events/{id}", testEvent.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/events/{id}", testEvent.getId()).with(jwt().jwt(getUserToken())))
                 .andExpect(status().isNoContent());
 
         assertTrue(challengeRepository.findById(testChallengeA.getId()).isEmpty());
