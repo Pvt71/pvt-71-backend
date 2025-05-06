@@ -4,14 +4,18 @@ import com.pvt.project71.domain.dto.ChallengeAttemptDto;
 import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
 import com.pvt.project71.domain.entities.ChallengeAttemptId;
+import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.enums.Status;
 import com.pvt.project71.mappers.mapperimpl.ChallengeAttemptMapper;
 import com.pvt.project71.services.ChallengeAttemptService;
+import com.pvt.project71.services.UserService;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -22,28 +26,29 @@ import java.util.Optional;
 public class ChallengeAttemptController {
     private ChallengeAttemptService challengeAttemptService;
     private ChallengeAttemptMapper challengeAttemptMapper;
+    private UserService userService;
 
 
-    public ChallengeAttemptController(ChallengeAttemptService challengeAttemptService, ChallengeAttemptMapper challengeAttemptMapper) {
+    public ChallengeAttemptController(ChallengeAttemptService challengeAttemptService, ChallengeAttemptMapper challengeAttemptMapper, UserService userService) {
         this.challengeAttemptService = challengeAttemptService;
         this.challengeAttemptMapper = challengeAttemptMapper;
+        this.userService = userService;
     }
 
     @PostMapping("/submit/{content}")
     public ResponseEntity<ChallengeAttemptDto> submitChallengeAttempt(@PathVariable("id") Integer id, @PathVariable("content") String content
-            , @AuthenticationPrincipal UserDto userDto) {
-        //För nu skapar vi en test user bara,TODO: ska tas bort när Authentication funkar korrekt
-        userDto = UserDto.builder().email("Test@Test.com").school("University").username("Tester").build();
-        ChallengeAttemptEntity challengeAttemptEntity = ChallengeAttemptEntity.builder()
-                .id(new ChallengeAttemptId(id, userDto.getEmail())).submittedAt(LocalDateTime.now()).content(content)
-                .build();
-        try {
-            return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.submit(challengeAttemptEntity)), HttpStatus.CREATED);
-        } catch (NoSuchElementException noSuchElementException) {
-            return new ResponseEntity<ChallengeAttemptDto>(HttpStatus.NOT_FOUND);
-        } catch (DuplicateKeyException duplicateKeyException) {
-            return new ResponseEntity<ChallengeAttemptDto>(HttpStatus.CONFLICT);
+            , @AuthenticationPrincipal Jwt userToken) {
+        if (userToken == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No token found");
         }
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token could not be linked to an user");
+        }
+        ChallengeAttemptEntity challengeAttemptEntity = ChallengeAttemptEntity.builder()
+                .id(new ChallengeAttemptId(id, user.get().getEmail())).submittedAt(LocalDateTime.now()).content(content)
+                .build();
+        return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.submit(challengeAttemptEntity)), HttpStatus.CREATED);
     }
     @PatchMapping("/accept/{userEmail}")
     public ResponseEntity<ChallengeAttemptDto> acceptChallengeAttempt( @PathVariable("id") Integer id, @PathVariable("userEmail") String email) {

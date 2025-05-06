@@ -1,6 +1,7 @@
 package com.pvt.project71.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.pvt.project71.domain.entities.ChallengeAttemptId;
 import com.pvt.project71.domain.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,11 +15,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class ChallengeAttemptDto {
-    ChallengeDto challenge;
-    String userEmail;
+    private ChallengeAttemptId id;
 
-    Status status;
+    private Status status;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    LocalDateTime submittedAt;
-    String content;
+    private LocalDateTime submittedAt;
+    private String content;
 }

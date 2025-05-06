@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public interface ChallengeAttemptService {
-    ChallengeAttemptEntity submit(ChallengeAttemptEntity challengeAttemptEntity) throws NoSuchElementException, DuplicateKeyException;
+    ChallengeAttemptEntity submit(ChallengeAttemptEntity challengeAttemptEntity);
     Optional<ChallengeAttemptEntity> find(ChallengeAttemptId challengeAttemptId);
     ChallengeAttemptEntity save(ChallengeAttemptEntity challengeAttemptEntity);
     ChallengeAttemptEntity accept(ChallengeAttemptEntity challengeAttemptEntity);

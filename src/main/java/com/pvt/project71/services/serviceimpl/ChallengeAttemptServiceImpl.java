@@ -11,7 +11,9 @@ import com.pvt.project71.repositories.ChallengeAttemptRepository;
 import com.pvt.project71.services.ChallengeAttemptService;
 import com.pvt.project71.services.ChallengeService;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
@@ -29,18 +31,18 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
     }
 
     @Override
-    public ChallengeAttemptEntity submit(ChallengeAttemptEntity challengeAttemptEntity) throws NoSuchElementException, DuplicateKeyException {
+    public ChallengeAttemptEntity submit(ChallengeAttemptEntity challengeAttemptEntity) {
         Optional<ChallengeEntity> challengeEntity = challengeService.find(challengeAttemptEntity.getId().getChallengeId());
         if (challengeEntity.isEmpty()) {
-            throw new NoSuchElementException();
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Challenge doesnt exist");
         } else if (challengeAttemptRepository.findById(challengeAttemptEntity.getId()).isPresent()) {
-            throw new DuplicateKeyException("Attempt already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Submission already exists");
         }
         challengeAttemptEntity.setChallenge(challengeEntity.get());
         challengeEntity.get().getAttempts().add(challengeAttemptEntity);
         if (challengeEntity.get().getProofType() == ProofType.REQUEST) {
             challengeAttemptEntity.setStatus(Status.PENDING);
-            challengeService.save(challengeEntity.get());
+            challengeService.save(challengeEntity.get(), challengeEntity.get().getCreator());
             return challengeAttemptEntity;
 
         }
