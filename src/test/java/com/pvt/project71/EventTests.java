@@ -11,12 +11,14 @@ import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.annotation.DirtiesContext;
@@ -362,6 +364,22 @@ public class EventTests {
         Optional<UserEntity> found = userService.findOne(user.getEmail());
         assertTrue(found.isPresent());
         assertTrue(userService.loadTheLazy(found.get()).getEvents().isEmpty());
+    }
+    @Test
+    public void testModifyingDefaultEventShouldGive403() throws Exception {
+        EventEntity defaultEvent = eventService.getDefaultEvent();
+        fixAndSaveUser();
+        mockMvc.perform(MockMvcRequestBuilders.delete("/events/" + defaultEvent.getId())
+                .with(jwt().jwt(getUserToken()))).andExpect(status().isForbidden());
+        mockMvc.perform(MockMvcRequestBuilders.patch("/events/" + defaultEvent.getId() + "/admins/add/random@mail.se" )
+                        .with(jwt().jwt(getUserToken())))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/events/" + defaultEvent.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(defaultEvent))
+                        .with(jwt().jwt(getUserToken()))
+        ).andExpect(status().isForbidden());
     }
 }
 

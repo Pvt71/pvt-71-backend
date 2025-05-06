@@ -110,7 +110,6 @@ public class ChallengeTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallenge.getRewardPoints()));
 
     }
-
     @Test
     public void testGetExistingChallengeGive200()throws Exception {
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();

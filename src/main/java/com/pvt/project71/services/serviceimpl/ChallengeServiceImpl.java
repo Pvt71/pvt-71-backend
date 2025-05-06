@@ -44,14 +44,18 @@ public class ChallengeServiceImpl implements ChallengeService {
     public ChallengeEntity save(ChallengeEntity challengeEntity, UserEntity doneBy) {
         if (challengeEntity.getEvent() == null) {
             EventEntity defaultEvent = eventService.getDefaultEvent();
+
             if (challengeEntity.getDates().getCreatedAt() == null) {
                 challengeEntity.getDates().setCreatedAt(LocalDateTime.now());
                 challengeEntity.getDates().setUpdatedAt(challengeEntity.getDates().getCreatedAt());
-            } if (challengeEntity.getDates().getStartsAt() == null) {
+            }
+
+            if (challengeEntity.getDates().getStartsAt() == null) {
                 challengeEntity.getDates().setStartsAt(challengeEntity.getDates().getCreatedAt());
             } if (!checkValidDate(challengeEntity, defaultEvent)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Challenge dates is not valid");
             }
+
             challengeEntity.setEvent(defaultEvent);
             challengeEntity = challengeRepository.save(challengeEntity);
             defaultEvent.getChallenges().add(challengeEntity);
@@ -62,10 +66,12 @@ public class ChallengeServiceImpl implements ChallengeService {
         if (eventEntity.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event can not be found");
         }
+
         if (challengeEntity.getDates().getCreatedAt() == null) {
             challengeEntity.getDates().setCreatedAt(LocalDateTime.now());
             challengeEntity.getDates().setUpdatedAt(challengeEntity.getDates().getCreatedAt());
         }
+
         if (challengeEntity.getDates().getStartsAt() == null) {
             if (eventEntity.get().getDates().getStartsAt().equals(eventEntity.get().getDates().getCreatedAt())) {
                 challengeEntity.getDates().setStartsAt(challengeEntity.getDates().getCreatedAt());
