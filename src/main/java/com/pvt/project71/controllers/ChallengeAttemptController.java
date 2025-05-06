@@ -51,14 +51,20 @@ public class ChallengeAttemptController {
         return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.submit(challengeAttemptEntity)), HttpStatus.CREATED);
     }
     @PatchMapping("/accept/{userEmail}")
-    public ResponseEntity<ChallengeAttemptDto> acceptChallengeAttempt( @PathVariable("id") Integer id, @PathVariable("userEmail") String email) {
+    public ResponseEntity<ChallengeAttemptDto> acceptChallengeAttempt( @PathVariable("id") Integer id, @PathVariable("userEmail") String email,
+                                                                       @AuthenticationPrincipal Jwt userToken) {
+        if (userToken == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No token found");
+        }
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token could not be linked to an user");
+        }
         Optional<ChallengeAttemptEntity> attemptToAccept = challengeAttemptService.find(new ChallengeAttemptId(id, email));
         if (attemptToAccept.isEmpty()) {
-            return new ResponseEntity<ChallengeAttemptDto>(HttpStatus.NOT_FOUND);
-        } else if (attemptToAccept.get().getStatus() == Status.ACCEPTED) {
-            return new ResponseEntity<ChallengeAttemptDto>(HttpStatus.CONFLICT);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Attempt doesnt exist");
         }
-        return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.accept(attemptToAccept.get())), HttpStatus.OK);
+        return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.accept(attemptToAccept.get(), user.get())), HttpStatus.OK);
     }
 
 }

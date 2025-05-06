@@ -5,11 +5,13 @@ package com.pvt.project71.services.serviceimpl;
 import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
 import com.pvt.project71.domain.entities.ChallengeAttemptId;
 import com.pvt.project71.domain.entities.ChallengeEntity;
+import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.enums.ProofType;
 import com.pvt.project71.domain.enums.Status;
 import com.pvt.project71.repositories.ChallengeAttemptRepository;
 import com.pvt.project71.services.ChallengeAttemptService;
 import com.pvt.project71.services.ChallengeService;
+import com.pvt.project71.services.EventService;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,10 +26,12 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
 
     private ChallengeService challengeService;
     private ChallengeAttemptRepository challengeAttemptRepository;
+    private EventService eventService;
 
-    public ChallengeAttemptServiceImpl(ChallengeService challengeService, ChallengeAttemptRepository challengeAttemptRepository) {
+    public ChallengeAttemptServiceImpl(ChallengeService challengeService, ChallengeAttemptRepository challengeAttemptRepository, EventService eventService) {
         this.challengeService = challengeService;
         this.challengeAttemptRepository = challengeAttemptRepository;
+        this.eventService = eventService;
     }
 
     @Override
@@ -64,11 +68,19 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
     }
 
     @Override
-    public ChallengeAttemptEntity accept(ChallengeAttemptEntity challengeAttemptEntity) {
-        Optional<ChallengeAttemptEntity> existing = challengeAttemptRepository.findById(challengeAttemptEntity.getId());
+    public ChallengeAttemptEntity accept(ChallengeAttemptEntity challengeAttemptEntity, UserEntity acceptedBy) {
+        if(challengeAttemptEntity.getChallenge().getEvent().getId() == 1) {
+            if (!challengeAttemptEntity.getChallenge().getCreator().equals(acceptedBy)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the challenge creator can accept this attempt");
+            }
+        } else if (!eventService.isAnAdmin(challengeAttemptEntity.getChallenge().getEvent(), acceptedBy)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can accept this attempt");
+        } if (challengeAttemptEntity.getStatus() == Status.ACCEPTED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Attempt is already accepted");
+        }
         //TODO: Score ska ges till användaren
-        existing.get().setStatus(Status.ACCEPTED);
-        return challengeAttemptRepository.save(existing.get());
+        challengeAttemptEntity.setStatus(Status.ACCEPTED);
+        return challengeAttemptRepository.save(challengeAttemptEntity);
     }
 
 }

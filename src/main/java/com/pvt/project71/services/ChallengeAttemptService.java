@@ -4,6 +4,7 @@ import com.pvt.project71.domain.dto.ChallengeAttemptDto;
 import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
 import com.pvt.project71.domain.entities.ChallengeAttemptId;
+import com.pvt.project71.domain.entities.UserEntity;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.util.NoSuchElementException;
@@ -13,5 +14,5 @@ public interface ChallengeAttemptService {
     ChallengeAttemptEntity submit(ChallengeAttemptEntity challengeAttemptEntity);
     Optional<ChallengeAttemptEntity> find(ChallengeAttemptId challengeAttemptId);
     ChallengeAttemptEntity save(ChallengeAttemptEntity challengeAttemptEntity);
-    ChallengeAttemptEntity accept(ChallengeAttemptEntity challengeAttemptEntity);
+    ChallengeAttemptEntity accept(ChallengeAttemptEntity challengeAttemptEntity, UserEntity acceptedBy);
 }
