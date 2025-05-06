@@ -7,7 +7,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.pvt.project71.handlers.OAuthSuccessHandler;
-import com.pvt.project71.services.JWTService;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,7 +67,7 @@ public class SecurityConfig {
         return new NimbusJwtEncoder(jwkSource);
     }
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JWTService jwtService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth

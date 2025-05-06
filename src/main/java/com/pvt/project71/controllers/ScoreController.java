@@ -6,30 +6,28 @@ import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.domain.entities.score.ScoreId;
 import com.pvt.project71.mappers.mapperimpl.ScoreMapper;
 import com.pvt.project71.services.EventService;
-import com.pvt.project71.services.JWTService;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 public class ScoreController {
     private final ScoreService scoreService;
-    private final JWTService jwtService;
+    private final JwtService jwtService;
     private final UserService userService;
     private final EventService eventService;
     private final ScoreMapper scoreMapper;
 
-    public ScoreController(ScoreService scoreService, JWTService jwtService, UserService userService, EventService eventService, ScoreMapper scoreMapper) {
+    public ScoreController(ScoreService scoreService, JwtService jwtService, UserService userService, EventService eventService, ScoreMapper scoreMapper) {
         this.scoreService = scoreService;
         this.jwtService = jwtService;
         this.userService = userService;

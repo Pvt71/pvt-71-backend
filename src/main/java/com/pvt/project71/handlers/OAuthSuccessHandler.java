@@ -1,7 +1,7 @@
 package com.pvt.project71.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pvt.project71.services.JWTService; // import your service
+import com.pvt.project71.services.JwtService; // import your service
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -16,10 +16,10 @@ import java.util.Map;
 
 public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final JWTService jwtService;
+    private final JwtService jwtService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String JSON_TYPE = "application/json";
-    public OAuthSuccessHandler(JWTService jwtService) {
+    public OAuthSuccessHandler(JwtService jwtService) {
         this.jwtService = jwtService;
     }
 
