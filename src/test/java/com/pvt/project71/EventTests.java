@@ -8,6 +8,7 @@ import com.pvt.project71.services.EventService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -21,19 +22,20 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@Transactional
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+
 
 public class EventTests {
 
@@ -44,7 +46,7 @@ public class EventTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-//    @BeforeEach
+    //    @BeforeEach
 //    public void clearDatabase() {
 //        eventService.findAll().forEach(event -> eventService.delete(event.getId()));
 //    }
@@ -110,10 +112,10 @@ public class EventTests {
     @Test
     public void testThatGetEventReturnsHttpStatus200IfEventExists() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
-        eventService.save(testEvent);
+        EventEntity saved = eventService.save(testEvent);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/events/1")
+                MockMvcRequestBuilders.get("/events/" + saved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(MockMvcResultMatchers.status().isOk());
     }
@@ -129,10 +131,10 @@ public class EventTests {
     @Test
     public void testThatGetEventReturnsEventIfEventExists() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
-        eventService.save(testEvent);
+        EventEntity saved = eventService.save(testEvent);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/events/2")
+                MockMvcRequestBuilders.get("/events/" + saved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.id").isNumber()
