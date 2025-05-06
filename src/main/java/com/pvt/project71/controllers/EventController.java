@@ -40,7 +40,7 @@ public class EventController {
         }if (event.getDates().getEndsAt() == null) {
             return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
         } if (userToken == null) {
-            return new ResponseEntity<EventDto>(HttpStatus.FORBIDDEN);
+            return new ResponseEntity<EventDto>(HttpStatus.UNAUTHORIZED);
         }
         event.getDates().setCreatedAt(null);
         EventEntity eventEntity = eventMapper.mapFrom(event);
@@ -48,7 +48,7 @@ public class EventController {
         Optional<UserEntity> creator = userService.findOne(userToken.getSubject());
         //Optional<UserEntity> creator = userService.findOne("Test@test.com"); //TODO: Ska bort sen
         if (creator.isEmpty()) {
-            return new ResponseEntity<EventDto>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<EventDto>(HttpStatus.UNAUTHORIZED);
         }
         userService.makeAdmin(creator.get(), eventEntity);
         eventEntity.setAdminUsers(new ArrayList<>());
@@ -112,12 +112,14 @@ public class EventController {
 
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (id == 1 || userToken == null) {
+        } if (id == 1) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }if (userToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
         if (user.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         EventEntity eventEntity = eventMapper.mapFrom(eventDto);
         EventEntity updatedEventEntity = eventService.partialUpdate(id, eventEntity, user.get());
@@ -130,12 +132,14 @@ public class EventController {
             @AuthenticationPrincipal Jwt userToken) {
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (id == 1 || userToken == null) {
+        } if (id == 1) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } if (userToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
         if (user.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         eventService.delete(id, user.get());
         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -158,11 +162,13 @@ public class EventController {
             return new ResponseEntity<EventDto>(HttpStatus.NOT_FOUND);
         } if (eventEntity.getAdminUsers().contains(toAdd)) {
             return new ResponseEntity<EventDto>(HttpStatus.CONFLICT);
+        } if (userToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        //Optional<UserEntity> user = userService.findOne(userToken.getClaimAsString("email"));
-        Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        //Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
         if (user.isEmpty()) {
-            return new ResponseEntity<EventDto>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<EventDto>(HttpStatus.UNAUTHORIZED);
         }
         eventEntity = eventService.addAdmin(eventEntity, toAdd.get(), user.get());
         return new ResponseEntity<>(eventMapper.mapTo(eventEntity), HttpStatus.OK);
@@ -175,13 +181,15 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } if (id == 1) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
+        } if (userToken == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         EventEntity eventEntity = eventService.findOne(id).get();
 
-        //Optional<UserEntity> user = userService.findOne(userToken.getClaimAsString("email"));
-        Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        //Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
         if (user.isEmpty()) {
-            return new ResponseEntity<EventDto>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         eventEntity = eventService.removeAdmin(eventEntity, user.get());
         return new ResponseEntity<>(eventMapper.mapTo(eventEntity), HttpStatus.OK);

@@ -104,7 +104,7 @@ public class EventChallengeIntegrationTests {
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         fixAndSaveUser();
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson));
+                .content(challengeJson).with(jwt().jwt(getUserToken())));
         assertFalse(eventService.loadTheLazy(eventService.getDefaultEvent()).getChallenges().isEmpty());
 
     }
@@ -166,7 +166,7 @@ public class EventChallengeIntegrationTests {
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isForbidden());
+                .content(challengeJson).with(jwt().jwt(jwtService.mockOauth2(testUser, 1, ChronoUnit.MINUTES)))).andExpect(status().isForbidden());
 
     }
     @Test
@@ -197,9 +197,9 @@ public class EventChallengeIntegrationTests {
         eventService.save(testEvent, testChallengeA.getCreator());
 
 
-        challengeService.save(testChallengeA);
-        challengeService.save(testChallengeB);
-        challengeService.save(testChallengeC);
+        challengeService.save(testChallengeA, testChallengeA.getCreator());
+        challengeService.save(testChallengeB, testChallengeB.getCreator());
+        challengeService.save(testChallengeC, testChallengeC.getCreator());
 
 
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges").param("eventId", testEvent.getId().toString()))
@@ -218,7 +218,7 @@ public class EventChallengeIntegrationTests {
         testChallengeA.setEvent(testEvent);
         testEvent.getAdminUsers().add(testChallengeA.getCreator());
         eventService.save(testEvent, testChallengeA.getCreator());
-        challengeService.save(testChallengeA);
+        challengeService.save(testChallengeA, testChallengeA.getCreator());
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/events/{id}", testEvent.getId()).with(jwt().jwt(getUserToken())))
                 .andExpect(status().isNoContent());

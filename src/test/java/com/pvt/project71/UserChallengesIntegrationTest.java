@@ -50,7 +50,7 @@ public class UserChallengesIntegrationTest {
 
         ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
         challengeEntity.setCreator(userEntity);
-        challengeService.save(challengeEntity);
+        challengeService.save(challengeEntity, userEntity);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/challenges")
@@ -69,11 +69,11 @@ public class UserChallengesIntegrationTest {
 
         ChallengeEntity challengeEntityA = TestDataUtil.createChallengeEnitityA();
         challengeEntityA.setCreator(userEntity);
-        challengeService.save(challengeEntityA);
+        challengeService.save(challengeEntityA, userEntity);
 
         ChallengeEntity challengeEntityB = TestDataUtil.createChallengeEnitityB();
         challengeEntityB.setCreator(userEntity);
-        challengeService.save(challengeEntityB);
+        challengeService.save(challengeEntityB, userEntity);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/challenges")
@@ -92,11 +92,11 @@ public class UserChallengesIntegrationTest {
 
         ChallengeEntity challengeEntityA = TestDataUtil.createChallengeEnitityA();
         challengeEntityA.setCreator(userEntity);
-        challengeService.save(challengeEntityA);
+        challengeService.save(challengeEntityA, userEntity);
 
         ChallengeEntity challengeEntityB = TestDataUtil.createChallengeEnitityB();
         challengeEntityB.setCreator(userEntity);
-        challengeService.save(challengeEntityB);
+        challengeService.save(challengeEntityB, userEntity);
 
         userEntity.setUsername("UPDATED");
         userService.save(userEntity);
@@ -117,7 +117,7 @@ public class UserChallengesIntegrationTest {
 
         ChallengeEntity challengeEntityA = TestDataUtil.createChallengeEnitityA();
         challengeEntityA.setCreator(userEntity);
-        challengeService.save(challengeEntityA);
+        challengeService.save(challengeEntityA, userEntity);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges")
                 .param("user", userEntity.getEmail())
@@ -127,7 +127,7 @@ public class UserChallengesIntegrationTest {
         );
 
         challengeEntityA.setName("UPDATED");
-        challengeService.save(challengeEntityA);
+        challengeService.save(challengeEntityA, userEntity);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges")
                 .param("user", userEntity.getEmail())
@@ -144,7 +144,7 @@ public class UserChallengesIntegrationTest {
 
         ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
         challengeEntity.setCreator(userEntity);
-        challengeEntity = challengeService.save(challengeEntity);
+        challengeEntity = challengeService.save(challengeEntity, userEntity);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/challenges")
@@ -155,7 +155,7 @@ public class UserChallengesIntegrationTest {
                 MockMvcResultMatchers.jsonPath("$.size()").value(1)
         );
 
-        challengeService.delete(challengeEntity.getId());
+        challengeService.delete(challengeEntity.getId(), userEntity);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/challenges")
@@ -174,11 +174,11 @@ public class UserChallengesIntegrationTest {
 
             ChallengeEntity challengeEntityA = TestDataUtil.createChallengeEnitityA();
             challengeEntityA.setCreator(userEntity);
-            challengeService.save(challengeEntityA);
+            challengeService.save(challengeEntityA, userEntity);
 
             ChallengeEntity challengeEntityB = TestDataUtil.createChallengeEnitityB();
             challengeEntityB.setCreator(userEntity);
-            challengeService.save(challengeEntityB);
+            challengeService.save(challengeEntityB, userEntity);
 
             mockMvc.perform(
                     MockMvcRequestBuilders.get("/challenges")

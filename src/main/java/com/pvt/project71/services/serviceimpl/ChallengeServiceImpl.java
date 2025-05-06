@@ -41,7 +41,7 @@ public class ChallengeServiceImpl implements ChallengeService {
      */
     @Override
     @Transactional
-    public ChallengeEntity save(ChallengeEntity challengeEntity) {
+    public ChallengeEntity save(ChallengeEntity challengeEntity, UserEntity doneBy) {
         if (challengeEntity.getEvent() == null) {
             EventEntity defaultEvent = eventService.getDefaultEvent();
             if (challengeEntity.getDates().getCreatedAt() == null) {
@@ -77,9 +77,10 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
 
         challengeEntity.setEvent(eventEntity.get());
-//        if (!checkValidAdmin(challengeEntity, challengeEntity.getCreator())) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid admin");
-//        }
+        if (eventEntity.get().getId() == 1 && !challengeEntity.getCreator().equals(doneBy)) { //Om det är en challenge i default event
+            //Får endast skaparn ändra på den
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can modify this challenge");
+        }
         challengeEntity = challengeRepository.save(challengeEntity);
         eventEntity.get().getChallenges().add(challengeEntity);
         eventEntity.get().getDates().setUpdatedAt(LocalDateTime.now());
@@ -94,19 +95,33 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public void delete(Integer id) {
+    public void delete(Integer id, UserEntity doneBy) {
+        ChallengeEntity found = challengeRepository.findById(id).get();
+        if (found.getEvent().getId() == 1) {
+            if (!found.getCreator().equals(doneBy)) { //Om det är en challenge i default event
+                //Får endast skaparn ändra på den
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can modify this challenge");
+            }
+        } else if (!eventService.isAnAdmin(found.getEvent(), doneBy)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not an admin");
+        }
         challengeRepository.deleteById(id);
     }
 
     @Override
-    public ChallengeEntity partialUpdate(Integer id, ChallengeEntity challengeEntity) {
+    public ChallengeEntity partialUpdate(Integer id, ChallengeEntity challengeEntity, UserEntity doneBy) {
         Optional<ChallengeEntity> found = challengeRepository.findById(challengeEntity.getId());
         if (found.isEmpty()) {
             throw new RuntimeException("Challenge Doesnt Exist");
+        } if (found.get().getEvent().getId() == 1) {
+            if (!challengeEntity.getCreator().equals(doneBy)) { //Om det är en challenge i default event
+                //Får endast skaparn ändra på den
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can modify this challenge");
+            }
+        } else if (!eventService.isAnAdmin(challengeEntity.getEvent(), doneBy)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not an admin");
         }
-//        if (checkValidAdmin(found.get(), found.get().getCreator())) {
-//            throw new RuntimeException("Challenge Doesnt Exist");
-//        }
+
         found.get().getDates().setUpdatedAt(LocalDateTime.now());
         return found.map(existing -> {
             Optional.ofNullable(challengeEntity.getName()).ifPresent(existing::setName);
@@ -151,12 +166,5 @@ public class ChallengeServiceImpl implements ChallengeService {
         return challengeEntity.getDates().getEndsAt().compareTo(eventEntity.getDates().getEndsAt()) <1 &&
                 !challengeEntity.getDates().getStartsAt().isBefore(eventEntity.getDates().getStartsAt());
     }
-
-//    private boolean checkValidAdmin(ChallengeEntity challengeEntity, UserEntity userEntity) {
-//        if (challengeEntity.getEvent().getId() == 1) {
-//            return challengeEntity.getCreator().getEmail().equals(userEntity.getEmail());
-//        }
-//        return challengeEntity.getEvent().getAdminUsers().contains(userEntity);
-//    }
 
 }

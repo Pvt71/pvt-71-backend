@@ -158,7 +158,7 @@ public class EventServiceImpl implements EventService {
                 && !eventEntity.getDates().getStartsAt().plus(MIN_DURATION_HOURS).isAfter(eventEntity.getDates().getEndsAt());
     }
 
-    private boolean isAnAdmin(EventEntity eventEntity, UserEntity userEntity) {
+    public boolean isAnAdmin(EventEntity eventEntity, UserEntity userEntity) {
         //Kollar om eventEntity har userEntity som admin så länge eventId inte är 1 för då är alla tillåtna att lägga till
         //Vi behöver inte tänka på om att alla har admin för default event för man får inte updatera något, bara lägga till och jobba på sina
         //egna challenges
