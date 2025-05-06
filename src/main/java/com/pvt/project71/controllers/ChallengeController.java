@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -30,7 +31,7 @@ public class ChallengeController {
     }
 
     @PostMapping(path = "/challenges")
-    public ResponseEntity<ChallengeDto> createChallenge(@Valid @RequestBody ChallengeDto challengeDto) {
+    public ResponseEntity<ChallengeDto> createChallenge(@Valid @RequestBody ChallengeDto challengeDto, @AuthenticationPrincipal Jwt userToken) {
         if (challengeDto.getDates() == null) {
             return new ResponseEntity<ChallengeDto>(HttpStatus.BAD_REQUEST);
         } if (challengeDto.getDates().getEndsAt() == null) {

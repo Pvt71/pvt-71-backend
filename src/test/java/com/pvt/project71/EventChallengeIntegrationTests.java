@@ -10,6 +10,7 @@ import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,12 @@ public class EventChallengeIntegrationTests {
     private UserEntity fixAndSaveUser() {
         return userService.save(TestDataUtil.createValidTestUserEntity());
     }
-
+    @AfterEach
+    public void cleanup() {
+        eventRepository.deleteAll();
+        challengeRepository.deleteAll();
+        userService.findAll().forEach(user -> userService.delete(user.getEmail()));
+    }
     @Test
     //@Transactional
     public void testCreatingChallengeWithoutASpecifiedEventShouldGetDefaultEvent() throws Exception {
@@ -98,7 +104,7 @@ public class EventChallengeIntegrationTests {
     public void testAddingChallengeToCustomEventWorks() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         String eventJson = objectMapper.writeValueAsString(testEvent);
-        fixAndSaveUser();
+        UserEntity user = fixAndSaveUser();
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
                 .content(eventJson));
 
@@ -127,7 +133,7 @@ public class EventChallengeIntegrationTests {
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson));
+                .content(challengeJson)).andExpect(status().isCreated());
         assertFalse(eventService.loadTheLazy(eventService.findOne(2).get()).getChallenges().isEmpty());
     }
     @Test
