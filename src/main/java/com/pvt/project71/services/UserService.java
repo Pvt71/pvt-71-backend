@@ -1,5 +1,6 @@
 package com.pvt.project71.services;
 
+import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 
 import java.util.List;
@@ -23,5 +24,7 @@ public interface    UserService {
     void delete(String email);
 
     boolean isExists(String email);
-
+    UserEntity loadTheLazy(UserEntity user);
+    UserEntity makeAdmin(UserEntity user, EventEntity event);
+    UserEntity removeAdmin(UserEntity user, EventEntity event);
 }

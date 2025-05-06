@@ -1,11 +1,20 @@
 package com.pvt.project71.domain.entities;
 
 
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.List;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -24,14 +33,27 @@ public class UserEntity {
 
     private String profilePictureUrl;
 
-    //När events/scores/challenges finns:
-    //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Event> events;
+    @ManyToMany(mappedBy = "adminUsers")
+    @JsonIgnore
+    private List<EventEntity> events;
 
-    //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Score> scores;
 
-    //@OneToMany(mappedBy = "placeholder", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<Challenge> challenges;
 
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<ChallengeEntity> challenges;
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserEntity)) return false;
+        UserEntity other = (UserEntity) o;
+        return other.getEmail().equals(email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email);
+    }
 }

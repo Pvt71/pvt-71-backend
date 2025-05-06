@@ -2,6 +2,7 @@ package com.pvt.project71.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pvt.project71.domain.enums.ProofType;
+import com.pvt.project71.domain.TimeStamps;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,18 +21,20 @@ public class ChallengeEntity {
     @Id
     @GeneratedValue(generator = "IDENTITY")
     private Integer id;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime endDate;
+
+    @Embedded
+    private TimeStamps dates;
+
     private String name;
     private Integer maxCompletions;
 
-    //@ManyToOne
-    //@JoinColumn(name = "placeholder", nullable = false)
-    //private EventEntity event;
+    @ManyToOne
+    @JoinColumn(name = "event_id", nullable = false)
+    private EventEntity event;
 
-    //@ManyToOne
-    //@JoinColumn(name = "creator_email", nullable = false)
-    //private UserEntity creator;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "creator_email", nullable = false)
+    private UserEntity creator;
 
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<ChallengeAttemptEntity> attempts;
