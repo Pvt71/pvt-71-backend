@@ -5,6 +5,7 @@ import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.mappers.Mapper;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,11 +27,13 @@ public class EventController {
     private UserService userService;
 
     private Mapper<EventEntity, EventDto> eventMapper;
+    private JwtService jwtService;
 
-    public EventController(EventService eventService, UserService userService, Mapper<EventEntity, EventDto> eventMapper) {
+    public EventController(EventService eventService, UserService userService, Mapper<EventEntity, EventDto> eventMapper, JwtService jwtService) {
         this.eventService = eventService;
         this.userService = userService;
         this.eventMapper = eventMapper;
+        this.jwtService = jwtService;
     }
 
     @PostMapping(path = "/events")
@@ -39,8 +42,8 @@ public class EventController {
             return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
         }if (event.getDates().getEndsAt() == null) {
             return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
-        } if (userToken == null) {
-            return new ResponseEntity<EventDto>(HttpStatus.UNAUTHORIZED);
+        } if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         event.getDates().setCreatedAt(null);
         EventEntity eventEntity = eventMapper.mapFrom(event);
@@ -134,8 +137,8 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } if (id == 1) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        } if (userToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
         if (user.isEmpty()) {
@@ -162,8 +165,8 @@ public class EventController {
             return new ResponseEntity<EventDto>(HttpStatus.NOT_FOUND);
         } if (eventEntity.getAdminUsers().contains(toAdd)) {
             return new ResponseEntity<EventDto>(HttpStatus.CONFLICT);
-        } if (userToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
         //Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
@@ -181,8 +184,8 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } if (id == 1) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
-        } if (userToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         EventEntity eventEntity = eventService.findOne(id).get();
 

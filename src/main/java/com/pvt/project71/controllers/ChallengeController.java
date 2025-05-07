@@ -6,6 +6,7 @@ import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.mappers.Mapper;
 import com.pvt.project71.services.ChallengeService;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -27,11 +28,13 @@ public class ChallengeController {
     private ChallengeService challengeService;
     private Mapper<ChallengeEntity, ChallengeDto> challengeMapper;
     private UserService userService;
+    private JwtService jwtService;
 
-    public ChallengeController(ChallengeService challengeService, Mapper<ChallengeEntity, ChallengeDto> challengeMapper, UserService userService) {
+    public ChallengeController(ChallengeService challengeService, Mapper<ChallengeEntity, ChallengeDto> challengeMapper, UserService userService, JwtService jwtService) {
         this.challengeService = challengeService;
         this.challengeMapper = challengeMapper;
         this.userService = userService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping(path = "/challenges")
@@ -39,7 +42,7 @@ public class ChallengeController {
         if (challengeDto.getDates() == null || challengeDto.getDates().getEndsAt() == null ||
                 (challengeDto.getDates().getStartsAt() != null && challengeDto.getDates().getStartsAt().isBefore(LocalDateTime.now()))) {
             return new ResponseEntity<ChallengeDto>(HttpStatus.BAD_REQUEST);
-        } if (userToken == null) {
+        } if (!jwtService.isTokenValid(userToken)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
@@ -64,19 +67,19 @@ public class ChallengeController {
 
     @DeleteMapping(path = "/challenges/{id}")
     public ResponseEntity deleteChallenge(@PathVariable("id") Integer id, @AuthenticationPrincipal Jwt userToken) {
-        if (userToken == null) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
         if (challengeService.find(id).isEmpty()) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } if (user.isEmpty()) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         challengeService.delete(id, user.get());
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping(path = "/challenges/{id}")
@@ -84,8 +87,8 @@ public class ChallengeController {
             @PathVariable("id") Integer id,
             @RequestBody ChallengeDto challengeDto,
             @AuthenticationPrincipal Jwt userToken) {
-        if (userToken == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         Optional<ChallengeEntity> found = challengeService.find(id);
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
@@ -109,7 +112,7 @@ public class ChallengeController {
         Optional<ChallengeEntity> found = challengeService.find(id);
         if (found.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (userToken == null) {
+        }if (!jwtService.isTokenValid(userToken)) {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());

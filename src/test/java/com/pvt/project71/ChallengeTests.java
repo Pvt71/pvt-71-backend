@@ -53,7 +53,7 @@ public class ChallengeTests {
     @Autowired
     private EventService eventService;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
     private JwtService jwtService;
 
@@ -91,7 +91,17 @@ public class ChallengeTests {
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
-
+    @Test
+    public void testCreatingAChallengeWithExpiredTokenGives401() throws Exception {
+        ChallengeDto testChallenge = TestDataUtil.createChallengeDtoA();
+        testChallenge.setRewardPoints(10);
+        String challengeJson = objectMapper.writeValueAsString(testChallenge);
+        Jwt jwt = jwtService.mockOauth2(fixAndSaveUser(), 1, ChronoUnit.NANOS);
+        Thread.sleep(1);
+        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
+                .content(challengeJson).with(jwt().jwt(jwt)))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
 
     @Test
     public void testCreatingAChallengeAndRetrievingIt() throws Exception{

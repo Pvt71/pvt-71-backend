@@ -16,7 +16,7 @@ import java.util.Optional;
 @Service
 public interface ScoreService {
 
-
+      ScoreEntity create(ScoreEntity scoreEntity);
       Optional<ScoreEntity> create(ScoreDto scoreDto);
       Optional<ScoreEntity> findOne(ScoreId scoreId);
 

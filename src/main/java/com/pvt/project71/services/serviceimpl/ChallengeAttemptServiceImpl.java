@@ -2,24 +2,20 @@ package com.pvt.project71.services.serviceimpl;
 
 
 
-import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
-import com.pvt.project71.domain.entities.ChallengeAttemptId;
-import com.pvt.project71.domain.entities.ChallengeEntity;
-import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.dto.ScoreDto;
+import com.pvt.project71.domain.entities.*;
+import com.pvt.project71.domain.entities.score.ScoreEntity;
+import com.pvt.project71.domain.entities.score.ScoreId;
 import com.pvt.project71.domain.enums.ProofType;
 import com.pvt.project71.domain.enums.Status;
 import com.pvt.project71.repositories.ChallengeAttemptRepository;
-import com.pvt.project71.services.ChallengeAttemptService;
-import com.pvt.project71.services.ChallengeService;
-import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.*;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
@@ -27,11 +23,15 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
     private ChallengeService challengeService;
     private ChallengeAttemptRepository challengeAttemptRepository;
     private EventService eventService;
+    private ScoreService scoreService;
+    private UserService userService;
 
-    public ChallengeAttemptServiceImpl(ChallengeService challengeService, ChallengeAttemptRepository challengeAttemptRepository, EventService eventService) {
+    public ChallengeAttemptServiceImpl(ChallengeService challengeService, ChallengeAttemptRepository challengeAttemptRepository, EventService eventService, ScoreService scoreService, UserService userService) {
         this.challengeService = challengeService;
         this.challengeAttemptRepository = challengeAttemptRepository;
         this.eventService = eventService;
+        this.scoreService = scoreService;
+        this.userService = userService;
     }
 
     @Override
@@ -43,6 +43,9 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Submission already exists");
         }
         challengeAttemptEntity.setChallenge(challengeEntity.get());
+        if (challengeAttemptEntity.getChallenge().getCreator().getEmail().equals(challengeAttemptEntity.getId().getUserEmail())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User can not attempt their own created challenge");
+        }
         challengeEntity.get().getAttempts().add(challengeAttemptEntity);
         if (challengeEntity.get().getProofType() == ProofType.REQUEST) {
             challengeAttemptEntity.setStatus(Status.PENDING);
@@ -78,9 +81,25 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
         } if (challengeAttemptEntity.getStatus() == Status.ACCEPTED) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Attempt is already accepted");
         }
-        //TODO: Score ska ges till användaren
+        ScoreId identifier = new ScoreId(userService.findOne(challengeAttemptEntity.getId().getUserEmail()
+        ).get(), challengeAttemptEntity.getChallenge().getEvent());
+        if (scoreService.findOne(identifier).isEmpty()) { //skapa en score om det inte finns
+            scoreService.create(ScoreEntity.builder().scoreId(identifier)
+                            .build());
+        }
+        scoreService.addPoints(identifier, challengeAttemptEntity.getChallenge().getRewardPoints());
         challengeAttemptEntity.setStatus(Status.ACCEPTED);
         return challengeAttemptRepository.save(challengeAttemptEntity);
+    }
+
+    @Override
+    public List<ChallengeAttemptEntity> getAttemptsUserIsPermittedToAllow(UserEntity user) {
+        user = userService.loadTheLazy(user);
+        Set<ChallengeAttemptEntity> set = new HashSet<>(challengeAttemptRepository.findAllByChallengeCreator(user));
+        for (EventEntity event : user.getEvents()) {
+            set.addAll(challengeAttemptRepository.findAllByChallengeEvent(event));
+        }
+        return set.stream().toList();
     }
 
 }

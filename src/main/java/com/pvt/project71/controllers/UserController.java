@@ -5,6 +5,7 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.mappers.Mapper;
 import com.pvt.project71.mappers.mapperimpl.UserMapperImpl;
 import com.pvt.project71.services.UserService;
+import jakarta.validation.Path;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,4 +95,5 @@ public class UserController {
         userService.delete(email);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
 }

@@ -2,18 +2,14 @@ package com.pvt.project71;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pvt.project71.domain.dto.ChallengeAttemptDto;
-import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
-import com.pvt.project71.domain.entities.ChallengeAttemptId;
-import com.pvt.project71.domain.entities.ChallengeEntity;
-import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.*;
+import com.pvt.project71.domain.entities.score.ScoreId;
 import com.pvt.project71.domain.enums.Status;
 import com.pvt.project71.mappers.mapperimpl.ChallengeAttemptMapper;
 import com.pvt.project71.repositories.ChallengeAttemptRepository;
 import com.pvt.project71.repositories.ChallengeRepository;
-import com.pvt.project71.services.ChallengeAttemptService;
-import com.pvt.project71.services.ChallengeService;
-import com.pvt.project71.services.JwtService;
-import com.pvt.project71.services.UserService;
+import com.pvt.project71.repositories.ScoreRepository;
+import com.pvt.project71.services.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,9 +62,15 @@ public class ChallengeAttemptTests {
     private ChallengeAttemptService challengeAttemptService;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private ScoreService scoreService;
+    @Autowired
+    private EventService eventService;
+    @Autowired
+    ScoreRepository scoreRepository;
 
     @AfterEach
-    public void cleanup() {challengeAttemptRepository.deleteAll(); challengeRepository.deleteAll();}
+    public void cleanup() {challengeAttemptRepository.deleteAll(); challengeRepository.deleteAll(); scoreRepository.deleteAll();}
     @BeforeEach
     public void setUp() {
         fixAndSaveUser();
@@ -162,6 +164,15 @@ public class ChallengeAttemptTests {
             assertFalse(challengeEntity.getAttempts().isEmpty());
     }
     @Test
+    public void testSubmittingAttemptToYourOwnCreatedChallengesGives403() throws Exception {
+        ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
+        UserEntity user = fixAndSaveUser();
+        challengeEntity.setCreator(user);
+        challengeEntity = challengeService.save(challengeEntity, user);
+        mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT)
+                .with(jwt().jwt(getUserToken()))).andExpect(status().isForbidden());
+    }
+    @Test
     public void testAcceptingASubmittedAttempt() throws Exception{
         ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
         UserEntity user = fixAndSaveUser();
@@ -201,6 +212,18 @@ public class ChallengeAttemptTests {
         assertEquals(Status.ACCEPTED, challengeEntity.getAttempts().get(0).getStatus());
     }
     @Test
+    public void testAcceptingSubmittedAttemptGivesUserItsPoints() throws Exception {
+        ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
+        UserEntity user = fixAndSaveUser();
+        challengeEntity.setCreator(user);
+        challengeEntity = challengeService.save(challengeEntity, user);
+        mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT).with(jwt().jwt(getOtherUserToken())));
+        mockMvc.perform(patch("/challenges/" + challengeEntity.getId() + "/accept/"+ getOtherUserToken().getSubject())
+                .with(jwt().jwt(getUserToken())));
+        assertEquals(challengeEntity.getRewardPoints(),scoreService.findOne(ScoreId.builder().event(eventService.getDefaultEvent())
+                .user(userService.findOne(getOtherUserToken().getSubject()).get()).build()).get().getScore());
+    }
+    @Test
     public void testDeletingAChallengeWithAnAttemptAndThatTheAttemptIsDeletedToo() throws Exception {
         ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
         UserEntity user = fixAndSaveUser();
@@ -223,5 +246,52 @@ public class ChallengeAttemptTests {
         mockMvc.perform(patch("/challenges/" + challengeEntity.getId() + "/accept/"+ getOtherUserToken().getSubject())
                         .with(jwt().jwt(getUserToken())))
                 .andExpect(status().isConflict());
+    }
+    @Test
+    public void testRetrievingAlistOfChallengesUserCanReviewIsCorrectlySized() throws Exception {
+        UserEntity user = fixAndSaveUser();
+
+        EventEntity eventEntity = TestDataUtil.createTestEventEntityA();
+        userService.makeAdmin(user, eventEntity);
+        eventEntity.getAdminUsers().add(user);
+        eventEntity = eventService.save(eventEntity, user);
+
+        ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
+        challengeEntity.setCreator(user);
+        challengeService.save(challengeEntity, user);
+
+        ChallengeEntity challengeEntityB = TestDataUtil.createChallengeEnitityB();
+
+        challengeEntityB.setCreator(user);
+        challengeEntityB.setEvent(eventEntity);
+        challengeService.save(challengeEntityB, user);
+
+        UserEntity userB = TestDataUtil.createValidTestUserEntity();
+        userB.setEmail("test2@test.com");
+        userB = userService.save(userB);
+        eventEntity = eventService.addAdmin(eventEntity, userB, user);
+
+        ChallengeEntity challengeEntityC = TestDataUtil.createChallengeEnitityB();
+        challengeEntityC.setName("TESTC");
+        challengeEntityC.setEvent(eventEntity);
+        challengeEntityC.setCreator(userB);
+        challengeService.save(challengeEntityC, userB);
+
+        UserEntity userC = UserEntity.builder().email("GOOB@Goob.com").school("Unemployed").username("Coolguy")
+                .profilePictureUrl("url").build();
+        userC = userService.save(userC);
+        Jwt userCJwt = jwtService.mockOauth2(userC, 1, ChronoUnit.MINUTES);
+        mockMvc.perform(post("/challenges/" + challengeEntity.getId() + "/submit/" + CONTENT)
+                .with(jwt().jwt(userCJwt)));
+        mockMvc.perform(post("/challenges/" + challengeEntityB.getId() + "/submit/" + CONTENT)
+                .with(jwt().jwt(userCJwt)));
+        mockMvc.perform(post("/challenges/" + challengeEntityC.getId() + "/submit/" + CONTENT)
+                .with(jwt().jwt(userCJwt)));
+
+        mockMvc.perform(get("/challenges/pending")
+                .with(jwt().jwt(getUserToken())))
+                .andExpect(jsonPath("$[2]").exists())
+                .andExpect(jsonPath("$[3]").doesNotExist());
+
     }
 }

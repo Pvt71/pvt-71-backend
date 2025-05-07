@@ -33,7 +33,7 @@ public class UserEntity {
 
     private String profilePictureUrl;
 
-    @ManyToMany(mappedBy = "adminUsers")
+    @ManyToMany(mappedBy = "adminUsers", cascade = CascadeType.REMOVE)
     @JsonIgnore
     private List<EventEntity> events;
 
