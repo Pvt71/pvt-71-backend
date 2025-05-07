@@ -52,7 +52,10 @@ public class EventTests {
 //    }
     @AfterEach
     public void clearDatabase() {
-        eventService.findAll().forEach(event -> eventService.delete(event.getId()));
+        eventService.findAll().forEach(event -> {
+            if (event.getId() != 1)  // Assuming ID 1 is the default event
+                eventService.delete(event.getId());
+            });
     }
 
     @Test

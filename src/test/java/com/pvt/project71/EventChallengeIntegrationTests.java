@@ -10,6 +10,7 @@ import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -57,6 +57,17 @@ public class EventChallengeIntegrationTests {
      * Skapar UserEntity och sparar den i repository
      * @return ChallengeEntity med userEntity
      */
+    @AfterEach
+    void setUp() {
+        // Clean up the database after each test
+        for (EventEntity e : eventRepository.findAll()) {
+            if (e.getId() != 1) {
+                eventRepository.delete(e);
+            }
+        }
+        challengeRepository.deleteAll();
+    }
+
     private ChallengeEntity setUpChallengeEntityAWithUser() {
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
         userService.save(testUser);
@@ -112,23 +123,24 @@ public class EventChallengeIntegrationTests {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson));
+        testEvent = eventService.save(testEvent);
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
-        testChallenge.setEvent(eventService.findOne(2).get());
+        testChallenge.setEvent(testEvent);
+
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson));
-        assertFalse(eventService.loadTheLazy(eventService.findOne(2).get()).getChallenges().isEmpty());
+        assertFalse(eventService.loadTheLazy(testEvent).getChallenges().isEmpty());
     }
     @Test
     public void testAddingChallengeToNonExistingEventShouldGive404() throws Exception {
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
         testChallenge.setEvent(EventEntity.builder().id(4).build());
+
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson)).andExpect(status().isNotFound());
