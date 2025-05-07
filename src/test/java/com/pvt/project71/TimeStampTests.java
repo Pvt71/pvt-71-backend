@@ -13,6 +13,8 @@ import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,9 +60,12 @@ public class TimeStampTests {
     private UserService userService;
 
 
-
-    @AfterEach
+    @BeforeEach
     void setUp() {
+        eventService.getDefaultEvent();
+    }
+    @AfterEach
+    void cleanUp() {
         // Clean up the database after each test
         for (EventEntity e : eventRepository.findAll()) {
             if (e.getId() != 1) {
