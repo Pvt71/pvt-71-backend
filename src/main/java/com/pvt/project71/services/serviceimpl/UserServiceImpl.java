@@ -90,6 +90,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserEntity makeAdmin(UserEntity user, EventEntity event) {
+        user = loadTheLazy(user);
         if (!user.getEvents().contains(event)) {
             user.getEvents().add(event);
             return userRepository.save(user);
@@ -99,6 +100,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity removeAdmin(UserEntity user, EventEntity event) {
+        user = loadTheLazy(user);
         if (user.getEvents().contains(event)) {
             user.getEvents().remove(event);
             return userRepository.save(user);

@@ -206,7 +206,7 @@ public class TimeStampTests {
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated());
         testEvent = eventService.loadTheLazy(testEvent);
-        testEvent = eventService.loadTheLazy(eventService.findOne(2).get());
+        testEvent = eventService.loadTheLazy(testEvent);
         assertEquals(testEvent.getDates().getStartsAt(),
                 testEvent.getChallenges().get(0).getDates().getStartsAt());
     }

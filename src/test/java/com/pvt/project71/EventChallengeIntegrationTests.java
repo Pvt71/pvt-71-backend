@@ -122,12 +122,12 @@ public class EventChallengeIntegrationTests {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         String eventJson = objectMapper.writeValueAsString(testEvent);
         UserEntity user = fixAndSaveUser();
-        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson)
-                .with(jwt().jwt(getUserToken())));
+        userService.makeAdmin(user, testEvent);
+        testEvent.getAdminUsers().add(user);
+        eventService.save(testEvent, user);
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
-        testChallenge.setEvent(eventService.findOne(2).get());
+        testChallenge.setEvent(testEvent);
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
@@ -138,9 +138,9 @@ public class EventChallengeIntegrationTests {
     public void testAddingChallengeToCustomEventAndRetrievingItViaEvent() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
-        String eventJson = objectMapper.writeValueAsString(testEvent);
-
-        testEvent = eventService.save(testEvent, user);
+        userService.makeAdmin(user, testEvent);
+        testEvent.getAdminUsers().add(user);
+        eventService.save(testEvent, user);
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
@@ -149,24 +149,24 @@ public class EventChallengeIntegrationTests {
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson));
+                .content(challengeJson).with(jwt().jwt(getUserToken())));
         assertFalse(eventService.loadTheLazy(testEvent).getChallenges().isEmpty());
     }
     @Test
     public void testAddingChallengeToCustomEventButWithANonAdminUserGives403() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
-        fixAndSaveUser();
-        String eventJson = objectMapper.writeValueAsString(testEvent);
+        UserEntity user = fixAndSaveUser();
+        userService.makeAdmin(user, testEvent);
+        testEvent.getAdminUsers().add(user);
+        eventService.save(testEvent, user);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson).with(jwt().jwt(getUserToken())));
 
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
         testUser.setEmail("Gooby@gmail.com");
         userService.save(testUser);
         testChallenge.setCreator(testUser);
-        testChallenge.setEvent(eventService.findOne(2).get());
+        testChallenge.setEvent(testEvent);
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)

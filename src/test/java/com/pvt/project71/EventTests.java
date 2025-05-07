@@ -73,7 +73,7 @@ public class EventTests {
     public void clearDatabase() {
         eventService.findAll().forEach(event -> {
             if (event.getId() != 1)  // Assuming ID 1 is the default event
-                eventService.delete(event.getId());
+                eventRepository.deleteById(event.getId());
             });
         userRepository.deleteAll();
     }
