@@ -44,10 +44,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
 		<dependency> <!-- Enables mySQL connection -->
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
@@ -175,7 +171,23 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludeGroupIds>
+						org.apache.tomcat.embed  <!-- Ensure no embedded Tomcat in final WAR -->
+					</excludeGroupIds>
+				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M8</version>
+				<configuration>
+					<forkCount>0</forkCount>
+					<reuseForks>false</reuseForks>
+					<argLine>-Xmx512m</argLine>
+				</configuration>
+			</plugin>
+
 		</plugins>
 		<extensions>
 			<extension>

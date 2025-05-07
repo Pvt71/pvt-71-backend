@@ -13,6 +13,7 @@ import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -28,6 +29,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -36,14 +38,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@Transactional
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+
 
 public class EventTests {
 
@@ -62,14 +65,16 @@ public class EventTests {
     @Autowired
     private JwtService jwtService;
 
-//    @BeforeEach
+    //    @BeforeEach
 //    public void clearDatabase() {
 //        eventService.findAll().forEach(event -> eventService.delete(event.getId()));
 //    }
-
     @AfterEach
     public void clearDatabase() {
-        eventRepository.deleteAll();
+        eventService.findAll().forEach(event -> {
+            if (event.getId() != 1)  // Assuming ID 1 is the default event
+                eventService.delete(event.getId());
+            });
         userRepository.deleteAll();
     }
     private Jwt getUserToken() {
@@ -142,10 +147,10 @@ public class EventTests {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
         testEvent.getAdminUsers().add(user);
-        eventService.save(testEvent, user);
+        EventEntity saved = eventService.save(testEvent, user);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/events/1")
+                MockMvcRequestBuilders.get("/events/" + saved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(MockMvcResultMatchers.status().isOk());
     }
@@ -164,10 +169,10 @@ public class EventTests {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         testEvent.getAdminUsers().add(user);
         userService.makeAdmin(user, testEvent);
-        eventService.save(testEvent, user);
+        EventEntity saved = eventService.save(testEvent, user);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/events/2")
+                MockMvcRequestBuilders.get("/events/" + saved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(jwt().jwt(getUserToken()))
         ).andExpect(

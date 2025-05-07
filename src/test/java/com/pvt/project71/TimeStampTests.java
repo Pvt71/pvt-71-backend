@@ -8,10 +8,14 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.mappers.mapperimpl.EventMapper;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.repositories.EventRepository;
+import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class TimeStampTests {
@@ -61,6 +64,22 @@ public class TimeStampTests {
     private UserService userService;
     @Autowired
     private JwtService jwtService;
+
+
+    @BeforeEach
+    void setUp() {
+        eventService.getDefaultEvent();
+    }
+    @AfterEach
+    void cleanUp() {
+        // Clean up the database after each test
+        for (EventEntity e : eventRepository.findAll()) {
+            if (e.getId() != 1) {
+                eventRepository.delete(e);
+            }
+        }
+        challengeRepository.deleteAll();
+    }
     /**
      * Skapar UserEntity och sparar den i repository
      * @return ChallengeEntity med userEntity
@@ -100,14 +119,13 @@ public class TimeStampTests {
         UserEntity user = fixAndSaveUser();
         userService.makeAdmin(user, testEvent);
         testEvent.getAdminUsers().add(user);
-        String eventJson = objectMapper.writeValueAsString(testEvent);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson).with(jwt().jwt(getUserToken())));
+        testEvent = eventService.save(testEvent, user);
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
-        testChallenge.setEvent(eventService.findOne(2).get());
+        testChallenge.setEvent(testEvent);
+
         testChallenge.getDates().setEndsAt(testChallenge.getEvent().getDates().getEndsAt().plusHours(1));
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
@@ -121,6 +139,7 @@ public class TimeStampTests {
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isBadRequest());
     }
+
     @Test
     public void testCreatingChallengeThatStartsBeforePreSetTimeAddedOnWhenEventStartsGives201() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
@@ -132,12 +151,11 @@ public class TimeStampTests {
 
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson).with(jwt().jwt(getUserToken())));
+        testEvent = eventService.save(testEvent, user);
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
-        testChallenge.setEvent(eventService.findOne(2).get());
+        testChallenge.setEvent(testEvent);
         testChallenge.getDates().setStartsAt(testEvent.getDates().getStartsAt().plusDays(12));
 
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
@@ -153,14 +171,13 @@ public class TimeStampTests {
         userService.makeAdmin(user, testEvent);
         testEvent.getAdminUsers().add(user);
 
-        String eventJson = objectMapper.writeValueAsString(testEvent);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson).with(jwt().jwt(getUserToken())));
+        testEvent = eventService.save(testEvent, user);
+
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
-        testChallenge.setEvent(eventService.findOne(2).get());
+        testChallenge.setEvent(testEvent);
         testChallenge.getDates().setStartsAt(LocalDateTime.now());
 
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
@@ -178,16 +195,17 @@ public class TimeStampTests {
 
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson).with(jwt().jwt(getUserToken())));
+        testEvent = eventService.save(testEvent, user);
+
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
-        testChallenge.setEvent(eventService.findOne(2).get());
+        testChallenge.setEvent(testEvent);
 
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated());
+        testEvent = eventService.loadTheLazy(testEvent);
         testEvent = eventService.loadTheLazy(eventService.findOne(2).get());
         assertEquals(testEvent.getDates().getStartsAt(),
                 testEvent.getChallenges().get(0).getDates().getStartsAt());
@@ -201,19 +219,17 @@ public class TimeStampTests {
         userService.makeAdmin(user, testEvent);
         testEvent.getAdminUsers().add(user);
 
-        String eventJson = objectMapper.writeValueAsString(testEvent);
+        testEvent = eventService.save(testEvent, user);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson).with(jwt().jwt(getUserToken())));
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
-        testChallenge.setEvent(eventService.findOne(2).get());
-        LocalDateTime oldUpdatedAt = eventService.findOne(2).get().getDates().getUpdatedAt();
+        testChallenge.setEvent(testEvent);
+        LocalDateTime oldUpdatedAt = testEvent.getDates().getUpdatedAt();
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated());
-        testEvent = eventService.loadTheLazy(eventService.findOne(2).get());
+        testEvent = eventService.loadTheLazy(testEvent);
         assertNotEquals(oldUpdatedAt, testEvent.getDates().getUpdatedAt());
     }
     @Test

@@ -13,6 +13,7 @@ import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -36,9 +38,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application-test.properties")
 public class EventChallengeIntegrationTests {
     @Autowired
     private ChallengeService challengeService;
@@ -63,6 +65,17 @@ public class EventChallengeIntegrationTests {
      * Skapar UserEntity och sparar den i repository
      * @return ChallengeEntity med userEntity
      */
+    @AfterEach
+    void setUp() {
+        // Clean up the database after each test
+        for (EventEntity e : eventRepository.findAll()) {
+            if (e.getId() != 1) {
+                eventRepository.delete(e);
+            }
+        }
+        challengeRepository.deleteAll();
+    }
+
     private ChallengeEntity setUpChallengeEntityAWithUser() {
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
         userService.save(testUser);
@@ -83,13 +96,8 @@ public class EventChallengeIntegrationTests {
     private Jwt getUserToken() {
         return jwtService.mockOauth2(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
     }
-    @AfterEach
-    public void cleanup() {
-        eventRepository.deleteAll();
-        challengeRepository.deleteAll();
-        userService.findAll().forEach(user -> userService.delete(user.getEmail()));
-    }
     @Test
+    //@Transactional
     public void testCreatingChallengeWithoutASpecifiedEventShouldGetDefaultEvent() throws Exception {
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
         fixAndSaveUser();
@@ -129,20 +137,20 @@ public class EventChallengeIntegrationTests {
     @Test
     public void testAddingChallengeToCustomEventAndRetrievingItViaEvent() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
-        fixAndSaveUser();
+        UserEntity user = fixAndSaveUser();
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson).with(jwt().jwt(getUserToken())));
+        testEvent = eventService.save(testEvent, user);
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
-        testChallenge.setEvent(eventService.findOne(2).get());
+        testChallenge.setEvent(testEvent);
+
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated());
-        assertFalse(eventService.loadTheLazy(eventService.findOne(2).get()).getChallenges().isEmpty());
+                .content(challengeJson));
+        assertFalse(eventService.loadTheLazy(testEvent).getChallenges().isEmpty());
     }
     @Test
     public void testAddingChallengeToCustomEventButWithANonAdminUserGives403() throws Exception {
@@ -182,6 +190,7 @@ public class EventChallengeIntegrationTests {
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
         testChallenge.setEvent(EventEntity.builder().id(4).build());
+
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isNotFound());

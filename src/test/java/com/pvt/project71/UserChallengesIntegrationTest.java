@@ -2,9 +2,14 @@ package com.pvt.project71;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pvt.project71.domain.entities.ChallengeEntity;
+import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.repositories.ChallengeRepository;
+import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.UserService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +28,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class UserChallengesIntegrationTest {
 
@@ -35,6 +40,19 @@ public class UserChallengesIntegrationTest {
     private UserService userService;
 
     private ChallengeService challengeService;
+
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ChallengeRepository challengeRepository;
+
+    @AfterEach
+    void setUp() {
+        challengeRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
+
 
     @Autowired
     public UserChallengesIntegrationTest(MockMvc mockMvc, UserService userService, ChallengeService challengeService) {
