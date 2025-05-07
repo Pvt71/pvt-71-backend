@@ -22,7 +22,6 @@ import java.util.Base64;
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class JwtTest {
 
     private final JwtService jwtService;

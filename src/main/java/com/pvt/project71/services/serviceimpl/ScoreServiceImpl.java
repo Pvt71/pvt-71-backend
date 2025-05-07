@@ -30,6 +30,11 @@ public class ScoreServiceImpl implements ScoreService {
 
 
     @Override
+    public ScoreEntity create(ScoreEntity scoreEntity) {
+        return scoreRepository.save(scoreEntity);
+    }
+
+    @Override
     public Optional<ScoreEntity> create(ScoreDto scoreDto) {
         Optional<UserEntity> userOpt = userService.findOne(scoreDto.getUserDto().getEmail() );
         Optional<EventEntity> eventOpt = eventService.findOne(scoreDto.getEventId());

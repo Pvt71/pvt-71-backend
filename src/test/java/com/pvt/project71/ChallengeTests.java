@@ -5,10 +5,13 @@ import com.pvt.project71.domain.dto.ChallengeDto;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
+import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -25,12 +29,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class ChallengeTests {
@@ -46,24 +52,35 @@ public class ChallengeTests {
     private ChallengeRepository challengeRepository;
     @Autowired
     private EventService eventService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private JwtService jwtService;
 
     @AfterEach
     public void cleanup() {
         challengeRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+    @BeforeEach
+    public void setUp() {
+        fixAndSaveUser();
     }
 
+    private Jwt getUserToken() {
+        return jwtService.mockOauth2(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
+    }
+    private UserEntity fixAndSaveUser() {
+        return userService.save(TestDataUtil.createValidTestUserEntity());
+    }
     @Test
     public void testCreatingAChallengeReturns201() throws Exception{
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
 
-        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
-        userService.save(testUser);
-        testChallenge.setCreator(testUser);
-
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isCreated());
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.status().isCreated());
     }
     @Test
     public void testCreatingAChallengeWithLessPointsThan1Gives404() throws Exception{
@@ -72,9 +89,19 @@ public class ChallengeTests {
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
-
+    @Test
+    public void testCreatingAChallengeWithExpiredTokenGives401() throws Exception {
+        ChallengeDto testChallenge = TestDataUtil.createChallengeDtoA();
+        testChallenge.setRewardPoints(10);
+        String challengeJson = objectMapper.writeValueAsString(testChallenge);
+        Jwt jwt = jwtService.mockOauth2(fixAndSaveUser(), 1, ChronoUnit.NANOS);
+        Thread.sleep(1);
+        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
+                .content(challengeJson).with(jwt().jwt(jwt)))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
 
     @Test
     public void testCreatingAChallengeAndRetrievingIt() throws Exception{
@@ -82,27 +109,25 @@ public class ChallengeTests {
 
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
         userService.save(testUser);
-        testChallenge.setCreator(testUser);
 
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("A"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallenge.getDescription()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallenge.getRewardPoints()));
 
     }
-
     @Test
     public void testGetExistingChallengeGive200()throws Exception {
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
 
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
         userService.save(testUser);
-        testChallenge.setCreator(testUser);
 
-        ChallengeEntity saved = challengeService.save(testChallenge);
+        testChallenge.setCreator(testUser);
+        ChallengeEntity saved = challengeService.save(testChallenge, testUser);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges/" + saved.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
@@ -114,9 +139,9 @@ public class ChallengeTests {
 
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
         userService.save(testUser);
-        testChallenge.setCreator(testUser);
 
-        ChallengeEntity saved = challengeService.save(testChallenge);
+        testChallenge.setCreator(testUser);
+        ChallengeEntity saved = challengeService.save(testChallenge, testUser);
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges/"  + saved.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(saved.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("A"))
@@ -132,7 +157,8 @@ public class ChallengeTests {
 
     @Test
     public void testDeletingGives404WhenChallengeDoesntExist() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/1").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/1").contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken())))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
@@ -144,11 +170,11 @@ public class ChallengeTests {
         userService.save(testUser);
         testChallenge.setCreator(testUser);
 
-        challengeService.save(testChallenge);
-        mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/1").contentType(MediaType.APPLICATION_JSON));
-        ChallengeEntity saved = challengeService.save(testChallenge);
-        mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/ + " + saved.getId()).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
+        challengeService.save(testChallenge, testUser);
+        mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/1").contentType(MediaType.APPLICATION_JSON).with(jwt().jwt(getUserToken())));
+        ChallengeEntity saved = challengeService.save(testChallenge, testUser);
+        mockMvc.perform(MockMvcRequestBuilders.delete("/challenges/ + " + saved.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     @Test
@@ -161,11 +187,11 @@ public class ChallengeTests {
 
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
         testChallengeA.setCreator(testUser);
-        challengeService.save(testChallengeA);
-        ChallengeEntity saved = challengeService.save(testChallengeA);
+        challengeService.save(testChallengeA, testUser);
+        ChallengeEntity saved = challengeService.save(testChallengeA, testUser);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/challenges/" + saved.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isOk());
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -180,10 +206,11 @@ public class ChallengeTests {
         testChallengeB.setCreator(testUser);
 
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
-        ChallengeEntity saved = challengeService.save(testChallengeA);
+        ChallengeEntity saved = challengeService.save(testChallengeA, testUser);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/challenges/" + saved.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(MockMvcResultMatchers.jsonPath("$.name").value(testChallengeB.getName()))
+                .content(challengeJson).with(jwt().jwt(getUserToken())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(testChallengeB.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallengeB.getDescription()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallengeB.getRewardPoints()));
 
@@ -195,7 +222,7 @@ public class ChallengeTests {
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/challenges/1").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isNotFound());
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
     @Test
     public void testFullUpdateGives200OnExistingChallenge() throws  Exception {
@@ -209,10 +236,10 @@ public class ChallengeTests {
         testChallengeB.setCreator(testUser);
 
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
-        ChallengeEntity saved = challengeService.save(testChallengeA);
+        ChallengeEntity saved = challengeService.save(testChallengeA, testUser);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/challenges/" + saved.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isOk());
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
@@ -227,10 +254,11 @@ public class ChallengeTests {
         testChallengeB.setCreator(testUser);
 
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);;
-        ChallengeEntity saved = challengeService.save(testChallengeA);
+        ChallengeEntity saved = challengeService.save(testChallengeA, testUser);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/challenges/" + saved.getId()).contentType(MediaType.APPLICATION_JSON)
-                        .content(challengeJson)).andExpect(MockMvcResultMatchers.jsonPath("$.name").value(testChallengeB.getName()))
+                        .content(challengeJson).with(jwt().jwt(getUserToken())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(testChallengeB.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallengeB.getDescription()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallengeB.getRewardPoints()));
 
@@ -242,7 +270,7 @@ public class ChallengeTests {
         String challengeJson = objectMapper.writeValueAsString(testChallengeB);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/challenges/1").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson)).andExpect(MockMvcResultMatchers.status().isNotFound());
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
     @Test
     public void testGetAllWithNoQueryInputsReturnsChallenges() throws Exception {
@@ -252,7 +280,7 @@ public class ChallengeTests {
 
         testChallenge.setCreator(testUser);
 
-        ChallengeEntity saved = challengeService.save(testChallenge);
+        ChallengeEntity saved = challengeService.save(testChallenge, testUser);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges")).andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(saved.getName()));

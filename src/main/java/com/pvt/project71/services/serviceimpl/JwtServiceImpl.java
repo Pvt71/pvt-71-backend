@@ -48,9 +48,16 @@ public class JwtServiceImpl implements JwtService {
                 .build();
         return this.encoder.encode(JwtEncoderParameters.from(claims));
     }
+
+    @Override
+    public boolean isTokenValid(Jwt jwt) {
+        if (jwt != null) {
+            return jwt.getExpiresAt().isAfter(Instant.now());
+        }
+        return false;
+    }
     //Pretty sure all OAuth2 verifications create an OAuth2User instance
     //so there should always be an e-mail.
-
     private String getEmail(Authentication authentication) {
         Object principal = authentication.getPrincipal();
         if (principal instanceof OAuth2User oauth2User) {

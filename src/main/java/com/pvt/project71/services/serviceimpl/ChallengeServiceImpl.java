@@ -10,8 +10,11 @@ import org.modelmapper.internal.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.*;
 import java.util.List;
 import java.time.Duration;
@@ -41,31 +44,39 @@ public class ChallengeServiceImpl implements ChallengeService {
      */
     @Override
     @Transactional
-    public ChallengeEntity save(ChallengeEntity challengeEntity) {
+    public ChallengeEntity save(ChallengeEntity challengeEntity, UserEntity doneBy) {
         if (challengeEntity.getEvent() == null) {
             EventEntity defaultEvent = eventService.getDefaultEvent();
+            if (challengeEntity.getAttempts() == null) {
+                challengeEntity.setAttempts(new ArrayList<>());
+            }
             if (challengeEntity.getDates().getCreatedAt() == null) {
                 challengeEntity.getDates().setCreatedAt(LocalDateTime.now());
                 challengeEntity.getDates().setUpdatedAt(challengeEntity.getDates().getCreatedAt());
-            } if (challengeEntity.getDates().getStartsAt() == null) {
+            }
+
+            if (challengeEntity.getDates().getStartsAt() == null) {
                 challengeEntity.getDates().setStartsAt(challengeEntity.getDates().getCreatedAt());
             } if (!checkValidDate(challengeEntity, defaultEvent)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Challenge dates is not valid");
             }
+
             challengeEntity.setEvent(defaultEvent);
             challengeEntity = challengeRepository.save(challengeEntity);
             defaultEvent.getChallenges().add(challengeEntity);
-            eventService.save(defaultEvent);
+            eventService.save(defaultEvent, null);
             return challengeEntity;
         }
         Optional<EventEntity> eventEntity = eventService.findOne(challengeEntity.getEvent().getId());
         if (eventEntity.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event can not be found");
         }
+
         if (challengeEntity.getDates().getCreatedAt() == null) {
             challengeEntity.getDates().setCreatedAt(LocalDateTime.now());
             challengeEntity.getDates().setUpdatedAt(challengeEntity.getDates().getCreatedAt());
         }
+
         if (challengeEntity.getDates().getStartsAt() == null) {
             if (eventEntity.get().getDates().getStartsAt().equals(eventEntity.get().getDates().getCreatedAt())) {
                 challengeEntity.getDates().setStartsAt(challengeEntity.getDates().getCreatedAt());
@@ -77,36 +88,52 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
 
         challengeEntity.setEvent(eventEntity.get());
-//        if (!checkValidAdmin(challengeEntity, challengeEntity.getCreator())) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid admin");
-//        }
+        if (eventEntity.get().getId() == 1 && !challengeEntity.getCreator().equals(doneBy)) { //Om det är en challenge i default event
+            //Får endast skaparn ändra på den
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can modify this challenge");
+        }
         challengeEntity = challengeRepository.save(challengeEntity);
         eventEntity.get().getChallenges().add(challengeEntity);
         eventEntity.get().getDates().setUpdatedAt(LocalDateTime.now());
-        eventService.save(eventEntity.get());
+        eventService.save(eventEntity.get(), challengeEntity.getCreator());
         return challengeEntity;
     }
 
 
     @Override
+    @Transactional
     public Optional<ChallengeEntity> find(Integer id) {
         return challengeRepository.findById(id);
     }
 
     @Override
-    public void delete(Integer id) {
+    public void delete(Integer id, UserEntity doneBy) {
+        ChallengeEntity found = challengeRepository.findById(id).get();
+        if (found.getEvent().getId() == 1) {
+            if (!found.getCreator().equals(doneBy)) { //Om det är en challenge i default event
+                //Får endast skaparn ändra på den
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can modify this challenge");
+            }
+        } else if (!eventService.isAnAdmin(found.getEvent(), doneBy)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not an admin");
+        }
         challengeRepository.deleteById(id);
     }
 
     @Override
-    public ChallengeEntity partialUpdate(Integer id, ChallengeEntity challengeEntity) {
+    public ChallengeEntity partialUpdate(Integer id, ChallengeEntity challengeEntity, UserEntity doneBy) {
         Optional<ChallengeEntity> found = challengeRepository.findById(challengeEntity.getId());
         if (found.isEmpty()) {
             throw new RuntimeException("Challenge Doesnt Exist");
+        } if (found.get().getEvent().getId() == 1) {
+            if (!challengeEntity.getCreator().equals(doneBy)) { //Om det är en challenge i default event
+                //Får endast skaparn ändra på den
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can modify this challenge");
+            }
+        } else if (!eventService.isAnAdmin(challengeEntity.getEvent(), doneBy)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not an admin");
         }
-//        if (checkValidAdmin(found.get(), found.get().getCreator())) {
-//            throw new RuntimeException("Challenge Doesnt Exist");
-//        }
+
         found.get().getDates().setUpdatedAt(LocalDateTime.now());
         return found.map(existing -> {
             Optional.ofNullable(challengeEntity.getName()).ifPresent(existing::setName);
@@ -151,12 +178,5 @@ public class ChallengeServiceImpl implements ChallengeService {
         return challengeEntity.getDates().getEndsAt().compareTo(eventEntity.getDates().getEndsAt()) <1 &&
                 !challengeEntity.getDates().getStartsAt().isBefore(eventEntity.getDates().getStartsAt());
     }
-
-//    private boolean checkValidAdmin(ChallengeEntity challengeEntity, UserEntity userEntity) {
-//        if (challengeEntity.getEvent().getId() == 1) {
-//            return challengeEntity.getCreator().getEmail().equals(userEntity.getEmail());
-//        }
-//        return challengeEntity.getEvent().getAdminUsers().contains(userEntity);
-//    }
 
 }

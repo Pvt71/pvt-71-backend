@@ -1,5 +1,6 @@
 package com.pvt.project71.services.serviceimpl;
 
+import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
@@ -7,9 +8,12 @@ import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,6 +37,9 @@ public class UserServiceImpl implements UserService {
     //CRUD - Create & Update (full)
     @Override
     public UserEntity save(UserEntity user) {
+        if (user.getEvents() == null) {
+            user.setEvents(new ArrayList<>());
+        }
         if(user == null){
             throw new IllegalArgumentException("Argument cannot be null.");
         }
@@ -77,6 +84,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setEmail(email);
 
         return userRepository.findById(email).map(existingUser -> {
+            //If attribute exists and not null, update said attribute
             Optional.ofNullable(userEntity.getUsername()).ifPresent(existingUser::setUsername);
             Optional.ofNullable(userEntity.getProfilePictureUrl()).ifPresent(existingUser::setProfilePictureUrl);
             Optional.ofNullable(userEntity.getSchool()).ifPresent(existingUser::setSchool);
@@ -121,6 +129,28 @@ public class UserServiceImpl implements UserService {
     public UserEntity loadTheLazy(UserEntity user) {
         UserEntity toReturn = userRepository.findById(user.getEmail()).get();
         toReturn.getChallenges().isEmpty();
+        toReturn.getEvents().isEmpty();
         return toReturn;
+    }
+
+    @Override
+    @Transactional
+    public UserEntity makeAdmin(UserEntity user, EventEntity event) {
+        user = loadTheLazy(user);
+        if (!user.getEvents().contains(event)) {
+            user.getEvents().add(event);
+            return userRepository.save(user);
+        }
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "User is already Admin");
+    }
+
+    @Override
+    public UserEntity removeAdmin(UserEntity user, EventEntity event) {
+        user = loadTheLazy(user);
+        if (user.getEvents().contains(event)) {
+            user.getEvents().remove(event);
+            return userRepository.save(user);
+        }
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "User was never an Admin");
     }
 }
