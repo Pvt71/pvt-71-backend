@@ -3,6 +3,7 @@ package com.pvt.project71;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -18,6 +20,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.time.temporal.ChronoUnit;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -35,10 +41,17 @@ public class UserControllerTests {
     private UserService userService;
 
     @Autowired
+    private JwtService jwtService;
+
+    @Autowired
     public UserControllerTests(MockMvc mockMvc, UserService userService){
         this.mockMvc = mockMvc;
         this.objectMapper = new ObjectMapper();
         this.userService = userService;
+    }
+
+    private Jwt getUserToken(UserEntity userEntity){
+        return jwtService.mockOauth2(userEntity, 1, ChronoUnit.MINUTES);
     }
 
     @Test
@@ -51,6 +64,7 @@ public class UserControllerTests {
                 MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(
                 MockMvcResultMatchers.status().isCreated()
         );
@@ -66,6 +80,7 @@ public class UserControllerTests {
                 MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(
                 MockMvcResultMatchers.status().isBadRequest()
         );
@@ -81,6 +96,7 @@ public class UserControllerTests {
                 MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.email").value("Test@test.com")
         ).andExpect(
@@ -105,7 +121,6 @@ public class UserControllerTests {
     @Test
     public void testListUsersReturnsListOfUsers() throws Exception {
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
-
         userService.save(testUser);
 
         mockMvc.perform(
@@ -130,6 +145,7 @@ public class UserControllerTests {
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/users/Test@test.com")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
         );
@@ -144,6 +160,7 @@ public class UserControllerTests {
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/users/Test@test.com")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.email").value("Test@test.com")
         ).andExpect(
@@ -167,14 +184,16 @@ public class UserControllerTests {
 
     @Test
     public void testFullUserUpdateHttpResponse404IfUserDoesNotExist() throws Exception {
-        UserDto testUser = TestDataUtil.createValidTestUserDtoA();
+        UserEntity userForValidToken = TestDataUtil.createValidTestUserEntity();
 
+        UserDto testUser = TestDataUtil.createValidTestUserDtoB();
         String userJson = objectMapper.writeValueAsString(testUser);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.put("/users/DoesNot@exist.com")
+                MockMvcRequestBuilders.put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
+                        .with(jwt().jwt(getUserToken(userForValidToken)))
         ).andExpect(
                 MockMvcResultMatchers.status().isNotFound()
         );
@@ -189,9 +208,10 @@ public class UserControllerTests {
         String userJson = objectMapper.writeValueAsString(testUserDto);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.put("/users/" + savedUser.getEmail())
+                MockMvcRequestBuilders.put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(
                 MockMvcResultMatchers.status().isBadRequest()
         );
@@ -206,9 +226,10 @@ public class UserControllerTests {
         String userJson = objectMapper.writeValueAsString(testUserDto);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.put("/users/" + savedUser.getEmail())
+                MockMvcRequestBuilders.put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
         );
@@ -224,9 +245,10 @@ public class UserControllerTests {
         String userJson = objectMapper.writeValueAsString(testUserDto);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.put("/users/" + savedUser.getEmail())
+                MockMvcRequestBuilders.put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.email").value(savedUser.getEmail())
         ).andExpect(
@@ -249,9 +271,10 @@ public class UserControllerTests {
         String userJson = objectMapper.writeValueAsString(testUserDto);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.patch("/users/" + savedUser.getEmail())
+                MockMvcRequestBuilders.patch("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
         );
@@ -267,9 +290,10 @@ public class UserControllerTests {
         String userJson = objectMapper.writeValueAsString(testUserDto);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.patch("/users/" + savedUser.getEmail())
+                MockMvcRequestBuilders.patch("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.email").value(savedUser.getEmail())
         ).andExpect(
@@ -283,9 +307,13 @@ public class UserControllerTests {
 
     @Test
     public void testDeleteUserReturnsHttpStatus204NonExistingUser() throws Exception{
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+
         mockMvc.perform(
-                MockMvcRequestBuilders.delete("/users/DoesNot@Exist.com")
+                MockMvcRequestBuilders.delete("/users")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
@@ -295,8 +323,9 @@ public class UserControllerTests {
         UserEntity savedUser = userService.save(testUser);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.delete("/users/" + savedUser.getEmail())
+                MockMvcRequestBuilders.delete("/users")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 

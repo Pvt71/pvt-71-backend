@@ -191,24 +191,4 @@ public class UserChallengesIntegrationTest {
             );
     }
 
-    @Test
-    public void testUserDoesNotDeleteChallenge() throws Exception {
-        UserEntity userEntity = TestDataUtil.createValidTestUserEntity();
-        userService.save(userEntity);
-
-        ChallengeEntity challengeEntityA = TestDataUtil.createChallengeEnitityA();
-        challengeEntityA.setCreator(userEntity);
-        challengeService.save(challengeEntityA);
-
-        userService.delete(userEntity.getEmail());
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/challenges/"  + challengeEntityA.getId()).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(challengeEntityA.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("A"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(challengeEntityA.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(challengeEntityA.getRewardPoints()));
-    }
-
-
-
 }

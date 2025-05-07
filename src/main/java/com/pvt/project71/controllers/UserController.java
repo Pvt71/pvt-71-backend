@@ -8,6 +8,8 @@ import com.pvt.project71.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +31,12 @@ public class UserController {
 
     // CRUD - Create
     @PostMapping(path = "/users")
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user){
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user,
+                                              @AuthenticationPrincipal Jwt userToken){
+        if(userToken == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
         UserEntity userEntity = userMapper.mapFrom(user);
         UserEntity savedUserEntity = userService.save(userEntity);
         return new ResponseEntity<>(userMapper.mapTo(savedUserEntity), HttpStatus.CREATED);
@@ -55,16 +62,21 @@ public class UserController {
     }
 
     // CRUD - Update (full update)
-    @PutMapping(path = "/users/{email}")
+    @PutMapping(path = "/users")
     public ResponseEntity<UserDto> fullUpdateUser(
-            @PathVariable("email") String email,
-            @Valid @RequestBody UserDto userDto){
+            @Valid @RequestBody UserDto userDto,
+            @AuthenticationPrincipal Jwt userToken){
 
-        if(!userService.isExists(email)){
+        if(userToken == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        String emailFromToken = userToken.getSubject();
+        if(!userService.isExists(emailFromToken)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        userDto.setEmail(email);
+        userDto.setEmail(emailFromToken);
         UserEntity userEntity = userMapper.mapFrom(userDto);
         UserEntity savedUserEntity = userService.save(userEntity);
         return new ResponseEntity<>(
@@ -74,24 +86,39 @@ public class UserController {
     }
 
     // CRUD - Update (partial update)
-    @PatchMapping(path = "/users/{email}")
+    @PatchMapping(path = "/users")
     public ResponseEntity<UserDto> partialUpdate(
-            @PathVariable("email") String email,
-            @Valid @RequestBody UserDto userDto
+            @Valid @RequestBody UserDto userDto,
+            @AuthenticationPrincipal Jwt userToken
     ){
-        if(!userService.isExists(email)){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(userToken == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        String emailFromToken = userToken.getSubject();
+        if(!userService.isExists(emailFromToken)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         UserEntity userEntity = userMapper.mapFrom(userDto);
-        UserEntity updatedUser = userService.partialUpdate(email, userEntity);
+        UserEntity updatedUser = userService.partialUpdate(emailFromToken, userEntity);
         return new ResponseEntity<>(userMapper.mapTo(updatedUser), HttpStatus.OK);
     }
 
     // CRUD - Delete
-    @DeleteMapping(path = "/users/{email}")
-    public ResponseEntity deleteUser(@PathVariable("email") String email){
-        userService.delete(email);
+    @DeleteMapping(path = "/users")
+    public ResponseEntity deleteUser(@AuthenticationPrincipal Jwt userToken){
+
+        if(userToken == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        String emailFromToken = userToken.getSubject();
+        if(!userService.isExists(emailFromToken)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        userService.delete(emailFromToken);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
