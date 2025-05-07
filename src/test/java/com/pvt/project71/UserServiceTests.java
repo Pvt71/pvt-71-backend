@@ -5,6 +5,7 @@ import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,11 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -104,7 +107,7 @@ public class UserServiceTests {
 
         ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
         testChallenge.setCreator(testUser);
-        challengeService.save(testChallenge);
+        challengeService.save(testChallenge, testUser);
 
         userService.delete(testUser.getEmail());
 
@@ -119,7 +122,7 @@ public class UserServiceTests {
 
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         testEvent.setAdminUsers(List.of(testUser));
-        eventService.save(testEvent);
+        eventService.save(testEvent, testUser);
 
         userService.delete(testUser.getEmail());
 

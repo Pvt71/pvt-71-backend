@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,15 +38,16 @@ public class UserServiceImpl implements UserService {
     //CRUD - Create & Update (full)
     @Override
     public UserEntity save(UserEntity user) {
-        if (user.getEvents() == null) {
-            user.setEvents(new ArrayList<>());
-        }
         if(user == null){
             throw new IllegalArgumentException("Argument cannot be null.");
         }
 
         if(user.getEmail() == null || user.getEmail().isBlank())
             throw new IllegalArgumentException("Email cannot be null or blank");
+
+        if (user.getEvents() == null) {
+            user.setEvents(new ArrayList<>());
+        }
 
         return userRepository.save(user);
     }
@@ -95,6 +97,7 @@ public class UserServiceImpl implements UserService {
 
     // CRUD - Delete
     @Override
+    @Transactional
     public void delete(String email) {
         if(email == null || email.isBlank())
             throw new IllegalArgumentException("Email cannot be null or blank");
