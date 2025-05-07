@@ -36,7 +36,8 @@ public class UserController {
     @PostMapping(path = "/users")
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user,
                                               @AuthenticationPrincipal Jwt userToken){
-        if(userToken == null){
+
+        if(userToken == null || !jwtService.isTokenValid(userToken)){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -70,7 +71,7 @@ public class UserController {
             @Valid @RequestBody UserDto userDto,
             @AuthenticationPrincipal Jwt userToken){
 
-        if(userToken == null && !jwtService.isTokenValid(userToken)){
+        if(userToken == null || !jwtService.isTokenValid(userToken)){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -94,7 +95,7 @@ public class UserController {
             @Valid @RequestBody UserDto userDto,
             @AuthenticationPrincipal Jwt userToken
     ){
-        if(userToken == null && !jwtService.isTokenValid(userToken)){
+        if(userToken == null || !jwtService.isTokenValid(userToken)){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -112,7 +113,7 @@ public class UserController {
     @DeleteMapping(path = "/users")
     public ResponseEntity deleteUser(@AuthenticationPrincipal Jwt userToken){
 
-        if(userToken == null && !jwtService.isTokenValid(userToken)){
+        if(userToken == null || !jwtService.isTokenValid(userToken)){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
