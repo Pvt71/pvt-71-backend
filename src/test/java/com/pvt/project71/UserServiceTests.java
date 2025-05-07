@@ -3,10 +3,12 @@ package com.pvt.project71;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,19 +31,23 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class UserServiceTests {
 
     @Autowired
     private UserService userService;
-
     @Autowired
     private ChallengeService challengeService;
-
     @Autowired
     private EventService eventService;
+    @Autowired
+    private UserRepository userRepository;
+
+    @AfterEach
+    public void cleanup() {
+        userRepository.deleteAll();
+    }
 
     @Test
     public void testSaveSavesValidUser(){

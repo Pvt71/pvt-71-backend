@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWT;
 import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,20 +36,20 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class UserControllerTests {
 
+    @Autowired
     private MockMvc mockMvc;
-
+    @Autowired
     private ObjectMapper objectMapper;
-
+    @Autowired
     private UserService userService;
-
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private JwtService jwtService;
 
-    @Autowired
-    public UserControllerTests(MockMvc mockMvc, UserService userService){
-        this.mockMvc = mockMvc;
-        this.objectMapper = new ObjectMapper();
-        this.userService = userService;
+    @AfterEach
+    public void cleanup() {
+        userRepository.deleteAll();
     }
 
     private Jwt getUserToken(UserEntity userEntity){
