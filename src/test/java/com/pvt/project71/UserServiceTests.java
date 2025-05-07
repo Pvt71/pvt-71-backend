@@ -83,6 +83,11 @@ public class UserServiceTests {
     }
 
     @Test
+    public void testSaveThrowsExceptionNullUserEntity(){
+        assertThrows(IllegalArgumentException.class, () -> userService.save(null));
+    }
+
+    @Test
     public void testDeleteDeletesUserWithNoChallengesOrEvents(){
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
         userService.save(testUser);
@@ -227,6 +232,12 @@ public class UserServiceTests {
     public void testPartialUpdateThrowsExceptionNullEmail(){
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
         assertThrows(IllegalArgumentException.class, () -> userService.partialUpdate(null, testUser));
+    }
+
+    @Test
+    public void testPartialUpdateThrowsExceptionNullUserEntity(){
+        String testEmail = "testEmail";
+        assertThrows(IllegalArgumentException.class, () -> userService.partialUpdate(testEmail, null));
     }
 
     @Test

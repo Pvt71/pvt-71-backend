@@ -4,6 +4,7 @@ import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.mappers.Mapper;
 import com.pvt.project71.mappers.mapperimpl.UserMapperImpl;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,13 +21,15 @@ import java.util.stream.Collectors;
 @RestController
 public class UserController {
 
+    private final JwtService jwtService;
     private UserService userService;
 
     private Mapper<UserEntity, UserDto> userMapper;
 
-    public UserController(UserService userService, Mapper<UserEntity, UserDto> userMapper){
+    public UserController(UserService userService, Mapper<UserEntity, UserDto> userMapper, JwtService jwtService){
         this.userService = userService;
         this.userMapper = userMapper;
+        this.jwtService = jwtService;
     }
 
     // CRUD - Create
@@ -67,7 +70,7 @@ public class UserController {
             @Valid @RequestBody UserDto userDto,
             @AuthenticationPrincipal Jwt userToken){
 
-        if(userToken == null){
+        if(userToken == null && !jwtService.isTokenValid(userToken)){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -91,7 +94,7 @@ public class UserController {
             @Valid @RequestBody UserDto userDto,
             @AuthenticationPrincipal Jwt userToken
     ){
-        if(userToken == null){
+        if(userToken == null && !jwtService.isTokenValid(userToken)){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -109,7 +112,7 @@ public class UserController {
     @DeleteMapping(path = "/users")
     public ResponseEntity deleteUser(@AuthenticationPrincipal Jwt userToken){
 
-        if(userToken == null){
+        if(userToken == null && !jwtService.isTokenValid(userToken)){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 

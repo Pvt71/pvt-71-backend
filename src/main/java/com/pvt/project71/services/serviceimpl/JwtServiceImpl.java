@@ -62,4 +62,12 @@ public class JwtServiceImpl implements JwtService {
         return "";
     }
 
+    @Override
+    public boolean isTokenValid(Jwt jwt) {
+        if (jwt != null) {
+            return jwt.getExpiresAt().isAfter(Instant.now());
+        }
+        return false;
+    }
+
 }

@@ -33,6 +33,10 @@ public class UserServiceImpl implements UserService {
     //CRUD - Create & Update (full)
     @Override
     public UserEntity save(UserEntity user) {
+        if(user == null){
+            throw new IllegalArgumentException("Argument cannot be null.");
+        }
+
         if(user.getEmail() == null || user.getEmail().isBlank())
             throw new IllegalArgumentException("Email cannot be null or blank");
 
@@ -63,6 +67,10 @@ public class UserServiceImpl implements UserService {
     //CRUD - Update (partial)
     @Override
     public UserEntity partialUpdate(String email, UserEntity userEntity) {
+        if(userEntity == null){
+            throw new IllegalArgumentException("userEntity cannot be null.");
+        }
+
         if(email == null || email.isBlank())
             throw new IllegalArgumentException("Email cannot be null or blank");
 

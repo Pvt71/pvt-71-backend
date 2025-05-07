@@ -71,6 +71,21 @@ public class UserControllerTests {
     }
 
     @Test
+    public void testCreateUserHttpResponse404ifInvalidJWTtoken() throws Exception {
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+
+        String userJson = objectMapper.writeValueAsString(testUser);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isUnauthorized()
+        );
+    }
+
+    @Test
     public void testCreateUserHttpResponse400BadRequestIfBlankEmail() throws Exception {
         UserEntity testUser = TestDataUtil.createInvalidTestUserEntity();
 
@@ -200,6 +215,20 @@ public class UserControllerTests {
     }
 
     @Test
+    public void testFullUserUpdateHttpResponse404IfInvalidJWTtoken() throws Exception {
+        UserDto testUser = TestDataUtil.createValidTestUserDtoB();
+        String userJson = objectMapper.writeValueAsString(testUser);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isUnauthorized()
+        );
+    }
+
+    @Test
     public void testFullUserUpdateHttpResponse400IfBlankEmailRequestBody() throws Exception {
         UserEntity testUser  = TestDataUtil.createValidTestUserEntity();
         UserEntity savedUser = userService.save(testUser);
@@ -257,6 +286,24 @@ public class UserControllerTests {
                 MockMvcResultMatchers.jsonPath("$.school").value(testUserDto.getSchool())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.profilePictureUrl").value(testUserDto.getProfilePictureUrl())
+        );
+    }
+
+    @Test
+    public void testPartialUpdateReturnHttp404ifInvalidJWTtoken() throws Exception {
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        UserEntity savedUser = userService.save(testUser);
+
+        UserDto testUserDto = TestDataUtil.createValidTestUserDtoA();
+        testUserDto.setUsername("UPDATED");
+        String userJson = objectMapper.writeValueAsString(testUserDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isUnauthorized()
         );
     }
 
@@ -328,5 +375,18 @@ public class UserControllerTests {
                         .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(MockMvcResultMatchers.status().isNoContent());
     }
+
+    @Test
+    public void testDeleteUserReturnsHttpStatus404IfInvalidJWTtoken() throws Exception{
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        UserEntity savedUser = userService.save(testUser);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+
 
 }

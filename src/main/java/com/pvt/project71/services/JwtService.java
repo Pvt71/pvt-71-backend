@@ -10,4 +10,5 @@ public interface JwtService {
 
       Jwt generateToken(Authentication authentication, long duration, ChronoUnit timeUnit);
       Jwt mockOauth2(UserEntity userEntity,long duration, ChronoUnit timeUnit);
+      boolean isTokenValid(Jwt jwt);
 }
