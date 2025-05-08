@@ -47,18 +47,28 @@ public class UserController {
         return new ResponseEntity<>(userMapper.mapTo(savedUserEntity), HttpStatus.CREATED);
     }
 
-    // CRUD - Read (many)
     @GetMapping(path = "/users")
-    public List<UserDto> listUsers(){
+    public ResponseEntity<?> listUsers(@AuthenticationPrincipal Jwt userToken) {
+        if (userToken == null || !jwtService.isTokenValid(userToken) || !userService.isExists(userToken.getSubject())) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
         List<UserEntity> users = userService.findAll();
-        return users.stream()
+        List<UserDto> userDtos = users.stream()
                 .map(userMapper::mapTo)
                 .collect(Collectors.toList());
+        return new ResponseEntity<>(userDtos, HttpStatus.OK);
     }
 
     // CRUD - Read (one)
     @GetMapping(path = "/users/{email}")
-    public ResponseEntity<UserDto> getUser(@PathVariable("email") String email){
+    public ResponseEntity<UserDto> getUser(@PathVariable("email") String email,
+                                           @AuthenticationPrincipal Jwt userToken){
+
+        if (userToken == null || !jwtService.isTokenValid(userToken) || !userService.isExists(userToken.getSubject())) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
         Optional<UserEntity> foundUser = userService.findOne(email);
         return foundUser.map(userEntity -> {
             UserDto userDto = userMapper.mapTo(userEntity);

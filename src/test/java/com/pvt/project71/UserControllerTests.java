@@ -147,9 +147,14 @@ public class UserControllerTests {
 
     @Test
     public void testListUsersSuccessfulHttpResponse200() throws Exception {
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        Jwt userToken = getUserToken(testUser);
+        userService.save(testUser);
+
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/users")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(userToken))
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
         );
@@ -158,11 +163,13 @@ public class UserControllerTests {
     @Test
     public void testListUsersReturnsListOfUsers() throws Exception {
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        Jwt userToken = getUserToken(testUser);
         userService.save(testUser);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/users")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(userToken))
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$[0].email").value("Test@test.com")
         ).andExpect(
@@ -171,6 +178,30 @@ public class UserControllerTests {
                 MockMvcResultMatchers.jsonPath("$[0].school").value("TestSchool")
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$[0].profilePictureUrl").value("testUrl")
+        );
+    }
+
+    @Test
+    public void testListUsersHttpReponse401IfNoJWTtoken() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(
+                MockMvcResultMatchers.status().isUnauthorized()
+        );
+    }
+
+    @Test
+    public void testListUsersHttpReponse404ifExpiredJWTtoken() throws Exception {
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        Jwt expiredUserToken = getExpiredUserToken(testUser);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(expiredUserToken))
+        ).andExpect(
+                MockMvcResultMatchers.status().isUnauthorized()
         );
     }
 
@@ -191,11 +222,10 @@ public class UserControllerTests {
     @Test
     public void testGetUserReturnsUserIfUserExists() throws Exception {
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
-
         userService.save(testUser);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/users/Test@test.com")
+                MockMvcRequestBuilders.get("/users/" + testUser.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(jwt().jwt(getUserToken(testUser)))
         ).andExpect(
@@ -206,6 +236,34 @@ public class UserControllerTests {
                 MockMvcResultMatchers.jsonPath("$.school").value("TestSchool")
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.profilePictureUrl").value("testUrl")
+        );
+    }
+
+    @Test
+    public void testGetUserHttpReponse401IfNoJWTtoken() throws Exception {
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/users/" + testUser.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(
+                MockMvcResultMatchers.status().isUnauthorized()
+        );
+    }
+
+    @Test
+    public void testGetUserHttpReponse404ifExpiredJWTtoken() throws Exception {
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        Jwt expiredUserToken = getExpiredUserToken(testUser);
+        userService.save(testUser);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/users/" + testUser.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(expiredUserToken))
+        ).andExpect(
+                MockMvcResultMatchers.status().isUnauthorized()
         );
     }
 
