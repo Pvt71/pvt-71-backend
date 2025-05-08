@@ -173,9 +173,19 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<excludeGroupIds>
-						org.apache.tomcat.embed  <!-- Ensure no embedded Tomcat in final WAR -->
+						org.apache.tomcat.embed
 					</excludeGroupIds>
 				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
