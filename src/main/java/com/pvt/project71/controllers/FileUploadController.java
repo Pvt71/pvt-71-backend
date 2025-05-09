@@ -4,12 +4,15 @@ import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.FileStorageService;
+import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import com.pvt.project71.util.ImageValidator;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -28,22 +31,29 @@ public class FileUploadController {
 
     private final UserService userService;
 
+    private final JwtService jwtService;
+
     @Autowired
     public FileUploadController(FileStorageService fileStorageService,
                                 EventService eventService,
                                 ImageValidator imageValidator,
-                                UserService userService) {
+                                UserService userService,
+                                JwtService jwtService) {
 
         this.fileStorageService = fileStorageService;
         this.eventService = eventService;
         this.userService = userService;
         this.imageValidator = imageValidator;
+        this.jwtService = jwtService;
     }
 
 
     //EVENT BANNER UPLOAD/GET
     @PostMapping("/events/{id}/banner")
-    public ResponseEntity<Void> uploadEventBanner(@PathVariable Integer id, @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<Void> uploadEventBanner(
+            @PathVariable Integer id,
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal Jwt userToken) throws IOException {
         Optional<EventEntity> optionalEvent = eventService.findOne(id);
         if (optionalEvent.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -54,10 +64,15 @@ public class FileUploadController {
         EventEntity event = optionalEvent.get();
         event.setBannerImage(file.getBytes());
 
-        if (event.getAdminUsers() == null || event.getAdminUsers().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        eventService.partialUpdate(event.getId(), event, event.getAdminUsers().get(0));
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        eventService.partialUpdate(event.getId(), event, user.get());
 
         return ResponseEntity.ok().build();
     }
@@ -95,18 +110,24 @@ public class FileUploadController {
 
     //PROFILE PICTURE UPLOAD/GET
     @PostMapping("/users/{email}/profilePicture")
-    public ResponseEntity<Void> uploadUserProfilePicture(@PathVariable String email, @RequestParam("file") MultipartFile file) throws IOException {
-        Optional<UserEntity> optionalUser = userService.findOne(email);
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> uploadUserProfilePicture(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal Jwt userToken) throws IOException {
 
         imageValidator.validate(file);
 
-        UserEntity user = optionalUser.get();
-        user.setProfilePicture(file.getBytes());
+        // TODO : CHECK FOR VALID TOKEN
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
 
-        userService.partialUpdate(email, user);
+        user.get().setProfilePicture(file.getBytes());
+
+        userService.partialUpdate(user.get().getEmail(), user.get());
 
         return ResponseEntity.ok().build();
     }
