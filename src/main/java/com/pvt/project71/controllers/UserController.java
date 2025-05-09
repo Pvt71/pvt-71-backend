@@ -42,17 +42,14 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
+        user.setEmail(userToken.getSubject());
         UserEntity userEntity = userMapper.mapFrom(user);
         UserEntity savedUserEntity = userService.save(userEntity);
         return new ResponseEntity<>(userMapper.mapTo(savedUserEntity), HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/users")
-    public ResponseEntity<?> listUsers(@AuthenticationPrincipal Jwt userToken) {
-        if (userToken == null || !jwtService.isTokenValid(userToken) || !userService.isExists(userToken.getSubject())) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
+    public ResponseEntity<?> listUsers() {
         List<UserEntity> users = userService.findAll();
         List<UserDto> userDtos = users.stream()
                 .map(userMapper::mapTo)
@@ -62,13 +59,7 @@ public class UserController {
 
     // CRUD - Read (one)
     @GetMapping(path = "/users/{email}")
-    public ResponseEntity<UserDto> getUser(@PathVariable("email") String email,
-                                           @AuthenticationPrincipal Jwt userToken){
-
-        if (userToken == null || !jwtService.isTokenValid(userToken) || !userService.isExists(userToken.getSubject())) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
+    public ResponseEntity<UserDto> getUser(@PathVariable("email") String email){
         Optional<UserEntity> foundUser = userService.findOne(email);
         return foundUser.map(userEntity -> {
             UserDto userDto = userMapper.mapTo(userEntity);
@@ -115,6 +106,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
+        userDto.setEmail(emailFromToken);
         UserEntity userEntity = userMapper.mapFrom(userDto);
         UserEntity updatedUser = userService.partialUpdate(emailFromToken, userEntity);
         return new ResponseEntity<>(userMapper.mapTo(updatedUser), HttpStatus.OK);

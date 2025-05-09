@@ -124,7 +124,7 @@ public class EventChallengeIntegrationTests {
         UserEntity user = fixAndSaveUser();
         userService.makeAdmin(user, testEvent);
         testEvent.getAdminUsers().add(user);
-        eventService.save(testEvent, user);
+        testEvent = eventService.save(testEvent, user);
 
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
         testChallenge.setEvent(testEvent);
@@ -132,7 +132,7 @@ public class EventChallengeIntegrationTests {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated())
-                .andExpect(jsonPath("$.event.id").value(2L));
+                .andExpect(jsonPath("$.event.id").value(testEvent.getId()));
     }
     @Test
     public void testAddingChallengeToCustomEventAndRetrievingItViaEvent() throws Exception {
