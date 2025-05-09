@@ -55,13 +55,12 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public FriendshipEntity setStatus(FriendshipEntity friendshipEntity, Status status) {
-        friendshipEntity.setStatus(status);
-        return friendshipRepository.save(friendshipEntity);
+    public void delete(FriendshipId id) {
+        friendshipRepository.deleteById(id);
     }
 
     @Override
-    public void delete(FriendshipId id) {
-        friendshipRepository.deleteById(id);
+    public boolean isExists(FriendshipId id) {
+        return friendshipRepository.existsById(id);
     }
 }

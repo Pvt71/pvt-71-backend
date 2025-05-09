@@ -3,15 +3,14 @@ package com.pvt.project71;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pvt.project71.domain.TimeStamps;
 import com.pvt.project71.domain.dto.ChallengeDto;
+import com.pvt.project71.domain.dto.FriendshipDto;
 import com.pvt.project71.domain.dto.UserDto;
-import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
-import com.pvt.project71.domain.entities.ChallengeEntity;
-import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.*;
 import com.pvt.project71.domain.enums.ProofType;
-import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.dto.EventDto;
 import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.domain.entities.score.ScoreId;
+import com.pvt.project71.domain.enums.Status;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -134,7 +133,20 @@ public class TestDataUtil {
                 .build();
     }
 
+    public static FriendshipEntity createTestPendingFriendshipEntityA() {
+        UserEntity userA = createValidTestUserEntity();
+        UserEntity userB = createValidTestUserEntityB();
 
+        return FriendshipEntity.builder().id(new FriendshipId(userA.getEmail(), userB.getEmail())).
+                requester(userA).receiver(userB).status(Status.PENDING).build();
+    }
+
+    public static FriendshipDto createTestPendingFriendshipDtoA() {
+        UserDto userA = createValidTestUserDtoA();
+        UserDto userB = createValidTestUserDtoB();
+
+        return FriendshipDto.builder().requester(userA).receiver(userB).status(Status.PENDING).build();
+    }
 
 }
 

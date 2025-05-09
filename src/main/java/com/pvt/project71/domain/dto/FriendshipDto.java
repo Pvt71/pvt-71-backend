@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class FriendshipDto {
 
-    private UserDto requesterEmail;
+    private UserDto requester;
 
-    private UserDto receiverEmail;
+    private UserDto receiver;
 
     private Status status;
 

@@ -20,7 +20,7 @@ public interface FriendshipService {
 
     Optional<FriendshipEntity> findOne(FriendshipId id);
 
-    FriendshipEntity setStatus(FriendshipEntity friendshipEntity, Status status);
+    void delete(FriendshipId id);
 
-    void delete(FriendshipId friendshipEntity);
+    boolean isExists(FriendshipId id);
 }
