@@ -4,6 +4,7 @@ import com.pvt.project71.domain.dto.ChallengeAttemptDto;
 import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
 import com.pvt.project71.domain.entities.ChallengeAttemptId;
+import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import org.springframework.dao.DuplicateKeyException;
 
@@ -16,5 +17,8 @@ public interface ChallengeAttemptService {
     Optional<ChallengeAttemptEntity> find(ChallengeAttemptId challengeAttemptId);
     ChallengeAttemptEntity save(ChallengeAttemptEntity challengeAttemptEntity);
     ChallengeAttemptEntity accept(ChallengeAttemptEntity challengeAttemptEntity, UserEntity acceptedBy);
-    List<ChallengeAttemptEntity> getAttemptsUserIsPermittedToAllow(UserEntity user);
+    List<ChallengeAttemptEntity> getAttemptsUserCanAllow(UserEntity user);
+    List<ChallengeAttemptEntity> getAttemptsSubmittedByUser(String userEmail);
+
+    ChallengeAttemptEntity sync(ChallengeAttemptEntity challengeAttemptEntity);
 }

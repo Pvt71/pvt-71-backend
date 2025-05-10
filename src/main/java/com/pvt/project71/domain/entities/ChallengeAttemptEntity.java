@@ -25,4 +25,6 @@ public class ChallengeAttemptEntity {
     @MapsId("challengeId")
     @JoinColumn(name = "challenge_id", insertable=false, updatable=false)
     ChallengeEntity challenge;
+
+    private boolean isContentHidden;
 }
