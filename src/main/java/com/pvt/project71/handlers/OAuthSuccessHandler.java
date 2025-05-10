@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
@@ -32,7 +33,8 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         String token = jwtService.generateToken(authentication, 1, ChronoUnit.HOURS).getTokenValue();
         //Send JWT back to OAuth2 process
-        response.setContentType(JSON_TYPE);
-        objectMapper.writeValue(response.getWriter(), Map.of("token", token));
+
+        String redirectPath = "/oauth-callback?token=" + URLEncoder.encode(token, "UTF-8");
+        response.sendRedirect(redirectPath);
     }
 }
