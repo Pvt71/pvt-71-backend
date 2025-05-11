@@ -16,4 +16,8 @@ public interface FriendshipRepository extends CrudRepository<FriendshipEntity, F
 
     List<FriendshipEntity> findAllByRequesterEmailAndStatus(String email, Status status);
     List<FriendshipEntity> findAllByReceiverEmailAndStatus(String email, Status status);
+
+    //Makes it easier when deleting a user
+    void deleteAllByRequesterEmail(String email);
+    void deleteAllByReceiverEmail(String email);
 }

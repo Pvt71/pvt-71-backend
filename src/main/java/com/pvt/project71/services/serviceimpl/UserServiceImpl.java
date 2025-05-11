@@ -6,6 +6,7 @@ import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.repositories.EventRepository;
+import com.pvt.project71.repositories.FriendshipRepository;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.UserService;
 import org.springframework.http.HttpStatus;
@@ -29,10 +30,13 @@ public class UserServiceImpl implements UserService {
 
     private ChallengeRepository challengeRepository;
 
-    public UserServiceImpl(UserRepository userRepository, ChallengeRepository challengeRepository, EventRepository eventRepository) {
+    private FriendshipRepository friendshipRepository;
+
+    public UserServiceImpl(UserRepository userRepository, ChallengeRepository challengeRepository, EventRepository eventRepository, FriendshipRepository friendshipRepository) {
         this.userRepository = userRepository;
         this.challengeRepository = challengeRepository;
         this.eventRepository = eventRepository;
+        this.friendshipRepository = friendshipRepository;
     }
 
     //CRUD - Create & Update (full)
@@ -114,6 +118,8 @@ public class UserServiceImpl implements UserService {
             user.get().getEvents().clear();
         }
 
+        friendshipRepository.deleteAllByRequesterEmail(email);
+        friendshipRepository.deleteAllByReceiverEmail(email);
 
         userRepository.deleteById(email);
     }
