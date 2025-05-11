@@ -22,9 +22,6 @@ import java.util.Optional;
 @RequestMapping("/uploads")
 public class FileUploadController {
 
-    private final FileStorageService fileStorageService;
-
-
     private final EventService eventService;
 
     private final ImageValidator imageValidator;
@@ -34,13 +31,11 @@ public class FileUploadController {
     private final JwtService jwtService;
 
     @Autowired
-    public FileUploadController(FileStorageService fileStorageService,
-                                EventService eventService,
+    public FileUploadController(EventService eventService,
                                 ImageValidator imageValidator,
                                 UserService userService,
                                 JwtService jwtService) {
 
-        this.fileStorageService = fileStorageService;
         this.eventService = eventService;
         this.userService = userService;
         this.imageValidator = imageValidator;
@@ -143,16 +138,6 @@ public class FileUploadController {
                 .ok()
                 .header("Content-Type", "image/jpeg")
                 .body(optionalUser.get().getProfilePicture());
-    }
-
-    @DeleteMapping("/image/{filename}")
-    public ResponseEntity<String> deleteImage(@PathVariable String filename) {
-        try {
-            boolean deleted = fileStorageService.deleteImage(filename);
-            return deleted ? ResponseEntity.ok("Deleted") : ResponseEntity.notFound().build();
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting image");
-        }
     }
 
     @DeleteMapping("/users/{email}/profilePicture")

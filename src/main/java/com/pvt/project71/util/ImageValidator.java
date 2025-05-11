@@ -1,7 +1,9 @@
 package com.pvt.project71.util;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -14,16 +16,17 @@ public class ImageValidator {
     public void validate(MultipartFile file) {
         String filename = file.getOriginalFilename();
         if (filename.isBlank()) {
-            throw new IllegalArgumentException("File must have a name.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File must have a name.");
         }
 
         String extension = getExtension(filename).toLowerCase();
         if (!ALLOWED_FILE_TYPES.contains(extension)) {
-            throw new IllegalArgumentException("Invalid file type. Only JPG and PNG are allowed.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid file type. Allowed types are: " + String.join(", ", ALLOWED_FILE_TYPES));
         }
 
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("File is too large. Max size is 10 MB.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is too large. Max size is 10 MB.");
         }
     }
 

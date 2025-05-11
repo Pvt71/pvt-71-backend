@@ -278,7 +278,7 @@ public class ChallengeAttemptTests {
         challengeService.save(challengeEntityC, userB);
 
         UserEntity userC = UserEntity.builder().email("GOOB@Goob.com").school("Unemployed").username("Coolguy")
-                .profilePictureUrl("url").build();
+                .build();
         userC = userService.save(userC);
         Jwt userCJwt = jwtService.mockOauth2(userC, 1, ChronoUnit.MINUTES);
         mockMvc.perform(post("/challenges/" + challengeEntity.getId() + "/submit/" + CONTENT)
