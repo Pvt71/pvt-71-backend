@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -85,6 +86,7 @@ public class FriendshipController {
         }
 
         friendship.setStatus(Status.ACCEPTED);
+        friendship.setFriendsSince(LocalDate.now());
         return new ResponseEntity<>(friendshipMapper.mapTo(friendshipService.save(friendship)), HttpStatus.OK);
     }
 
