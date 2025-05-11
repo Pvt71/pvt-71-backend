@@ -51,7 +51,7 @@ public class FriendshipController {
 
         //Can't add yourself
         if(otherUser.getEmail().equals(requesterToken.getSubject())){
-            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         Optional<UserEntity> requester = userService.findOne(requesterToken.getSubject());
@@ -77,7 +77,7 @@ public class FriendshipController {
 
         //User can't accept requests the user sent, friendships must be pending
         if(userToken.getSubject().equals(friendRequest.getRequester().getEmail()) || friendRequest.getStatus() != Status.PENDING){
-            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         FriendshipEntity friendship = friendshipMapper.mapFrom(friendRequest);
