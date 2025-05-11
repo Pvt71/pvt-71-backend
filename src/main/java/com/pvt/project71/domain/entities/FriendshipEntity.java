@@ -19,11 +19,11 @@ public class FriendshipEntity {
     @EmbeddedId
     FriendshipId id;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne()
     @JoinColumn(name = "requesterEmail", insertable = false, updatable = false)
     private UserEntity requester;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne()
     @JoinColumn(name = "receiverEmail", insertable = false, updatable = false)
     private UserEntity receiver;
 

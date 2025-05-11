@@ -76,7 +76,7 @@ public class FriendshipTests {
         userService.save(receiver);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.post("/friends/request")
+                MockMvcRequestBuilders.post("/friends/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(receiverJson)
                         .with(jwt().jwt(requesterToken))
@@ -96,7 +96,7 @@ public class FriendshipTests {
         userService.save(receiver);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.post("/friends/request")
+                MockMvcRequestBuilders.post("/friends/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(receiverJson)
                         .with(jwt().jwt(requesterToken))
@@ -153,6 +153,86 @@ public class FriendshipTests {
         ).andExpect(jsonPath("$.requester.email").value(requester.getEmail())
         ).andExpect(jsonPath("$.receiver.email").value(receiver.getEmail())
         ).andExpect(jsonPath("$.status").value(Status.ACCEPTED.toString()));
+    }
+
+    @Test
+    public void testRejectFriendRequestHttpResponse204WhenRejected() throws Exception {
+        UserEntity requester = TestDataUtil.createValidTestUserEntity();
+        UserEntity receiver = TestDataUtil.createValidTestUserEntityB();
+        userService.save(requester);
+        userService.save(receiver);
+
+        FriendshipEntity friendship = FriendshipEntity.builder().
+                id(new FriendshipId(requester.getEmail(), receiver.getEmail())).
+                requester(requester).receiver(receiver).status(Status.ACCEPTED).build();
+        friendshipRepository.save(friendship);
+        String friendshipJson = objectMapper.writeValueAsString(friendship);
+
+        Jwt userToken = getUserToken(receiver);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/friends")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(friendshipJson)
+                        .with(jwt().jwt(userToken))
+        ).andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    public void testGetFriendRequestsHttpsResponse201() throws Exception {
+        UserEntity testUserA = TestDataUtil.createValidTestUserEntity();
+        UserEntity testUserB = TestDataUtil.createValidTestUserEntityB();
+        userService.save(testUserA);
+        userService.save(testUserB);
+        Jwt userToken = getUserToken(testUserA);
+
+        FriendshipEntity friendship = TestDataUtil.createTestPendingFriendshipEntityA();
+        friendshipRepository.save(friendship);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/friends/requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(userToken))
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+    }
+
+    @Test
+    public void testGetFriendRequestsReturnsListOfRequests() throws Exception {
+        UserEntity testUserA = TestDataUtil.createValidTestUserEntity();
+        UserEntity testUserB = TestDataUtil.createValidTestUserEntityB();
+        UserEntity testUserC = TestDataUtil.createValidTestUserEntityC();
+        UserEntity testUserD = TestDataUtil.createValidTestUserEntityD();
+        userService.save(testUserA);
+        userService.save(testUserB);
+        userService.save(testUserC);
+        userService.save(testUserD);
+        Jwt userToken = getUserToken(testUserA);
+
+
+        FriendshipEntity friendshipA = TestDataUtil.createTestAcceptedFriendshipEntityA();
+        FriendshipEntity friendshipB = TestDataUtil.createTestPendingFriendshipEntityA();
+        FriendshipEntity friendshipC = TestDataUtil.createTestPendingFriendshipEntityB();
+        friendshipRepository.save(friendshipA);
+        friendshipRepository.save(friendshipB);
+        friendshipRepository.save(friendshipC);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/friends/requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(userToken))
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.length()").value(2)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$[0].receiver.email").value("TestB@test.com")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$[0].status").value(Status.PENDING.toString())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$[1].receiver.email").value("TestC@test.com")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$[1].status").value(Status.PENDING.toString())
+        );
     }
 
 }

@@ -14,8 +14,6 @@ public interface FriendshipService {
 
     FriendshipEntity save(FriendshipEntity friendshipEntity);
 
-    List<FriendshipEntity> findAll(String email);
-
     List<FriendshipEntity> findAllByStatus(String email, Status status);
 
     Optional<FriendshipEntity> findOne(FriendshipId id);

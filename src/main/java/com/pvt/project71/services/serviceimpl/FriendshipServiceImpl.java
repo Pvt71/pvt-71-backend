@@ -30,16 +30,6 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public List<FriendshipEntity> findAll(String email) {
-        List<FriendshipEntity> friends = new ArrayList<>();
-
-        friends.addAll(friendshipRepository.findAllByReceiverEmail(email));
-        friends.addAll(friendshipRepository.findAllByRequesterEmail(email));
-
-        return friends;
-    }
-
-    @Override
     public List<FriendshipEntity> findAllByStatus(String email, Status status) {
         List<FriendshipEntity> friends = new ArrayList<>();
 

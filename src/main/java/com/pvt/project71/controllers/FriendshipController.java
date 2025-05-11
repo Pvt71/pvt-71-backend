@@ -14,16 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
-
-/*
-TODO: Fixa resten av controllern (Delete, visa friends osv)
-*/
+import java.util.stream.Collectors;
 
 @RestController
 public class FriendshipController {
@@ -41,10 +36,9 @@ public class FriendshipController {
         this.userService = userService;
     }
 
-    @PostMapping(path = "/friends/request")
+    @PostMapping(path = "/friends/add")
     public ResponseEntity<FriendshipDto> sendFriendRequest(@RequestBody UserDto otherUser,
                                                            @AuthenticationPrincipal Jwt requesterToken){
-
         if(requesterToken == null || !jwtService.isTokenValid(requesterToken)){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -76,8 +70,11 @@ public class FriendshipController {
     @PutMapping(path = "/friends/accept")
     public ResponseEntity<FriendshipDto> acceptFriendRequest(@AuthenticationPrincipal Jwt userToken,
                                                              @RequestBody FriendshipDto friendRequest){
+        if(userToken == null || !jwtService.isTokenValid(userToken)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
 
-        //User can't accept requests the user sent, and friendship must be pending
+        //User can't accept requests the user sent, friendships must be pending
         if(userToken.getSubject().equals(friendRequest.getRequester().getEmail()) || friendRequest.getStatus() != Status.PENDING){
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
@@ -91,4 +88,46 @@ public class FriendshipController {
         return new ResponseEntity<>(friendshipMapper.mapTo(friendshipService.save(friendship)), HttpStatus.OK);
     }
 
+    @GetMapping(path = "/friends/requests")
+    public ResponseEntity<?> getFriendRequests(@AuthenticationPrincipal Jwt userToken){
+        if(userToken == null || !jwtService.isTokenValid(userToken)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        List<FriendshipEntity> friendships = friendshipService.findAllByStatus(userToken.getSubject(), Status.PENDING);
+        List<FriendshipDto> friendshipDtos = friendships.stream()
+                .map(friendshipMapper::mapTo)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(friendshipDtos, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/friends")
+    public ResponseEntity<?> getFriends(@AuthenticationPrincipal Jwt userToken){
+        if(userToken == null || !jwtService.isTokenValid(userToken)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        List<FriendshipEntity> friendships = friendshipService.findAllByStatus(userToken.getSubject(), Status.ACCEPTED);
+        List<FriendshipDto> friendshipDtos = friendships.stream()
+                .map(friendshipMapper::mapTo)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(friendshipDtos, HttpStatus.OK);
+    }
+
+    // Reject requests and remove friendships
+    @DeleteMapping(path = "/friends")
+    public ResponseEntity<FriendshipDto> deleteFriendship(@AuthenticationPrincipal Jwt userToken,
+                                                             @RequestBody FriendshipDto friendRequest){
+        if(userToken == null || !jwtService.isTokenValid(userToken)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        FriendshipEntity friendship = friendshipMapper.mapFrom(friendRequest);
+        if(!friendshipService.isExists(friendship.getId())){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        friendshipService.delete(friendship.getId());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

@@ -57,6 +57,22 @@ public class TestDataUtil {
                 .profilePictureUrl("testUrl")
                 .build();
     }
+    public static UserEntity createValidTestUserEntityC(){
+        return UserEntity.builder()
+                .email("TestC@test.com")
+                .username("TestNameC")
+                .school("TestSchoolC")
+                .profilePictureUrl("testUrl")
+                .build();
+    }
+    public static UserEntity createValidTestUserEntityD(){
+        return UserEntity.builder()
+                .email("TestD@test.com")
+                .username("TestNameD")
+                .school("TestSchoolD")
+                .profilePictureUrl("testUrl")
+                .build();
+    }
     //event must be saved in the database as its primary key is auto gen
     //DO NOT forget to cleanup
     public static ScoreEntity createValidScoreEntity(UserEntity user, EventEntity event){
@@ -139,6 +155,22 @@ public class TestDataUtil {
 
         return FriendshipEntity.builder().id(new FriendshipId(userA.getEmail(), userB.getEmail())).
                 requester(userA).receiver(userB).status(Status.PENDING).build();
+    }
+
+    public static FriendshipEntity createTestPendingFriendshipEntityB() {
+        UserEntity userA = createValidTestUserEntity();
+        UserEntity userC = createValidTestUserEntityC();
+
+        return FriendshipEntity.builder().id(new FriendshipId(userA.getEmail(), userC.getEmail())).
+                requester(userA).receiver(userC).status(Status.PENDING).build();
+    }
+
+    public static FriendshipEntity createTestAcceptedFriendshipEntityA() {
+        UserEntity userA = createValidTestUserEntity();
+        UserEntity userD = createValidTestUserEntityD();
+
+        return FriendshipEntity.builder().id(new FriendshipId(userA.getEmail(), userD.getEmail())).
+                requester(userA).receiver(userD).status(Status.ACCEPTED).build();
     }
 
     public static FriendshipDto createTestPendingFriendshipDtoA() {
