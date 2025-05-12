@@ -162,7 +162,7 @@ public class TestDataUtil {
         UserEntity userC = createValidTestUserEntityC();
 
         return FriendshipEntity.builder().id(new FriendshipId(userA.getEmail(), userC.getEmail())).
-                requester(userA).receiver(userC).status(Status.PENDING).build();
+                requester(userC).receiver(userA).status(Status.PENDING).build();
     }
 
     public static FriendshipEntity createTestAcceptedFriendshipEntityA() {

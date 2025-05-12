@@ -50,7 +50,12 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public boolean isExists(FriendshipId id) {
-        return friendshipRepository.existsById(id);
+    public boolean isExists(String email1, String email2) {
+        return !friendshipRepository.findByEmails(email1, email2).isEmpty();
+    }
+
+    @Override
+    public boolean isExists(FriendshipId friendshipId) {
+        return friendshipRepository.existsById(friendshipId);
     }
 }

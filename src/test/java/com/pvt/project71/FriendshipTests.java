@@ -7,6 +7,7 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.enums.Status;
 import com.pvt.project71.repositories.FriendshipRepository;
 import com.pvt.project71.repositories.UserRepository;
+import com.pvt.project71.services.FriendshipService;
 import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -50,6 +52,8 @@ public class FriendshipTests {
     private JwtService jwtService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private FriendshipService friendshipService;
 
     @AfterEach
     public void cleanup() {
@@ -97,6 +101,30 @@ public class FriendshipTests {
                 MockMvcRequestBuilders.post("/friends/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requesterJson)
+                        .with(jwt().jwt(requesterToken))
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+
+    @Test
+    public void testSendRequestHttpResponse400IfFriendshipAlreadyExists() throws Exception {
+
+        UserEntity requester = TestDataUtil.createValidTestUserEntity();
+        UserEntity receiver = TestDataUtil.createValidTestUserEntityD();
+        Jwt requesterToken = getUserToken(requester);
+
+        String receiverJson = objectMapper.writeValueAsString(receiver);
+        userService.save(requester);
+        userService.save(receiver);
+
+        FriendshipEntity friendship = TestDataUtil.createTestAcceptedFriendshipEntityA();
+        friendshipService.save(friendship);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/friends/add")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(receiverJson)
                         .with(jwt().jwt(requesterToken))
         ).andExpect(
                 MockMvcResultMatchers.status().isBadRequest()
@@ -216,9 +244,7 @@ public class FriendshipTests {
         userService.save(requester);
         userService.save(receiver);
 
-        FriendshipEntity pendingFriendship = FriendshipEntity.builder().
-                id(new FriendshipId(requester.getEmail(), receiver.getEmail())).
-                requester(requester).receiver(receiver).status(Status.PENDING).build();
+        FriendshipEntity pendingFriendship = TestDataUtil.createTestPendingFriendshipEntityA();
         friendshipRepository.save(pendingFriendship);
         String friendshipJson = objectMapper.writeValueAsString(pendingFriendship);
 
@@ -231,7 +257,9 @@ public class FriendshipTests {
                         .with(jwt().jwt(userToken))
         ).andExpect(jsonPath("$.requester.email").value(requester.getEmail())
         ).andExpect(jsonPath("$.receiver.email").value(receiver.getEmail())
-        ).andExpect(jsonPath("$.status").value(Status.ACCEPTED.toString()));
+        ).andExpect(jsonPath("$.status").value(Status.ACCEPTED.toString())
+        ).andExpect(jsonPath("$.friendsSince").value(LocalDate.now().toString())
+        );
     }
 
     @Test
@@ -365,7 +393,7 @@ public class FriendshipTests {
     }
 
     @Test
-    public void testDeleteFriendRequestHttpsResponse204() throws Exception {
+    public void testDeleteFriendHttpsResponse204() throws Exception {
         UserEntity userA = TestDataUtil.createValidTestUserEntity();
         UserEntity userB = TestDataUtil.createValidTestUserEntityB();
         userService.save(userA);
@@ -387,7 +415,7 @@ public class FriendshipTests {
     }
 
     @Test
-    public void testDeleteFriendRequestSuccessFullyDeletesRequest() throws Exception {
+    public void testDeleteFriendSuccessFullyDeletesFriendship() throws Exception {
         UserEntity userA = TestDataUtil.createValidTestUserEntity();
         UserEntity userB = TestDataUtil.createValidTestUserEntityB();
         userService.save(userA);

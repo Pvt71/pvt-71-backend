@@ -20,5 +20,7 @@ public interface FriendshipService {
 
     void delete(FriendshipId id);
 
+    boolean isExists(String email1, String email2);
+
     boolean isExists(FriendshipId id);
 }

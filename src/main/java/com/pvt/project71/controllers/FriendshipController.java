@@ -44,6 +44,11 @@ public class FriendshipController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
+        //Can't send request to already existing friendship
+        if(friendshipService.isExists(requesterToken.getSubject(), otherUser.getEmail())){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         //Both users must exist
         if(!userService.isExists(otherUser.getEmail()) || !userService.isExists(requesterToken.getSubject())){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
