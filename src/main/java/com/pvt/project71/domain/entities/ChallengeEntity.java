@@ -40,7 +40,7 @@ public class ChallengeEntity {
     List<ChallengeAttemptEntity> attempts;
 
 
-    private int rewardPoints;
+    private int points;
     private String description;
     private ProofType proofType;
 

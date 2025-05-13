@@ -85,7 +85,7 @@ public class ChallengeTests {
     @Test
     public void testCreatingAChallengeWithLessPointsThan1Gives404() throws Exception{
         ChallengeDto testChallenge = TestDataUtil.createChallengeDtoA();
-        testChallenge.setRewardPoints(0);
+        testChallenge.setPoints(0);
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
@@ -94,7 +94,7 @@ public class ChallengeTests {
     @Test
     public void testCreatingAChallengeWithExpiredTokenGives401() throws Exception {
         ChallengeDto testChallenge = TestDataUtil.createChallengeDtoA();
-        testChallenge.setRewardPoints(10);
+        testChallenge.setPoints(10);
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         Jwt jwt = jwtService.mockOauth2(fixAndSaveUser(), 1, ChronoUnit.NANOS);
         Thread.sleep(1);
@@ -116,7 +116,7 @@ public class ChallengeTests {
                 .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("A"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallenge.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallenge.getRewardPoints()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.points").value(testChallenge.getPoints()));
 
     }
     @Test
@@ -146,7 +146,7 @@ public class ChallengeTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(saved.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("A"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallenge.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallenge.getRewardPoints()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.points").value(testChallenge.getPoints()));
     }
 
     @Test
@@ -212,7 +212,7 @@ public class ChallengeTests {
                 .content(challengeJson).with(jwt().jwt(getUserToken())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(testChallengeB.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallengeB.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallengeB.getRewardPoints()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.points").value(testChallengeB.getPoints()));
 
     }
 
@@ -260,7 +260,7 @@ public class ChallengeTests {
                         .content(challengeJson).with(jwt().jwt(getUserToken())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(testChallengeB.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(testChallengeB.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.rewardPoints").value(testChallengeB.getRewardPoints()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.points").value(testChallengeB.getPoints()));
 
     }
 

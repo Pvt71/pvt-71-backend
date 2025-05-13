@@ -27,6 +27,7 @@ com\pvt\project71\controllers\UserController.class
 com\pvt\project71\config\RsaKeyProperties.class
 com\pvt\project71\domain\dto\EventDto.class
 com\pvt\project71\services\ChallengeService.class
+com\pvt\project71\util\ImageValidator.class
 com\pvt\project71\domain\enums\Status.class
 com\pvt\project71\domain\dto\ChallengeDto$ChallengeDtoBuilder.class
 com\pvt\project71\repositories\ScoreRepository.class
@@ -41,7 +42,6 @@ com\pvt\project71\domain\dto\ScoreDto$ScoreDtoBuilder.class
 com\pvt\project71\controllers\ChallengeController.class
 com\pvt\project71\repositories\ChallengeAttemptRepository.class
 com\pvt\project71\domain\entities\score\ScoreEntity$ScoreEntityBuilder.class
-com\pvt\project71\services\serviceimpl\FileStorageServiceImpl.class
 com\pvt\project71\services\UserService.class
 com\pvt\project71\domain\dto\ChallengeAttemptDto$ChallengeAttemptDtoBuilder.class
 com\pvt\project71\domain\entities\UserEntity$UserEntityBuilder.class

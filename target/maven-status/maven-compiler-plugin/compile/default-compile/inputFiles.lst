@@ -9,7 +9,6 @@ C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\repositories\Chal
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\mappers\mapperimpl\ChallengeAttemptMapper.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\ChallengeAttemptService.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\EventService.java
-C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\serviceimpl\FileStorageServiceImpl.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\TimeStamps.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\UserService.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\entities\ChallengeEntity.java
@@ -47,6 +46,7 @@ C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\controllers\FileU
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\controllers\EventController.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\MainController.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\serviceimpl\ChallengeServiceImpl.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\util\ImageValidator.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\dto\UserDto.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\dto\EventDto.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\dto\ChallengeDto.java
