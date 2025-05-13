@@ -62,7 +62,7 @@ public class TestDataUtil {
                 .email("TestC@test.com")
                 .username("TestNameC")
                 .school("TestSchoolC")
-                .profilePictureUrl("testUrl")
+                .profilePicture(createTestImageBytes())
                 .build();
     }
     public static UserEntity createValidTestUserEntityD(){
@@ -70,7 +70,7 @@ public class TestDataUtil {
                 .email("TestD@test.com")
                 .username("TestNameD")
                 .school("TestSchoolD")
-                .profilePictureUrl("testUrl")
+                .profilePicture(createTestImageBytes())
                 .build();
     }
     //event must be saved in the database as its primary key is auto gen
