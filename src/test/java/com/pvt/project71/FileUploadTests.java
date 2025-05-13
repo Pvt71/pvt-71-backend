@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -277,6 +278,37 @@ public class FileUploadTests {
         mockMvc.perform(MockMvcRequestBuilders
                         .delete("/uploads/users/Test@test.com/profilePicture"))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testUploadAndRetrieveEventBannerBLOB() throws Exception {
+        byte[] imageBytes = new byte[]{10, 20, 30, 40, 50};
+        MockMultipartFile file = new MockMultipartFile("file", "banner.jpg", "image/jpeg", imageBytes);
+
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
+        userService.save(user);
+
+        EventEntity event = TestDataUtil.createTestEventEntityA();
+        event.setAdminUsers(List.of(user));
+        eventService.save(event, user);
+
+        Jwt jwt = jwtService.mockOauth2(user, 5, ChronoUnit.MINUTES);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .multipart("/uploads/events/" + event.getId() + "/banner")
+                        .file(file)
+                        .header("Authorization", "Bearer " + jwt.getTokenValue()))
+                .andExpect(status().isOk());
+
+        byte[] retrievedImageBytes = mockMvc.perform(MockMvcRequestBuilders
+                        .get("/uploads/events/" + event.getId() + "/banner"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/jpeg"))
+                .andReturn()
+                .getResponse()
+                .getContentAsByteArray();
+
+        assertArrayEquals(imageBytes, retrievedImageBytes, "Retrieved image should match uploaded image");
     }
 
 
