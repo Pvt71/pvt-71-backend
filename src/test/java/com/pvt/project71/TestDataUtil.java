@@ -82,7 +82,7 @@ public class TestDataUtil {
                 .email("Test@test.com")
                 .username("TestName")
                 .school("TestSchool")
-                .profilePictureUrl("testUrl")
+                .profilePictureUrl("/uploads/users/Test@test.com/profilePicture")
                 .build();
     }
 
@@ -91,7 +91,7 @@ public class TestDataUtil {
                 .email("Test2@test.com")
                 .username("TestName2")
                 .school("TestSchool2")
-                .profilePictureUrl("testUrl2")
+                .profilePictureUrl("/uploads/users/Test@test.com/profilePicture")
                 .build();
     }
 
@@ -100,7 +100,7 @@ public class TestDataUtil {
                 .email("")
                 .username("TestName2")
                 .school("TestSchool2")
-                .profilePictureUrl("testUrl2")
+                .profilePictureUrl("/uploads/users/Test@test.com/profilePicture")
                 .build();
     }
     public static EventEntity createTestEventEntityA() {

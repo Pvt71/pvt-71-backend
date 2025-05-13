@@ -80,7 +80,7 @@ public class FileUploadTests {
         byte[] imageBytes = new byte[1024];
         MockMultipartFile file = new MockMultipartFile("file", "banner.jpg", "image/jpeg", imageBytes);
 
-        UserEntity user = TestDataUtil.createInvalidTestUserEntity();
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
         userService.save(user);
 
         EventEntity event = TestDataUtil.createTestEventEntityA();
@@ -302,6 +302,34 @@ public class FileUploadTests {
 
         byte[] retrievedImageBytes = mockMvc.perform(MockMvcRequestBuilders
                         .get("/uploads/events/" + event.getId() + "/banner"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/jpeg"))
+                .andReturn()
+                .getResponse()
+                .getContentAsByteArray();
+
+        assertArrayEquals(imageBytes, retrievedImageBytes, "Retrieved image should match uploaded image");
+    }
+
+    @Test
+    public void testUploadAndRetrieveProfilePictureBLOB() throws Exception {
+        byte[] imageBytes = new byte[]{10, 20, 30, 40, 50};
+        MockMultipartFile file = new MockMultipartFile("file", "pf.jpg", "image/jpeg", imageBytes);
+
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
+        userService.save(user);
+
+
+        Jwt jwt = jwtService.mockOauth2(user, 5, ChronoUnit.MINUTES);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .multipart("/uploads/users/" + user.getEmail() + "/profilePicture")
+                        .file(file)
+                        .header("Authorization", "Bearer " + jwt.getTokenValue()))
+                .andExpect(status().isOk());
+
+        byte[] retrievedImageBytes = mockMvc.perform(MockMvcRequestBuilders
+                        .get("/uploads/users/" + user.getEmail() + "/profilePicture"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("image/jpeg"))
                 .andReturn()
