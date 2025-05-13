@@ -77,6 +77,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .oauth2Login(oauth -> oauth
                         .successHandler(new OAuthSuccessHandler(jwtService))
+
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
