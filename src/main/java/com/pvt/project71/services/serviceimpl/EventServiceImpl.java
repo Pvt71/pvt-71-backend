@@ -89,6 +89,7 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findById(id).map(existingEvent -> {
             Optional.ofNullable(eventEntity.getName()).ifPresent(existingEvent::setName);
             Optional.ofNullable(eventEntity.getDescription()).ifPresent(existingEvent::setDescription);
+            Optional.ofNullable(eventEntity.getBannerImage()).ifPresent(existingEvent::setBannerImage);
             return eventRepository.save(existingEvent);
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event does not exist!"));
     }

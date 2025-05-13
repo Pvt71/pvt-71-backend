@@ -127,7 +127,10 @@ public class UserControllerTests {
     public void testCreateUserSuccessfulReturnSavedAuthor() throws Exception {
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
 
+        testUser.setProfilePicture(null);
+
         String userJson = objectMapper.writeValueAsString(testUser);
+
 
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/users")
@@ -141,7 +144,7 @@ public class UserControllerTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.school").value("TestSchool")
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.profilePictureUrl").value("testUrl")
+                MockMvcResultMatchers.jsonPath("$.profilePictureUrl").doesNotExist()
         );
     }
 
@@ -177,7 +180,7 @@ public class UserControllerTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$[0].school").value("TestSchool")
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$[0].profilePictureUrl").value("testUrl")
+                MockMvcResultMatchers.jsonPath("$[0].profilePictureUrl").value("/uploads/users/Test@test.com/profilePicture")
         );
     }
 
@@ -211,7 +214,7 @@ public class UserControllerTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.school").value("TestSchool")
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.profilePictureUrl").value("testUrl")
+                MockMvcResultMatchers.jsonPath("$.profilePictureUrl").value("/uploads/users/Test@test.com/profilePicture")
         );
     }
 
@@ -315,9 +318,13 @@ public class UserControllerTests {
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
         UserEntity savedUser = userService.save(testUser);
 
+        savedUser.setProfilePicture(TestDataUtil.createTestImageBytes());
+        userService.save(savedUser);
+
         UserDto testUserDto = TestDataUtil.createValidTestUserDtoB();
         testUserDto.setEmail(savedUser.getEmail());
         String userJson = objectMapper.writeValueAsString(testUserDto);
+
 
         mockMvc.perform(
                 MockMvcRequestBuilders.put("/users")
