@@ -16,12 +16,24 @@ public class EventMapper implements Mapper<EventEntity, EventDto> {
     }
 
     @Override
-    public EventDto mapTo(EventEntity projectEntity) {
-        return modelMapper.map(projectEntity, EventDto.class);
+    public EventDto mapTo(EventEntity eventEntity) {
+        EventDto dto = modelMapper.map(eventEntity, EventDto.class);
+
+        if (eventEntity.getBannerImage() != null) {
+            dto.setBannerUrl("/uploads/events/" + eventEntity.getId() + "/banner");
+        }
+
+        return dto;
     }
 
     @Override
-    public EventEntity mapFrom(EventDto projectDto) {
-        return modelMapper.map(projectDto, EventEntity.class);
+    public EventEntity mapFrom(EventDto eventDto) {
+
+        EventEntity entity = modelMapper.map(eventDto, EventEntity.class);
+
+        // Do not map bannerUrl
+        entity.setBannerImage(null);
+
+        return entity;
     }
 }

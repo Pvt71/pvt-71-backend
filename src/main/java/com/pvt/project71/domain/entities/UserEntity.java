@@ -31,7 +31,9 @@ public class UserEntity {
 
     private String school;
 
-    private String profilePictureUrl;
+    @Lob
+    @Column(name = "profile_picture", columnDefinition = "LONGBLOB")
+    private byte[] profilePicture;
 
     @ManyToMany(mappedBy = "adminUsers", cascade = CascadeType.REMOVE)
     @JsonIgnore

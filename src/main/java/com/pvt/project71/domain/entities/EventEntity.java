@@ -29,7 +29,11 @@ public class EventEntity {
     private String name;
 
     private String description;
-    private String bannerUrl;
+
+    @Lob
+    @Column(name = "banner_image", columnDefinition = "LONGBLOB")
+    private byte[] bannerImage;
+
     @Embedded
     private TimeStamps dates;
 
