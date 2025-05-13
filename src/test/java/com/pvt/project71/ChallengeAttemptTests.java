@@ -220,7 +220,7 @@ public class ChallengeAttemptTests {
         mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT).with(jwt().jwt(getOtherUserToken())));
         mockMvc.perform(patch("/challenges/" + challengeEntity.getId() + "/accept/"+ getOtherUserToken().getSubject())
                 .with(jwt().jwt(getUserToken())));
-        assertEquals(challengeEntity.getRewardPoints(),scoreService.findOne(ScoreId.builder().event(eventService.getDefaultEvent())
+        assertEquals(challengeEntity.getPoints(),scoreService.findOne(ScoreId.builder().event(eventService.getDefaultEvent())
                 .user(userService.findOne(getOtherUserToken().getSubject()).get()).build()).get().getScore());
     }
     @Test

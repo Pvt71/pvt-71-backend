@@ -138,7 +138,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         return found.map(existing -> {
             Optional.ofNullable(challengeEntity.getName()).ifPresent(existing::setName);
             Optional.ofNullable(challengeEntity.getDescription()).ifPresent(existing::setDescription);
-            Optional.ofNullable(challengeEntity.getRewardPoints()).ifPresent(existing::setRewardPoints);
+            Optional.ofNullable(challengeEntity.getPoints()).ifPresent(existing::setPoints);
             return challengeRepository.save(existing);
         }).orElseThrow(() ->new RuntimeException("Challenge Doesnt Exist"));
     }
