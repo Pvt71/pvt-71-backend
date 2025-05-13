@@ -47,7 +47,7 @@ public class TestDataUtil {
                 .email("Test@test.com")
                 .username("TestName")
                 .school("TestSchool")
-                .profilePictureUrl("testUrl")
+                .profilePicture(createTestImageBytes())
                 .build();
     }
     public static UserEntity createValidTestUserEntityB(){
@@ -55,7 +55,7 @@ public class TestDataUtil {
                 .email("TestB@test.com")
                 .username("TestNameB")
                 .school("TestSchoolB")
-                .profilePictureUrl("testUrl")
+                .profilePicture(createTestImageBytes())
                 .build();
     }
     //event must be saved in the database as its primary key is auto gen
@@ -73,7 +73,7 @@ public class TestDataUtil {
                 .email("")
                 .username("TestName")
                 .school("TestSchool")
-                .profilePictureUrl("testUrl")
+                .profilePicture(createTestImageBytes())
                 .build();
     }
 
@@ -82,7 +82,7 @@ public class TestDataUtil {
                 .email("Test@test.com")
                 .username("TestName")
                 .school("TestSchool")
-                .profilePictureUrl("testUrl")
+                .profilePictureUrl("/uploads/users/Test@test.com/profilePicture")
                 .build();
     }
 
@@ -91,7 +91,7 @@ public class TestDataUtil {
                 .email("Test2@test.com")
                 .username("TestName2")
                 .school("TestSchool2")
-                .profilePictureUrl("testUrl2")
+                .profilePictureUrl("/uploads/users/Test@test.com/profilePicture")
                 .build();
     }
 
@@ -100,7 +100,7 @@ public class TestDataUtil {
                 .email("")
                 .username("TestName2")
                 .school("TestSchool2")
-                .profilePictureUrl("testUrl2")
+                .profilePictureUrl("/uploads/users/Test@test.com/profilePicture")
                 .build();
     }
     public static EventEntity createTestEventEntityA() {
@@ -132,6 +132,15 @@ public class TestDataUtil {
                 .description("TestDescription")
                 .dates(createTimeStampForTest())
                 .build();
+    }
+
+    public static byte[] createTestImageBytes() {
+        // Just some sample bytes to represent an image
+        return new byte[] {
+                (byte) 0xFF, (byte) 0xD8, // JPEG SOI marker
+                0x00, 0x10, 0x20, 0x30,   // arbitrary filler bytes
+                (byte) 0xFF, (byte) 0xD9  // JPEG EOI marker
+        };
     }
 
 

@@ -19,11 +19,22 @@ public class UserMapperImpl implements Mapper<UserEntity, UserDto> {
 
     @Override
     public UserDto mapTo(UserEntity userEntity) {
-        return modelMapper.map(userEntity, UserDto.class);
+        UserDto dto = modelMapper.map(userEntity, UserDto.class);
+
+        if (userEntity.getProfilePicture() != null) {
+            dto.setProfilePictureUrl("/uploads/users/" + userEntity.getEmail() + "/profilePicture");
+        }
+
+        return dto;
     }
 
     @Override
     public UserEntity mapFrom(UserDto userDto) {
-        return modelMapper.map(userDto, UserEntity.class);
+        UserEntity entity = modelMapper.map(userDto, UserEntity.class);
+
+        // Do not map profilePictureUrl
+        entity.setProfilePicture(null);
+
+        return entity;
     }
 }

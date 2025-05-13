@@ -78,13 +78,18 @@ public class UserController {
         }
 
         String emailFromToken = userToken.getSubject();
-        if(!userService.isExists(emailFromToken)){
+        Optional<UserEntity> existingUserOpt = userService.findOne(emailFromToken);
+        if (existingUserOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        userDto.setEmail(emailFromToken);
-        UserEntity userEntity = userMapper.mapFrom(userDto);
-        UserEntity savedUserEntity = userService.save(userEntity);
+        UserEntity existingUser = existingUserOpt.get();
+
+        existingUser.setUsername(userDto.getUsername());
+        existingUser.setSchool(userDto.getSchool());
+
+        UserEntity savedUserEntity = userService.save(existingUser);
+
         return new ResponseEntity<>(
                 userMapper.mapTo(savedUserEntity),
                 HttpStatus.OK

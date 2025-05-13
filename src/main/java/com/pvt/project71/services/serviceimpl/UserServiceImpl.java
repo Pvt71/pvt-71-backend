@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(email).map(existingUser -> {
             //If attribute exists and not null, update said attribute
             Optional.ofNullable(userEntity.getUsername()).ifPresent(existingUser::setUsername);
-            Optional.ofNullable(userEntity.getProfilePictureUrl()).ifPresent(existingUser::setProfilePictureUrl);
+            Optional.ofNullable(userEntity.getProfilePicture()).ifPresent(existingUser::setProfilePicture);
             Optional.ofNullable(userEntity.getSchool()).ifPresent(existingUser::setSchool);
 
             return userRepository.save(existingUser);
