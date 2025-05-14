@@ -189,7 +189,7 @@ public class EventChallengeIntegrationTests {
     public void testAddingChallengeToNonExistingEventShouldGive404() throws Exception {
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
-        testChallenge.setEvent(EventEntity.builder().id(4).build());
+        testChallenge.setEvent(EventEntity.builder().id(0).build());
 
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
