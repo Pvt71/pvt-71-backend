@@ -7,6 +7,8 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.UserService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +64,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventEntity> findAll(){
         return StreamSupport.stream(eventRepository
-                        .findAll()
+                        .findAll(Sort.by(Sort.Direction.DESC, "dates.updatedAt"))
                         .spliterator()
                         , false)
                 .collect(Collectors.toList());

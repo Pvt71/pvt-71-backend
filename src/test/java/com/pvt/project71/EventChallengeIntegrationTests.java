@@ -243,5 +243,4 @@ public class EventChallengeIntegrationTests {
         assertTrue(challengeRepository.findById(testChallengeA.getId()).isEmpty());
     }
 
-
 }

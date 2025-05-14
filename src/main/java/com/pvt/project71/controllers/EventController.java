@@ -80,12 +80,14 @@ public class EventController {
         userService.makeAdmin(creator.get(), eventEntity);
         eventEntity.setAdminUsers(new ArrayList<>());
         eventEntity.getAdminUsers().add(creator.get());
+        eventEntity.setSchool(creator.get().getSchool());
         EventEntity savedEvent = eventService.save(eventEntity, creator.get());
         return new ResponseEntity<>(eventMapper.mapTo(savedEvent), HttpStatus.CREATED);
     }
 
     /**
-     * Get existing Events.
+     * Get existing Events that are active or upcoming. This can optionally also send a school as a query param to specify
+     * to only retrieve events from that school. If school is specified, no expired events or default events are retrieved.
      * <p><b>GET</b><code>/events</code></p>
      * @return a list of Events with status 200.
      */
@@ -161,7 +163,6 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
         }
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
-        //Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
         if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

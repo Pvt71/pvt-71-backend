@@ -386,6 +386,13 @@ public class EventTests {
                         .with(jwt().jwt(getUserToken()))
         ).andExpect(status().isForbidden());
     }
+    @Test
+    public void testCreatingTwoDifferentDefaultEventsWorks() throws Exception {
+        EventEntity defaultSU = eventService.getDefaultEvent("Stockholm Universitet");
+        EventEntity detaulftKTH = eventService.getDefaultEvent("KTH");
+        assertTrue(detaulftKTH.isDefault());
+        assertTrue(defaultSU.isDefault());
+    }
 }
 
 
