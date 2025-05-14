@@ -32,9 +32,9 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
-        String token = jwtService.generateToken(authentication, 1, ChronoUnit.MONTHS).getTokenValue();
+        String token = jwtService.generateToken(authentication, 20, ChronoUnit.DAYS).getTokenValue();
         //Send JWT back to OAuth2 process
-        objectMapper.writeValue(response.getWriter(), Map.of("token", token));
+        //objectMapper.writeValue(response.getWriter(), Map.of("token", token));
         String redirectPath = "/oauth-callback?token=" + URLEncoder.encode(token, "UTF-8");
 
         response.sendRedirect(redirectPath);
