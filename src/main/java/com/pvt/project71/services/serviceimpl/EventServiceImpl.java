@@ -36,7 +36,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventEntity save(EventEntity eventEntity, UserEntity doneBy) {
-        getDefaultEvent();//Ser till att default alltid finns först som event med id 1.
         if (eventEntity.getChallenges() == null) {
             eventEntity.setChallenges(new ArrayList<>());
         } if (eventEntity.getDates().getCreatedAt() == null) {

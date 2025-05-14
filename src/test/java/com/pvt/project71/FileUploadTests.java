@@ -99,7 +99,7 @@ public class FileUploadTests {
         MockMultipartFile file = new MockMultipartFile("file", "banner.jpg", "image/jpeg", imageBytes);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .multipart("/uploads/events/1/banner")
+                        .multipart("/uploads/events/"+eventService.getDefaultEvent(TestDataUtil.SCHOOL_NAME).getId()+"/banner")
                         .file(file))
                 .andExpect(status().isUnauthorized());
     }

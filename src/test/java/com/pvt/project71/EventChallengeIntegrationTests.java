@@ -69,7 +69,7 @@ public class EventChallengeIntegrationTests {
     void setUp() {
         // Clean up the database after each test
         for (EventEntity e : eventRepository.findAll()) {
-            if (e.getId() != 1) {
+            if (e.isDefault()) {
                 eventRepository.delete(e);
             }
         }
@@ -104,7 +104,7 @@ public class EventChallengeIntegrationTests {
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated())
-                .andExpect(jsonPath("$.event.id").value(1));
+                .andExpect(jsonPath("$.event.id").isNumber());
     }
     @Test
     public void testCreatingChallengeWithoutASpecifiedEventAndRetrieveChallengeViaTheEvent() throws Exception {
@@ -113,7 +113,7 @@ public class EventChallengeIntegrationTests {
         fixAndSaveUser();
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson).with(jwt().jwt(getUserToken())));
-        assertFalse(eventService.loadTheLazy(eventService.getDefaultEvent()).getChallenges().isEmpty());
+        assertFalse(eventService.loadTheLazy(eventService.getDefaultEvent(TestDataUtil.SCHOOL_NAME)).getChallenges().isEmpty());
 
     }
 

@@ -31,6 +31,7 @@ com\pvt\project71\util\ImageValidator.class
 com\pvt\project71\domain\enums\Status.class
 com\pvt\project71\domain\dto\ChallengeDto$ChallengeDtoBuilder.class
 com\pvt\project71\repositories\ScoreRepository.class
+com\pvt\project71\controllers\LoginController.class
 com\pvt\project71\mappers\mapperimpl\EventMapper.class
 com\pvt\project71\mappers\mapperimpl\UserMapperImpl.class
 com\pvt\project71\services\ChallengeAttemptService.class

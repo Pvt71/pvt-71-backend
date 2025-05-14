@@ -40,13 +40,13 @@ public class TestDataUtil {
         return  ChallengeDto.builder().name("B").description("Not the First Letter of the alphabet")
                 .proofType(ProofType.REQUEST).dates(createTimeStampForTest()).points(110).build();
     }
-
+    public static final String SCHOOL_NAME = "TestSchool";
 
     public static UserEntity createValidTestUserEntity(){
         return UserEntity.builder()
                 .email("Test@test.com")
                 .username("TestName")
-                .school("TestSchool")
+                .school(SCHOOL_NAME)
                 .profilePicture(createTestImageBytes())
                 .build();
     }
@@ -54,7 +54,7 @@ public class TestDataUtil {
         return UserEntity.builder()
                 .email("TestB@test.com")
                 .username("TestNameB")
-                .school("TestSchoolB")
+                .school(SCHOOL_NAME)
                 .profilePicture(createTestImageBytes())
                 .build();
     }
@@ -72,7 +72,7 @@ public class TestDataUtil {
         return UserEntity.builder()
                 .email("")
                 .username("TestName")
-                .school("TestSchool")
+                .school(SCHOOL_NAME)
                 .profilePicture(createTestImageBytes())
                 .build();
     }
@@ -81,7 +81,7 @@ public class TestDataUtil {
         return UserDto.builder()
                 .email("Test@test.com")
                 .username("TestName")
-                .school("TestSchool")
+                .school(SCHOOL_NAME)
                 .profilePictureUrl("/uploads/users/Test@test.com/profilePicture")
                 .build();
     }
@@ -90,7 +90,7 @@ public class TestDataUtil {
         return UserDto.builder()
                 .email("Test2@test.com")
                 .username("TestName2")
-                .school("TestSchool2")
+                .school(SCHOOL_NAME)
                 .profilePictureUrl("/uploads/users/Test@test.com/profilePicture")
                 .build();
     }
@@ -99,7 +99,7 @@ public class TestDataUtil {
         return UserDto.builder()
                 .email("")
                 .username("TestName2")
-                .school("TestSchool2")
+                .school(SCHOOL_NAME)
                 .profilePictureUrl("/uploads/users/Test@test.com/profilePicture")
                 .build();
     }
