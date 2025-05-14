@@ -197,7 +197,6 @@
 					<argLine>-Xmx512m</argLine>
 				</configuration>
 			</plugin>
-
 		</plugins>
 		<extensions>
 			<extension>

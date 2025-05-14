@@ -20,7 +20,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtService jwtService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String JSON_TYPE = "application/json";
-    private static final String CALLBACK_SCHEME = "pvt71://oauth-callback";
+    private static final String CALLBACK_SCHEME = "token";
     public OAuthSuccessHandler(JwtService jwtService) {
         this.jwtService = jwtService;
     }
@@ -32,10 +32,11 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
-        String token = jwtService.generateToken(authentication, 1, ChronoUnit.HOURS).getTokenValue();
+        String token = jwtService.generateToken(authentication, 1, ChronoUnit.MONTHS).getTokenValue();
         //Send JWT back to OAuth2 process
+        objectMapper.writeValue(response.getWriter(), Map.of("token", token));
+        String redirectPath = "/oauth-callback?token=" + URLEncoder.encode(token, "UTF-8");
 
-        String redirectPath = CALLBACK_SCHEME + "?token=" + URLEncoder.encode(token, "UTF-8");
         response.sendRedirect(redirectPath);
     }
 }

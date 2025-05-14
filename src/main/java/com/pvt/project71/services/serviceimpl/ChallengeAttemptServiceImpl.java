@@ -87,7 +87,7 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
             scoreService.create(ScoreEntity.builder().scoreId(identifier)
                             .build());
         }
-        scoreService.addPoints(identifier, challengeAttemptEntity.getChallenge().getRewardPoints());
+        scoreService.addPoints(identifier, challengeAttemptEntity.getChallenge().getPoints());
         challengeAttemptEntity.setStatus(Status.ACCEPTED);
         return challengeAttemptRepository.save(challengeAttemptEntity);
     }

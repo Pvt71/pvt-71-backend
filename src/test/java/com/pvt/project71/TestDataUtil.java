@@ -25,19 +25,19 @@ public class TestDataUtil {
     // "2025-10-27T16:30" test tiden som man kan ta och jämföra med.
     public static ChallengeEntity createChallengeEnitityA() {
         return  ChallengeEntity.builder().dates(createTimeStampForTest()).name("A").description("First Letter of the alphabet")
-                .proofType(ProofType.REQUEST).rewardPoints(1000).build();
+                .proofType(ProofType.REQUEST).points(1000).build();
     }
     public static ChallengeDto createChallengeDtoA() {
         return  ChallengeDto.builder().name("A").description("First Letter of the alphabet")
-                .dates(createTimeStampForTest()).proofType(ProofType.REQUEST).rewardPoints(1000).build();
+                .dates(createTimeStampForTest()).proofType(ProofType.REQUEST).points(1000).build();
     }
     public static ChallengeEntity createChallengeEnitityB() {
         return  ChallengeEntity.builder().name("B").description("Not the First Letter of the alphabet")
-                .proofType(ProofType.REQUEST).dates(createTimeStampForTest()).rewardPoints(110).build();
+                .proofType(ProofType.REQUEST).dates(createTimeStampForTest()).points(110).build();
     }
     public static ChallengeDto createChallengeDtoB() {
         return  ChallengeDto.builder().name("B").description("Not the First Letter of the alphabet")
-                .proofType(ProofType.REQUEST).dates(createTimeStampForTest()).rewardPoints(110).build();
+                .proofType(ProofType.REQUEST).dates(createTimeStampForTest()).points(110).build();
     }
 
 

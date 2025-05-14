@@ -25,7 +25,7 @@ public class ChallengeDto {
     private EventDto event;
     @NonNull
     @Positive
-    private Integer rewardPoints;
+    private Integer points;
     private UserDto creator;
 
     private String description;
