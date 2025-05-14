@@ -72,7 +72,7 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
 
     @Override
     public ChallengeAttemptEntity accept(ChallengeAttemptEntity challengeAttemptEntity, UserEntity acceptedBy) {
-        if(challengeAttemptEntity.getChallenge().getEvent().getId() == 1) {
+        if(challengeAttemptEntity.getChallenge().getEvent().isDefault()) {
             if (!challengeAttemptEntity.getChallenge().getCreator().equals(acceptedBy)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the challenge creator can accept this attempt");
             }
