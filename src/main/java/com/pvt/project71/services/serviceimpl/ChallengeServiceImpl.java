@@ -88,7 +88,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
 
         challengeEntity.setEvent(eventEntity.get());
-        if (eventEntity.get().getId() == 1 && !challengeEntity.getCreator().equals(doneBy)) { //Om det är en challenge i default event
+        if (eventEntity.get().isDefault() && !challengeEntity.getCreator().equals(doneBy)) { //Om det är en challenge i default event
             //Får endast skaparn ändra på den
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can modify this challenge");
         }
@@ -109,7 +109,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     public void delete(Integer id, UserEntity doneBy) {
         ChallengeEntity found = challengeRepository.findById(id).get();
-        if (found.getEvent().getId() == 1) {
+        if (found.getEvent().isDefault()) {
             if (!found.getCreator().equals(doneBy)) { //Om det är en challenge i default event
                 //Får endast skaparn ändra på den
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can modify this challenge");
@@ -125,7 +125,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         Optional<ChallengeEntity> found = challengeRepository.findById(challengeEntity.getId());
         if (found.isEmpty()) {
             throw new RuntimeException("Challenge Doesnt Exist");
-        } if (found.get().getEvent().getId() == 1) {
+        } if (found.get().getEvent().isDefault()) {
             if (!challengeEntity.getCreator().equals(doneBy)) { //Om det är en challenge i default event
                 //Får endast skaparn ändra på den
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can modify this challenge");
@@ -144,13 +144,15 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public List<ChallengeEntity> getChallenges(String email, Integer eventId) {
+    public List<ChallengeEntity> getChallenges(String email, Integer eventId, String eventName) {
         if (eventId != null && email != null) {
             return challengeRepository.findByCreatorEmailAndEventId(email, eventId);
         } else if (eventId != null) {
             return challengeRepository.findChallengeEntitiesByEvent_Id(eventId);
         } else if (email != null) {
             return challengeRepository.findByCreatorEmail(email);
+        } else if (eventName != null) {
+            return challengeRepository.findByEventName(eventName);
         }
         List<ChallengeEntity> toReturn = new ArrayList<>();
         challengeRepository.findAll().forEach(toReturn::add);
@@ -164,7 +166,7 @@ public class ChallengeServiceImpl implements ChallengeService {
             return false;
         } if (challengeEntity.getDates().getStartsAt().plus(MIN_DURATION).isAfter(challengeEntity.getDates().getEndsAt())) {
             return false;
-        } if (eventEntity.getId() == 1) {
+        } if (eventEntity.isDefault()) {
             return !challengeEntity.getDates().getStartsAt().isBefore(challengeEntity.getDates().getCreatedAt()) &&
                     !challengeEntity.getDates().getCreatedAt().plus(MAX_PRE_CREATION_TIME).isBefore(challengeEntity.getDates().getStartsAt());
         }
