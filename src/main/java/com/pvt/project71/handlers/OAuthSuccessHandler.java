@@ -20,7 +20,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtService jwtService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String JSON_TYPE = "application/json";
-    private static final String CALLBACK_SCHEME = "https://group-1-75.pvt.dsv.su.se/campusquest/deeplink_redirect/";
+    private static final String CALLBACK_SCHEME = "token";
     public OAuthSuccessHandler(JwtService jwtService) {
         this.jwtService = jwtService;
     }
@@ -34,7 +34,9 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         String token = jwtService.generateToken(authentication, 1, ChronoUnit.HOURS).getTokenValue();
         //Send JWT back to OAuth2 process
-        String redirectPath = CALLBACK_SCHEME + URLEncoder.encode(token, "UTF-8");
+        objectMapper.writeValue(response.getWriter(), Map.of("token", token));
+        String redirectPath = "/oauth-callback?token=" + URLEncoder.encode(token, "UTF-8");
+
         response.sendRedirect(redirectPath);
     }
 }
