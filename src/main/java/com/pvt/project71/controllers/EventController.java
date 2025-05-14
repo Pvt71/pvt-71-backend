@@ -171,6 +171,7 @@ public class EventController {
         eventDto.setDates(found.getDates());
         eventDto.getDates().setUpdatedAt(LocalDateTime.now());
         EventEntity eventEntity = eventMapper.mapFrom(eventDto);
+        eventEntity.setSchool(user.get().getSchool());
         eventEntity.setAdminUsers(found.getAdminUsers());
         EventEntity savedEventEntity = eventService.save(eventEntity, user.get());
         return new ResponseEntity<>(
