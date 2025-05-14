@@ -62,6 +62,10 @@ public class ChallengeController {
      *     <li><b>401 Unauthorized</b> - If token is invalid or cant be linked to a user.</li>
      *     <li><b>403 Forbidden</b> - If trying a User tries adding a Challenge to an event they aren't an admin in.</li>
      * </ul>
+     * <p><b>Example JSON:</b></p>
+     * <pre>
+     * {"dates":{"startsAt":null,"endsAt":"2025-10-27T16:30"},"name":"Example Challenge","maxCompletions":null,"event":null,"points":110,"description":"Challenge","proofType":"REQUEST"}
+     * </pre>
      */
     @PostMapping(path = "/challenges")
     public ResponseEntity<ChallengeDto> createChallenge(@Valid @RequestBody ChallengeDto challengeDto, @AuthenticationPrincipal Jwt userToken) {
@@ -148,6 +152,10 @@ public class ChallengeController {
      *     <li><b>403 Forbidden</b> - If the Token isn't linked to the creator, or an admin if the challenge belongs to an event</li>
      *     <li><b>404 Not Found0</b> - If the Challenge doesn't exist.</li>
      * </ul>
+     * <p><b>Example JSON:</b></p>
+     * <pre>
+     * {"name":"Example Challenge Updated","maxCompletions":null,"event":null,"points":110,"description":"Updated","proofType":"REQUEST"}
+     * </pre>
      */
     @PatchMapping(path = "/challenges/{id}")
     public ResponseEntity<ChallengeDto> partialUpdate(
@@ -193,6 +201,10 @@ public class ChallengeController {
      *     <li><b>403 Forbidden</b> - If the Token isn't linked to the creator, or an admin if the challenge belongs to an event</li>
      *     <li><b>404 Not Found0</b> - If the Challenge doesn't exist.</li>
      * </ul>
+     * <p><b>Example JSON:</b></p>
+     * <pre>
+     * {"name":"Example Challenge Fully Updated","maxCompletions":null,"event":null,"points":110,"description":"Updated","proofType":"REQUEST"}
+     * </pre>
      */
     @PutMapping(path = "/challenges/{id}")
     public ResponseEntity<ChallengeDto> fullUpdate(@PathVariable("id") Integer id, @Valid @RequestBody ChallengeDto challengeDto,
