@@ -103,12 +103,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventEntity getDefaultEvent() {
-        Optional<EventEntity> defaultEvent = findOne(1);
+    public EventEntity getDefaultEvent(String school) {
+        Optional<EventEntity> defaultEvent = eventRepository.findByName(school);
         if (defaultEvent.isEmpty()) {
-            return eventRepository.save(EventEntity.builder().name("Default").challenges(new ArrayList<>())
+            return eventRepository.save(EventEntity.builder().name(school).challenges(new ArrayList<>())
                     .dates(TimeStamps.builder().startsAt(LocalDateTime.now()).createdAt(LocalDateTime.now())
-                            .updatedAt(LocalDateTime.now()).build()).isDefault(true).build());
+                            .updatedAt(LocalDateTime.now()).build()).isDefault(true).school(school).build());
         }
         return defaultEvent.get();
     }

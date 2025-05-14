@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface EventRepository extends CrudRepository<EventEntity, Integer>,
         PagingAndSortingRepository<EventEntity, Integer> {
     List<EventEntity> findBySchool(String school);
-
+    Optional<EventEntity> findByName(String name);
 }
