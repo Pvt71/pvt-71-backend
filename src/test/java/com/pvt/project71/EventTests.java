@@ -119,7 +119,8 @@ public class EventTests {
     @Test
     public void testThatListEventsReturnsOk() throws Exception {
         // Assert that the response status is 200 OK
-        mockMvc.perform(MockMvcRequestBuilders.get("/events"))
+        fixAndSaveUser();
+        mockMvc.perform(MockMvcRequestBuilders.get("/events").with(jwt().jwt(getUserToken())))
                 .andExpect(status().isOk());
     }
 
@@ -134,7 +135,7 @@ public class EventTests {
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/events")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON).with(jwt().jwt(getUserToken()))
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$[0].id").isNumber()
         ).andExpect(
