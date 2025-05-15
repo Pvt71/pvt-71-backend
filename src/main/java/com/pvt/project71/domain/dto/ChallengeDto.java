@@ -31,5 +31,5 @@ public class ChallengeDto {
     private String description;
     private ProofType proofType;
     private Integer maxCompletions;
-
+    private boolean isSocial;
 }

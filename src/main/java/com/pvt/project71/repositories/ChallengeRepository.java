@@ -17,5 +17,11 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
     List<ChallengeEntity> findByCreatorEmailAndEventId(String email, Integer id);
 
     List<ChallengeEntity> findByEventName(String eventName);
-
+    @Query("""
+    SELECT c FROM ChallengeEntity c
+    WHERE c.event.school = :school
+      AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
+    ORDER BY c.dates.updatedAt DESC
+""")
+    List<ChallengeEntity> findAllByEventSchool(String school);
 }

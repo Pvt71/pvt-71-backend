@@ -219,7 +219,8 @@ public class EventChallengeIntegrationTests {
         challengeService.save(testChallengeC, testChallengeC.getCreator());
 
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/challenges").param("eventId", testEvent.getId().toString()))
+        mockMvc.perform(MockMvcRequestBuilders.get("/challenges").param("eventId", testEvent.getId().toString())
+                        .with(jwt().jwt(getUserToken())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value(testChallengeA.getName()))
                 .andExpect(jsonPath("$[1].name").value(testChallengeB.getName()))
