@@ -1,6 +1,8 @@
 package com.pvt.project71.repositories;
 
 import com.pvt.project71.domain.entities.ChallengeEntity;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +15,7 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
 
     List<ChallengeEntity> findChallengeEntitiesByEvent_Id(Integer id);
     List<ChallengeEntity> findByCreatorEmailAndEventId(String email, Integer id);
+
+    List<ChallengeEntity> findByEventName(String eventName);
+
 }

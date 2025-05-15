@@ -23,6 +23,8 @@ public class EventDto {
 
     private String description;
 
+    private String school;
+
     private TimeStamps dates;
 
 

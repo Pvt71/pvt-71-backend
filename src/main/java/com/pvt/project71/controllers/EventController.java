@@ -74,29 +74,36 @@ public class EventController {
         EventEntity eventEntity = eventMapper.mapFrom(event);
 
         Optional<UserEntity> creator = userService.findOne(userToken.getSubject());
-        //Optional<UserEntity> creator = userService.findOne("Test@test.com"); //TODO: Ska bort sen
         if (creator.isEmpty()) {
             return new ResponseEntity<EventDto>(HttpStatus.UNAUTHORIZED);
         }
         userService.makeAdmin(creator.get(), eventEntity);
         eventEntity.setAdminUsers(new ArrayList<>());
         eventEntity.getAdminUsers().add(creator.get());
+        eventEntity.setSchool(creator.get().getSchool());
         EventEntity savedEvent = eventService.save(eventEntity, creator.get());
         return new ResponseEntity<>(eventMapper.mapTo(savedEvent), HttpStatus.CREATED);
     }
 
     /**
-     * Get existing Events.
+     * Get existing Events that are active or upcoming. This can optionally also send a school as a query param to specify
+     * to only retrieve events from that school. If school is specified, no expired events or default events are retrieved.
      * <p><b>GET</b><code>/events</code></p>
      * @return a list of Events with status 200.
      */
     @GetMapping(path = "/events")
-    @ResponseBody
-    public List<EventDto> listEvents() {
-        List<EventEntity> events = eventService.findAll();
-        return events.stream()
+    public ResponseEntity<List<EventDto>> listEvents(
+            @RequestParam(value = "school", required = false) String school) {
+
+        List<EventEntity> events = (school == null)
+                ? eventService.findAll()
+                : eventService.findAllBySchool(school);
+
+        List<EventDto> dtos = events.stream()
                 .map(eventMapper::mapTo)
                 .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
     }
 
     /**
@@ -152,11 +159,10 @@ public class EventController {
 
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (id == 1 || userToken == null) {
+        } if (eventService.findOne(id).get().isDefault() || userToken == null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
         }
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
-        //Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
         if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -165,6 +171,7 @@ public class EventController {
         eventDto.setDates(found.getDates());
         eventDto.getDates().setUpdatedAt(LocalDateTime.now());
         EventEntity eventEntity = eventMapper.mapFrom(eventDto);
+        eventEntity.setSchool(user.get().getSchool());
         eventEntity.setAdminUsers(found.getAdminUsers());
         EventEntity savedEventEntity = eventService.save(eventEntity, user.get());
         return new ResponseEntity<>(
@@ -206,7 +213,7 @@ public class EventController {
 
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (id == 1) {
+        } if (eventService.findOne(id).get().isDefault()) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }if (userToken == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -238,7 +245,7 @@ public class EventController {
             @AuthenticationPrincipal Jwt userToken) {
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (id == 1) {
+        } if (eventService.findOne(id).get().isDefault()) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         } if (!jwtService.isTokenValid(userToken)) {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
@@ -272,7 +279,7 @@ public class EventController {
                                                     @AuthenticationPrincipal Jwt userToken) {
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (id == 1) {
+        } if (eventService.findOne(id).get().isDefault()) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
         }
         Optional<UserEntity> toAdd = userService.findOne(email);
@@ -307,7 +314,7 @@ public class EventController {
                                                       @AuthenticationPrincipal Jwt userToken) {
         if (!eventService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } if (id == 1) {
+        } if (eventService.findOne(id).get().isDefault()) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN); //Ingen får ändra på default event
         } if (!jwtService.isTokenValid(userToken)) {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
@@ -315,7 +322,6 @@ public class EventController {
         EventEntity eventEntity = eventService.findOne(id).get();
 
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
-        //Optional<UserEntity> user = userService.findOne("Test@test.com"); //TODO: Ska bort sen
         if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }

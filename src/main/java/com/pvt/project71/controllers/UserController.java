@@ -1,10 +1,15 @@
 package com.pvt.project71.controllers;
 
 import com.pvt.project71.domain.dto.UserDto;
+import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.score.ScoreEntity;
+import com.pvt.project71.domain.entities.score.ScoreId;
 import com.pvt.project71.mappers.Mapper;
 import com.pvt.project71.mappers.mapperimpl.UserMapperImpl;
+import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.UserService;
 import jakarta.validation.Path;
 import jakarta.validation.Valid;
@@ -25,12 +30,14 @@ public class UserController {
     private final JwtService jwtService;
     private UserService userService;
 
+
     private Mapper<UserEntity, UserDto> userMapper;
 
     public UserController(UserService userService, Mapper<UserEntity, UserDto> userMapper, JwtService jwtService){
         this.userService = userService;
         this.userMapper = userMapper;
         this.jwtService = jwtService;
+
     }
 
     /**

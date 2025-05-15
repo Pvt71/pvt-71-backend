@@ -30,6 +30,10 @@ public class EventEntity {
 
     private String description;
 
+    private String school;
+
+    private boolean isDefault = false;
+
     @Lob
     @Column(name = "banner_image", columnDefinition = "LONGBLOB")
     private byte[] bannerImage;

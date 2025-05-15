@@ -72,7 +72,7 @@ public class EventTests {
     @AfterEach
     public void clearDatabase() {
         eventService.findAll().forEach(event -> {
-            if (event.getId() != 1)  // Assuming ID 1 is the default event
+            if (event.isDefault())  // Assuming ID 1 is the default event
                 eventRepository.deleteById(event.getId());
             });
         userRepository.deleteAll();
@@ -130,15 +130,15 @@ public class EventTests {
         UserEntity user = fixAndSaveUser();
         userService.makeAdmin(user, testEventA);
         testEventA.getAdminUsers().add(user);
-        eventService.save(testEventA, user);
+        testEventA = eventService.save(testEventA, user);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/events")
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$[1].id").isNumber()
+                MockMvcResultMatchers.jsonPath("$[0].id").isNumber()
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$[1].name").value("TestEventA")
+                MockMvcResultMatchers.jsonPath("$[0].name").value("TestEventA")
         );
     }
 
@@ -372,7 +372,7 @@ public class EventTests {
     }
     @Test
     public void testModifyingDefaultEventShouldGive403() throws Exception {
-        EventEntity defaultEvent = eventService.getDefaultEvent();
+        EventEntity defaultEvent = eventService.getDefaultEvent(TestDataUtil.SCHOOL_NAME);
         fixAndSaveUser();
         mockMvc.perform(MockMvcRequestBuilders.delete("/events/" + defaultEvent.getId())
                 .with(jwt().jwt(getUserToken()))).andExpect(status().isForbidden());
@@ -385,6 +385,13 @@ public class EventTests {
                         .content(objectMapper.writeValueAsString(defaultEvent))
                         .with(jwt().jwt(getUserToken()))
         ).andExpect(status().isForbidden());
+    }
+    @Test
+    public void testCreatingTwoDifferentDefaultEventsWorks() throws Exception {
+        EventEntity defaultSU = eventService.getDefaultEvent("Stockholm Universitet");
+        EventEntity detaulftKTH = eventService.getDefaultEvent("KTH");
+        assertTrue(detaulftKTH.isDefault());
+        assertTrue(defaultSU.isDefault());
     }
 }
 

@@ -1,19 +1,20 @@
 package com.pvt.project71.services.serviceimpl;
 
 import com.pvt.project71.domain.TimeStamps;
+import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.UserService;
-import org.apache.catalina.User;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventEntity save(EventEntity eventEntity, UserEntity doneBy) {
-        getDefaultEvent();//Ser till att default alltid finns först som event med id 1.
         if (eventEntity.getChallenges() == null) {
             eventEntity.setChallenges(new ArrayList<>());
         } if (eventEntity.getDates().getCreatedAt() == null) {
@@ -55,7 +55,7 @@ public class EventServiceImpl implements EventService {
             if (checkValidDate(eventEntity)) {
                 return eventRepository.save(eventEntity);
             }
-        } else if (eventEntity.getId() == 1 || checkValidDate(eventEntity)){ //Default event ignoreras att göra date check
+        } else if (eventEntity.isDefault() || checkValidDate(eventEntity)){ //Default event ignoreras att göra date check
             return eventRepository.save(eventEntity);
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event date is not valid!");
@@ -64,7 +64,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventEntity> findAll(){
         return StreamSupport.stream(eventRepository
-                        .findAll()
+                        .findAll(Sort.by(Sort.Direction.DESC, "dates.updatedAt"))
                         .spliterator()
                         , false)
                 .collect(Collectors.toList());
@@ -104,12 +104,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventEntity getDefaultEvent() {
-        Optional<EventEntity> defaultEvent = findOne(1);
+    public EventEntity getDefaultEvent(String school) {
+        Optional<EventEntity> defaultEvent = eventRepository.findByName(school);
         if (defaultEvent.isEmpty()) {
-            return eventRepository.save(EventEntity.builder().name("Default").challenges(new ArrayList<>())
+            return eventRepository.save(EventEntity.builder().name(school).challenges(new ArrayList<>())
                     .dates(TimeStamps.builder().startsAt(LocalDateTime.now()).createdAt(LocalDateTime.now())
-                            .updatedAt(LocalDateTime.now()).build()).build());
+                            .updatedAt(LocalDateTime.now()).build()).isDefault(true).school(school).build());
         }
         return defaultEvent.get();
     }
@@ -163,6 +163,14 @@ public class EventServiceImpl implements EventService {
         //Kollar om eventEntity har userEntity som admin så länge eventId inte är 1 för då är alla tillåtna att lägga till
         //Vi behöver inte tänka på om att alla har admin för default event för man får inte updatera något, bara lägga till och jobba på sina
         //egna challenges
-        return (eventEntity.getId() != null && eventEntity.getId() == 1) || eventEntity.getAdminUsers().contains(userEntity);
+        return (eventEntity.getId() != null && eventEntity.isDefault()) || eventEntity.getAdminUsers().contains(userEntity);
     }
+
+    @Override
+    public List<EventEntity> findAllBySchool(String school) {
+        return eventRepository.findBySchool(school);
+    }
+
+
+
 }

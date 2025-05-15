@@ -68,13 +68,13 @@ public class TimeStampTests {
 
     @BeforeEach
     void setUp() {
-        eventService.getDefaultEvent();
+        eventService.getDefaultEvent(TestDataUtil.SCHOOL_NAME);
     }
     @AfterEach
     void cleanUp() {
         // Clean up the database after each test
         for (EventEntity e : eventRepository.findAll()) {
-            if (e.getId() != 1) {
+            if (e.isDefault()) {
                 eventRepository.delete(e);
             }
         }

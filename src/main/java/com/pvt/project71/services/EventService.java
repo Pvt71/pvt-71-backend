@@ -23,7 +23,7 @@ public interface EventService {
 
     void delete(Integer id, UserEntity doneBy);
 
-    EventEntity getDefaultEvent();
+    EventEntity getDefaultEvent(String school);
 
     EventEntity loadTheLazy(EventEntity toLoad);
 
@@ -32,4 +32,7 @@ public interface EventService {
     EventEntity removeAdmin(EventEntity eventEntity, UserEntity toRemove);
 
     boolean isAnAdmin(EventEntity eventEntity, UserEntity userEntity);
+
+    List<EventEntity> findAllBySchool(String school);
+
 }
