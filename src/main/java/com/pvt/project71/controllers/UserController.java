@@ -150,6 +150,18 @@ public class UserController {
             return new ResponseEntity<>(userDto,HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+    @GetMapping(path = "/users/myProfile")
+    public ResponseEntity<UserDto> getOwnUser(@AuthenticationPrincipal Jwt userToken) {
+        if(userToken == null || !jwtService.isTokenValid(userToken)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<UserEntity> foundUser = userService.findOne(userToken.getSubject());
+        if (foundUser.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+        }
+        return new ResponseEntity<>(userMapper.mapTo(foundUser.get()), HttpStatus.OK);
+    }
 
     /**
      * {@code PUT /users} - Fully updates an existing users profile using the provided user data provided in the Dto.
