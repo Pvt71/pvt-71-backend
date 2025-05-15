@@ -152,30 +152,6 @@ public class UserController {
     }
 
     /**
-     * {@code GET /profile} - Retrieves the user assciated with a JWT token.
-     * <p> Returns a userDto in JSON format, if the user is found.</p>
-     *
-     * @return ResponseEntity containing the user data and HTTP status:
-     *      <ul>
-     *          <li>{@code 200 OK} if the user is found</li>
-     *          <li>{@code 404 Not found} if the user with given email is not found.</li>
-     *      </ul>
-     */
-    @GetMapping(path = "/profile")
-    public ResponseEntity<UserDto> getUser(@AuthenticationPrincipal Jwt userToken){
-
-        if(userToken == null || !jwtService.isTokenValid(userToken)){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        Optional<UserEntity> foundUser = userService.findOne(userToken.getSubject());
-        return foundUser.map(userEntity -> {
-            UserDto userDto = userMapper.mapTo(userEntity);
-            return new ResponseEntity<>(userDto,HttpStatus.OK);
-        }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    /**
      * {@code PUT /users} - Fully updates an existing users profile using the provided user data provided in the Dto.
      * <p>Expects user data provided in JSON format, and a valid JWT token.
      * Currently only school and username can be updated.</p>
