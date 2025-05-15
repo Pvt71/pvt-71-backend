@@ -265,6 +265,53 @@ public class UserControllerTests {
     }
 
     @Test
+    public void testGetProfileHttpResponse200IfUserExists() throws Exception {
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken(testUser)))
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+    }
+
+    @Test
+    public void testGetProfileReturnsUserIfUserExists() throws Exception {
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken(testUser)))
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.email").value("Test@test.com")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.username").value("TestName")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.school").value("TestSchool")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.profilePictureUrl").value("/uploads/users/Test@test.com/profilePicture")
+        );
+    }
+
+    @Test
+    public void testGetProfileHttpResponse404IfUserDoesNotExists() throws Exception {
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(getUserToken(testUser)))
+        ).andExpect(
+                MockMvcResultMatchers.status().isNotFound()
+        );
+    }
+
+    @Test
     public void testFullUserUpdateHttpResponse404IfUserDoesNotExist() throws Exception {
         UserEntity userForValidToken = TestDataUtil.createValidTestUserEntity();
 
