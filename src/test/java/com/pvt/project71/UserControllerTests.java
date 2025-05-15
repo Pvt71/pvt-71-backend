@@ -149,6 +149,42 @@ public class UserControllerTests {
     }
 
     @Test
+    public void testCreateUserWithoutJWTSuccessfulReturnSavedAuthor() throws Exception {
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        testUser.setProfilePicture(null);
+        String userJson = objectMapper.writeValueAsString(testUser);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/public/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userJson)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.email").value("Test@test.com")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.username").value("TestName")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.school").value("TestSchool")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.profilePictureUrl").doesNotExist()
+        );
+    }
+
+    @Test
+    public void testCreateUserWithoutJWTHttpResponse201IfValidUser() throws Exception {
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+
+        String userJson = objectMapper.writeValueAsString(testUser);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/public/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isCreated()
+        );
+    }
+
+    @Test
     public void testListUsersSuccessfulHttpResponse200() throws Exception {
         UserEntity testUser = TestDataUtil.createValidTestUserEntity();
         Jwt userToken = getUserToken(testUser);

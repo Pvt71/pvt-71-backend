@@ -83,6 +83,39 @@ public class UserController {
     }
 
     /**
+     * {@code POST /public/users} - Creates a new user without requiring JWT token.
+     * <p>Expects user data in JSON format containing user information.</p>
+     *
+     * @param user the user data in JSON format. Expected fields:
+     *             <ul>
+     *             <li><strong>email</strong>: String (required), must follow something@example.com format.</li>
+     *             <li><strong>username</strong>: String (optional)</li>
+     *             <li><strong>school</strong>: String (optional)</li>
+     *             <li><strong>profilePictureUrl</strong>: String (optional)</li>
+     *             </ul>
+     *             <p><strong>Example JSON:</strong></p>
+     *                  <pre>{@code
+     *                  {
+     *                      "email": "something@example.com,
+     *                      "username": "exampleName",
+     *                      "school": "exampleSchool",
+     *                      "profilePictureUrl": "https://example.com/picture.jpg"
+     *                  }
+     *                  }</pre>
+     *
+     * @return ResponseEntity containing:
+     *      <ul>
+     *          <li>{@code 201 Created} and the user data in JSON format.</li>
+     *      <ul>
+     */
+    @PostMapping(path = "/public/users")
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user){
+        UserEntity userEntity = userMapper.mapFrom(user);
+        UserEntity savedUserEntity = userService.save(userEntity);
+        return new ResponseEntity<>(userMapper.mapTo(savedUserEntity), HttpStatus.CREATED);
+    }
+
+    /**
      * {@code GET /users} - Retrieves a list of all registered users.
      * <p> Returns a list of userDto objects, in JSON format, representing each user in the system.</p>
      *
