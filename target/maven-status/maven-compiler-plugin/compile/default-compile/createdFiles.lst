@@ -49,10 +49,12 @@ com\pvt\project71\domain\entities\ChallengeAttemptEntity$ChallengeAttemptEntityB
 com\pvt\project71\services\serviceimpl\ChallengeServiceImpl.class
 com\pvt\project71\domain\dto\ScoreDto$ScoreDtoBuilder.class
 com\pvt\project71\domain\entities\FriendshipId$FriendshipIdBuilder.class
+com\pvt\project71\controllers\WellKnownForwardController.class
 com\pvt\project71\controllers\ChallengeController.class
 com\pvt\project71\repositories\ChallengeAttemptRepository.class
 com\pvt\project71\domain\entities\score\ScoreEntity$ScoreEntityBuilder.class
 com\pvt\project71\mappers\mapperimpl\FriendshipMapper.class
+com\pvt\project71\config\WebConfig.class
 com\pvt\project71\services\UserService.class
 com\pvt\project71\domain\dto\ChallengeAttemptDto$ChallengeAttemptDtoBuilder.class
 com\pvt\project71\domain\entities\UserEntity$UserEntityBuilder.class

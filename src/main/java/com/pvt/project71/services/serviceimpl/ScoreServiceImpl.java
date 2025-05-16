@@ -13,6 +13,7 @@ import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.UserService;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;

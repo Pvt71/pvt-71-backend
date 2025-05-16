@@ -13,6 +13,11 @@ import java.util.List;
 public interface ScoreRepository extends CrudRepository<ScoreEntity, ScoreId> {
 
       List<ScoreEntity> findAllByScoreIdUserEmail(String email);
+      @Query("""
+    SELECT s FROM ScoreEntity s
+    WHERE s.scoreId.event.id = :eventId
+    ORDER BY s.score DESC
+""")
       List<ScoreEntity> findAllByScoreIdEventId(int eventId);
 
 }

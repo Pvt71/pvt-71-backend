@@ -90,6 +90,19 @@ public class ScoreController {
         List<ScoreDto> scores = scoreOpt.get().stream().map(scoreMapper::mapTo).toList();
         return new ResponseEntity<>(scores,HttpStatus.OK);
     }
+    @GetMapping("/scoreboard/mySchool")
+    public ResponseEntity<List<ScoreDto>> getAllScoresForSchool(@AuthenticationPrincipal Jwt userToken) {
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        List<ScoreEntity> scoreEntities = scoreService.findAllByEvent(eventService.getDefaultEvent(user.get().getSchool())
+                .getId()).get();
+        List<ScoreDto> scores = scoreEntities.stream().map(scoreMapper::mapTo).toList();
+        return new ResponseEntity<>(scores, HttpStatus.OK);
+    }
 
 
 }

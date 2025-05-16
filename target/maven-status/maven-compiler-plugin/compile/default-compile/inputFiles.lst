@@ -10,6 +10,7 @@ C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\repositories\Chal
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\mappers\mapperimpl\ChallengeAttemptMapper.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\ChallengeAttemptService.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\EventService.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\controllers\WellKnownForwardController.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\TimeStamps.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\UserService.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\entities\ChallengeEntity.java
@@ -26,6 +27,7 @@ C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\config\MapperConf
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\JwtService.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\mappers\mapperimpl\ChallengeMapper.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\enums\ProofType.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\config\WebConfig.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\mappers\mapperimpl\ScoreMapper.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\serviceimpl\UserServiceImpl.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\FileStorageService.java
