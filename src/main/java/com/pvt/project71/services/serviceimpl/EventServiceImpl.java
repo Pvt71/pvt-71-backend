@@ -48,6 +48,8 @@ public class EventServiceImpl implements EventService {
             eventEntity.getDates().setUpdatedAt(eventEntity.getDates().getCreatedAt());
         }if (eventEntity.getDates().getStartsAt() == null) {
             eventEntity.getDates().setStartsAt(eventEntity.getDates().getCreatedAt());
+        } if (eventEntity.getParticipants() == null) {
+            eventEntity.setParticipants(0);
         }
 
         if (!userService.isAnAdmin(doneBy, eventEntity)) {
@@ -112,7 +114,7 @@ public class EventServiceImpl implements EventService {
         if (defaultEvent.isEmpty()) {
             return eventRepository.save(EventEntity.builder().name(school).challenges(new ArrayList<>())
                     .dates(TimeStamps.builder().startsAt(LocalDateTime.now()).createdAt(LocalDateTime.now())
-                            .updatedAt(LocalDateTime.now()).build()).isDefault(true).scores(new ArrayList<>()).school(school).build());
+                            .updatedAt(LocalDateTime.now()).build()).isDefault(true).participants(0).scores(new ArrayList<>()).school(school).build());
         }
         return defaultEvent.get();
     }
