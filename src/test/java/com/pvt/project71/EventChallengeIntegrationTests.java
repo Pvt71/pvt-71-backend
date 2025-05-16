@@ -122,7 +122,7 @@ public class EventChallengeIntegrationTests {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         String eventJson = objectMapper.writeValueAsString(testEvent);
         UserEntity user = fixAndSaveUser();
-        userService.makeAdmin(user, testEvent);
+        user.getEvents().add(testEvent);
         testEvent.getAdminUsers().add(user);
         testEvent = eventService.save(testEvent, user);
 
@@ -138,7 +138,8 @@ public class EventChallengeIntegrationTests {
     public void testAddingChallengeToCustomEventAndRetrievingItViaEvent() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
-        userService.makeAdmin(user, testEvent);
+        user = userService.loadTheLazy(user);
+        user.getEvents().add(testEvent);
         testEvent.getAdminUsers().add(user);
         eventService.save(testEvent, user);
 
@@ -156,7 +157,8 @@ public class EventChallengeIntegrationTests {
     public void testAddingChallengeToCustomEventButWithANonAdminUserGives403() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
-        userService.makeAdmin(user, testEvent);
+        user = userService.loadTheLazy(user);
+        user.getEvents().add(testEvent);
         testEvent.getAdminUsers().add(user);
         eventService.save(testEvent, user);
 

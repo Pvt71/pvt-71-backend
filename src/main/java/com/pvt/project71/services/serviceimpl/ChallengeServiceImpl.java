@@ -6,6 +6,7 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.UserService;
 import org.modelmapper.internal.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,10 +32,12 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     private ChallengeRepository challengeRepository;
     private EventService eventService;
+    private UserService userService;
 
-    public ChallengeServiceImpl(ChallengeRepository challengeRepository, EventService eventService) {
+    public ChallengeServiceImpl(ChallengeRepository challengeRepository, EventService eventService, UserService userService) {
         this.challengeRepository = challengeRepository;
         this.eventService = eventService;
+        this.userService = userService;
     }
 
     /**
@@ -114,7 +117,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 //Får endast skaparn ändra på den
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can modify this challenge");
             }
-        } else if (!eventService.isAnAdmin(found.getEvent(), doneBy)) {
+        } else if (!userService.isAnAdmin(doneBy, found.getEvent())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not an admin");
         }
         challengeRepository.deleteById(id);
@@ -130,7 +133,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 //Får endast skaparn ändra på den
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can modify this challenge");
             }
-        } else if (!eventService.isAnAdmin(challengeEntity.getEvent(), doneBy)) {
+        } else if (!userService.isAnAdmin(doneBy, challengeEntity.getEvent())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not an admin");
         }
 

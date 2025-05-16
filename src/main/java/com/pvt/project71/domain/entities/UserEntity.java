@@ -3,6 +3,7 @@ package com.pvt.project71.domain.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.pvt.project71.domain.entities.score.ScoreEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,6 +48,9 @@ public class UserEntity {
     @JsonIgnore
     private List<ChallengeEntity> challenges;
 
+    @OneToMany(mappedBy = "scoreId.user", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    private List<ScoreEntity> scores;
 
     @Override
     public boolean equals(Object o) {

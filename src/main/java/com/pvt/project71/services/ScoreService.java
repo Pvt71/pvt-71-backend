@@ -17,7 +17,6 @@ import java.util.Optional;
 public interface ScoreService {
 
       ScoreEntity create(ScoreEntity scoreEntity);
-      Optional<ScoreEntity> create(ScoreDto scoreDto);
       Optional<ScoreEntity> findOne(ScoreId scoreId);
 
       Optional<List<ScoreEntity>> findAllByUser(UserEntity userEntity);

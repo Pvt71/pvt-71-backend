@@ -129,7 +129,7 @@ public class EventTests {
         // Assert that the response contains a list of events
         EventEntity testEventA = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
-        userService.makeAdmin(user, testEventA);
+        user.getEvents().add(testEventA);
         testEventA.getAdminUsers().add(user);
         testEventA = eventService.save(testEventA, user);
 
@@ -169,7 +169,7 @@ public class EventTests {
         UserEntity user = fixAndSaveUser();
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         testEvent.getAdminUsers().add(user);
-        userService.makeAdmin(user, testEvent);
+        user.getEvents().add(testEvent);
         EventEntity saved = eventService.save(testEvent, user);
 
         mockMvc.perform(
@@ -202,7 +202,7 @@ public class EventTests {
         EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
         testEventEntity.getAdminUsers().add(user);
-        userService.makeAdmin(user, testEventEntity);
+        user.getEvents().add(testEventEntity);
         EventEntity savedEvent = eventService.save(testEventEntity, user);
 
         EventDto testEventDto = TestDataUtil.createTestEventDtoA();
@@ -222,7 +222,7 @@ public class EventTests {
         EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
         testEventEntity.getAdminUsers().add(user);
-        userService.makeAdmin(user, testEventEntity);
+        user.getEvents().add(testEventEntity);
         EventEntity savedEvent = eventService.save(testEventEntity, user);
 
         EventDto testEventDto = TestDataUtil.createTestEventDtoA();
@@ -249,7 +249,7 @@ public class EventTests {
         EventEntity testProjectA = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
         testProjectA.getAdminUsers().add(user);
-        userService.makeAdmin(user, testProjectA);
+        user.getEvents().add(testProjectA);
         EventEntity savedTestEvent = eventService.save(testProjectA, user);
 
         //EventDto eventDto = TestDataUtil.createTestEventDtoA(TestDataUtil.createTestUserEntityA());
@@ -270,7 +270,7 @@ public class EventTests {
         EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
         testEventEntityA.getAdminUsers().add(user);
-        userService.makeAdmin(user, testEventEntityA);
+        user.getEvents().add(testEventEntityA);
         EventEntity savedTestEvent = eventService.save(testEventEntityA, user);
 
 
@@ -297,7 +297,8 @@ public class EventTests {
         EventEntity testEventEntityA = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
         testEventEntityA.getAdminUsers().add(user);
-        userService.makeAdmin(user, testEventEntityA);
+        user = userService.loadTheLazy(user);
+        user.getEvents().add(testEventEntityA);
         EventEntity savedTestEvent = eventService.save(testEventEntityA, user);
 
         mockMvc.perform(
@@ -322,7 +323,7 @@ public class EventTests {
         EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
         testEventEntity.getAdminUsers().add(user);
-        userService.makeAdmin(user, testEventEntity);
+        user.getEvents().add(testEventEntity);
         EventEntity savedEvent = eventService.save(testEventEntity, user);
 
         UserEntity userB = TestDataUtil.createValidTestUserEntity();
@@ -342,13 +343,14 @@ public class EventTests {
         EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
         testEventEntity.getAdminUsers().add(user);
-        userService.makeAdmin(user, testEventEntity);
+        user.getEvents().add(testEventEntity);
         EventEntity savedEvent = eventService.save(testEventEntity, user);
 
         UserEntity userB = TestDataUtil.createValidTestUserEntity();
         userB.setEmail("test2@test.com");
         userB = userService.save(userB);
-        savedEvent = eventService.addAdmin(savedEvent, userB, user);
+        userB = userService.makeAdmin(userB, savedEvent, user);
+        savedEvent = eventService.findOne(savedEvent.getId()).get();
         mockMvc.perform(MockMvcRequestBuilders.patch("/events/" + savedEvent.getId() + "/admins/leave")
                         .with(jwt().jwt(getUserToken())))
                 .andExpect(status().isOk());
@@ -363,7 +365,7 @@ public class EventTests {
         EventEntity testEventEntity = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
         testEventEntity.getAdminUsers().add(user);
-        userService.makeAdmin(user, testEventEntity);
+        user.getEvents().add(testEventEntity);
         EventEntity savedEvent = eventService.save(testEventEntity, user);
         mockMvc.perform(MockMvcRequestBuilders.delete("/events/" + savedEvent.getId())
                 .with(jwt().jwt(getUserToken())));

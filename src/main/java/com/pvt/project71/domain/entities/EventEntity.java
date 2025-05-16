@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pvt.project71.domain.TimeStamps;
 
+import com.pvt.project71.domain.entities.score.ScoreEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -53,6 +54,10 @@ public class EventEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "event")
     @JsonIgnore //ignorerar listan när Entity görs till Json
     private List<ChallengeEntity> challenges;
+
+    @OneToMany(mappedBy = "scoreId.event", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<ScoreEntity> scores;
 
     @Override
     public boolean equals(Object o) {

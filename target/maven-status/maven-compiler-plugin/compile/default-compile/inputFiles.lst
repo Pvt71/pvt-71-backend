@@ -4,6 +4,7 @@ C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\entities\s
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\mappers\Mapper.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\repositories\ScoreRepository.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\entities\EventEntity.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\FriendshipService.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\controllers\ChallengeController.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\repositories\ChallengeRepository.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\mappers\mapperimpl\ChallengeAttemptMapper.java
@@ -12,7 +13,10 @@ C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\EventSer
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\TimeStamps.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\UserService.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\entities\ChallengeEntity.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\controllers\FriendshipController.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\repositories\FriendshipRepository.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\handlers\OAuthSuccessHandler.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\mappers\mapperimpl\FriendshipMapper.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\entities\ChallengeAttemptId.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\serviceimpl\ChallengeAttemptServiceImpl.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\serviceimpl\ScoreServiceImpl.java
@@ -38,13 +42,17 @@ C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\repositories\Chal
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\config\SecurityConfig.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\mappers\mapperimpl\EventMapper.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\ScoreService.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\serviceimpl\FriendshipServiceImpl.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\controllers\ScoreController.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\repositories\UserRepository.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\entities\FriendshipId.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\entities\UserEntity.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\LoginService.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\Project71Application.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\entities\FriendshipEntity.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\controllers\FileUploadController.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\controllers\EventController.java
+C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\domain\dto\FriendshipDto.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\MainController.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\services\serviceimpl\ChallengeServiceImpl.java
 C:\Users\Daniel\pvt-71-backend\src\main\java\com\pvt\project71\util\ImageValidator.java

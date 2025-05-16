@@ -7,6 +7,7 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,7 @@ public class EventServiceImpl implements EventService {
     private static final Duration MIN_DURATION_HOURS = Duration.ofHours(24);
     private static final Duration MAX_DURATION_DAYS = Duration.ofDays(365);
 
-    public EventServiceImpl (EventRepository eventRepository, UserService userService) {
+    public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService) {
         this.eventRepository = eventRepository;
         this.userService = userService;
     }
@@ -40,14 +41,16 @@ public class EventServiceImpl implements EventService {
     public EventEntity save(EventEntity eventEntity, UserEntity doneBy) {
         if (eventEntity.getChallenges() == null) {
             eventEntity.setChallenges(new ArrayList<>());
-        } if (eventEntity.getDates().getCreatedAt() == null) {
+        } if (eventEntity.getScores() == null) {
+            eventEntity.setScores(new ArrayList<>());
+        }if (eventEntity.getDates().getCreatedAt() == null) {
             eventEntity.getDates().setCreatedAt(LocalDateTime.now());
             eventEntity.getDates().setUpdatedAt(eventEntity.getDates().getCreatedAt());
         }if (eventEntity.getDates().getStartsAt() == null) {
             eventEntity.getDates().setStartsAt(eventEntity.getDates().getCreatedAt());
         }
 
-        if (!isAnAdmin(eventEntity, doneBy)) {
+        if (!userService.isAnAdmin(doneBy, eventEntity)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not an admin");
         }
 
@@ -96,7 +99,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void delete(Integer id, UserEntity doneBy) {
-        if (!isAnAdmin(eventRepository.findById(id).get(), doneBy)) {
+        if (!userService.isAnAdmin(doneBy, eventRepository.findById(id).get())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not an Admin");
         }
         eventRepository.deleteById(id);
@@ -109,7 +112,7 @@ public class EventServiceImpl implements EventService {
         if (defaultEvent.isEmpty()) {
             return eventRepository.save(EventEntity.builder().name(school).challenges(new ArrayList<>())
                     .dates(TimeStamps.builder().startsAt(LocalDateTime.now()).createdAt(LocalDateTime.now())
-                            .updatedAt(LocalDateTime.now()).build()).isDefault(true).school(school).build());
+                            .updatedAt(LocalDateTime.now()).build()).isDefault(true).scores(new ArrayList<>()).school(school).build());
         }
         return defaultEvent.get();
     }
@@ -122,30 +125,8 @@ public class EventServiceImpl implements EventService {
     public EventEntity loadTheLazy(EventEntity toLoad) {
         EventEntity eventEntity = eventRepository.findById(toLoad.getId()).get();
         eventEntity.getChallenges().isEmpty();
+        eventEntity.getScores().isEmpty();
         return eventEntity;
-    }
-
-    @Override
-    public EventEntity addAdmin(EventEntity eventEntity, UserEntity toAdd, UserEntity userAddingThem) {
-        if (!isAnAdmin(eventEntity, userAddingThem)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can add new admins");
-        }
-        if (eventEntity.getAdminUsers().size() > 9) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Max Admins reached");
-        }
-        userService.makeAdmin(toAdd, eventEntity);
-        eventEntity.getAdminUsers().add(toAdd);
-        return eventRepository.save(eventEntity);
-    }
-
-    @Override
-    public EventEntity removeAdmin(EventEntity eventEntity, UserEntity toRemove) {
-        if (!isAnAdmin(eventEntity, toRemove)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not an admin"); //Tanken är att bara en själv kallar remove
-        }
-        toRemove = userService.removeAdmin(toRemove, eventEntity);
-        eventEntity.getAdminUsers().remove(toRemove);
-        return eventRepository.save(eventEntity);
     }
 
     private boolean checkValidDate(EventEntity eventEntity) {
@@ -159,12 +140,7 @@ public class EventServiceImpl implements EventService {
                 && !eventEntity.getDates().getStartsAt().plus(MIN_DURATION_HOURS).isAfter(eventEntity.getDates().getEndsAt());
     }
 
-    public boolean isAnAdmin(EventEntity eventEntity, UserEntity userEntity) {
-        //Kollar om eventEntity har userEntity som admin så länge eventId inte är 1 för då är alla tillåtna att lägga till
-        //Vi behöver inte tänka på om att alla har admin för default event för man får inte updatera något, bara lägga till och jobba på sina
-        //egna challenges
-        return (eventEntity.getId() != null && eventEntity.isDefault()) || eventEntity.getAdminUsers().contains(userEntity);
-    }
+
 
     @Override
     public List<EventEntity> findAllBySchool(String school) {

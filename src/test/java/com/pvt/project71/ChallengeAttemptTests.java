@@ -252,7 +252,8 @@ public class ChallengeAttemptTests {
         UserEntity user = fixAndSaveUser();
 
         EventEntity eventEntity = TestDataUtil.createTestEventEntityA();
-        userService.makeAdmin(user, eventEntity);
+        user = userService.loadTheLazy(user);
+        user.getEvents().add(eventEntity);
         eventEntity.getAdminUsers().add(user);
         eventEntity = eventService.save(eventEntity, user);
 
@@ -269,7 +270,8 @@ public class ChallengeAttemptTests {
         UserEntity userB = TestDataUtil.createValidTestUserEntity();
         userB.setEmail("test2@test.com");
         userB = userService.save(userB);
-        eventEntity = eventService.addAdmin(eventEntity, userB, user);
+        userB = userService.makeAdmin(userB, eventEntity, user);
+        eventEntity = eventService.findOne(eventEntity.getId()).get();
 
         ChallengeEntity challengeEntityC = TestDataUtil.createChallengeEnitityB();
         challengeEntityC.setName("TESTC");
@@ -298,14 +300,16 @@ public class ChallengeAttemptTests {
     public void testAcceptingAcceptingYourOwnChallengeAttemptInAnEventYouAreAdminInGives403() throws Exception {
         UserEntity user = fixAndSaveUser();
         EventEntity eventEntity = TestDataUtil.createTestEventEntityA();
-        userService.makeAdmin(user, eventEntity);
+        user = userService.loadTheLazy(user);
+        user.getEvents().add(eventEntity);
         eventEntity.getAdminUsers().add(user);
         eventEntity = eventService.save(eventEntity, user);
 
         UserEntity userB = TestDataUtil.createValidTestUserEntity();
         userB.setEmail("test2@test.com");
         userB = userService.save(userB);
-        eventEntity = eventService.addAdmin(eventEntity, userB, user);
+        userB = userService.makeAdmin(userB, eventEntity, user);
+        eventEntity = eventService.findOne(eventEntity.getId()).get();
 
         ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
         challengeEntity.setCreator(user);

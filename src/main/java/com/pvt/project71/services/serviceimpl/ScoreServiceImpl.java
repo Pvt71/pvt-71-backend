@@ -8,10 +8,14 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.domain.entities.score.ScoreId;
 import com.pvt.project71.repositories.ScoreRepository;
+import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.UserService;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,34 +25,33 @@ public class ScoreServiceImpl implements ScoreService {
     private final ScoreRepository scoreRepository;
     private final UserService userService;
     private final EventService eventService;
+    private UserRepository userRepository;
 
-    public ScoreServiceImpl(ScoreRepository scoreRepository, UserService userService, EventService eventService) {
+    public ScoreServiceImpl(ScoreRepository scoreRepository, @Lazy UserService userService, EventService eventService, UserRepository userRepository) {
         this.scoreRepository = scoreRepository;
         this.userService = userService;
         this.eventService = eventService;
+        this.userRepository = userRepository;
     }
 
 
     @Override
     public ScoreEntity create(ScoreEntity scoreEntity) {
-        return scoreRepository.save(scoreEntity);
+        UserEntity user = userService.loadTheLazy(scoreEntity.getScoreId().getUser());
+        EventEntity event = eventService.loadTheLazy(scoreEntity.getScoreId().getEvent());
+        scoreEntity = scoreRepository.save(scoreEntity);
+        user.getScores().add(scoreEntity);
+        event.getScores().add(scoreEntity);
+        if (event.isDefault()) {
+            eventService.save(event, null);
+        } else {
+            eventService.save(event, event.getAdminUsers().get(0));
+        }
+        userRepository.save(user);
+        return scoreEntity;
     }
 
-    @Override
-    public Optional<ScoreEntity> create(ScoreDto scoreDto) {
-        Optional<UserEntity> userOpt = userService.findOne(scoreDto.getUserDto().getEmail() );
-        Optional<EventEntity> eventOpt = eventService.findOne(scoreDto.getEventId());
-        //Check if user and event are valid
-        if (userOpt.isEmpty() || eventOpt.isEmpty())
-            return Optional.empty();
-        ScoreId scoreId = ScoreId.builder().
-                user(userOpt.get())
-                .event(eventOpt.get()).build();
-        ScoreEntity scoreEntity = ScoreEntity.builder()
-                .scoreId(scoreId)
-                .score(scoreDto.getScore()).build();
-        return Optional.of(scoreRepository.save(scoreEntity));
-    }
+
 
     @Override
     public Optional<ScoreEntity> findOne(ScoreId scoreId) {

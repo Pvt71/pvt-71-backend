@@ -4,11 +4,16 @@ import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.score.ScoreEntity;
+import com.pvt.project71.domain.entities.score.ScoreId;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.repositories.FriendshipRepository;
 import com.pvt.project71.repositories.UserRepository;
+import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,11 +37,17 @@ public class UserServiceImpl implements UserService {
 
     private FriendshipRepository friendshipRepository;
 
-    public UserServiceImpl(UserRepository userRepository, ChallengeRepository challengeRepository, EventRepository eventRepository, FriendshipRepository friendshipRepository) {
+    private ScoreService scoreService;
+
+    private EventService eventService;
+
+    public UserServiceImpl(UserRepository userRepository, ChallengeRepository challengeRepository, EventRepository eventRepository, FriendshipRepository friendshipRepository, ScoreService scoreService, EventService eventService) {
         this.userRepository = userRepository;
         this.challengeRepository = challengeRepository;
         this.eventRepository = eventRepository;
         this.friendshipRepository = friendshipRepository;
+        this.scoreService = scoreService;
+        this.eventService = eventService;
     }
 
     //CRUD - Create & Update (full)
@@ -51,9 +62,18 @@ public class UserServiceImpl implements UserService {
 
         if (user.getEvents() == null) {
             user.setEvents(new ArrayList<>());
+        } if (user.getChallenges() == null) {
+            user.setChallenges(new ArrayList<>());
+        } if (user.getScores() == null) {
+            user.setScores(new ArrayList<>());
         }
 
-        return userRepository.save(user);
+        user = userRepository.save(user);
+        EventEntity usersDefault = eventService.getDefaultEvent(user.getSchool());
+        try {
+            scoreService.create(ScoreEntity.builder().scoreId(new ScoreId(user, usersDefault)).build());
+        } catch (ResponseStatusException responseStatusException) {}
+        return user;
     }
 
     //CRUD - Read (many)
@@ -139,27 +159,73 @@ public class UserServiceImpl implements UserService {
         UserEntity toReturn = userRepository.findById(user.getEmail()).get();
         toReturn.getChallenges().isEmpty();
         toReturn.getEvents().isEmpty();
+        toReturn.getScores().isEmpty();
         return toReturn;
     }
 
     @Override
-    @Transactional
-    public UserEntity makeAdmin(UserEntity user, EventEntity event) {
-        user = loadTheLazy(user);
-        if (!user.getEvents().contains(event)) {
-            user.getEvents().add(event);
-            return userRepository.save(user);
-        }
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "User is already Admin");
+    public boolean isAnAdmin(UserEntity userEntity, EventEntity eventEntity) {
+        return (eventEntity.getId() != null && eventEntity.isDefault()) || eventEntity.getAdminUsers().contains(userEntity);
     }
 
     @Override
-    public UserEntity removeAdmin(UserEntity user, EventEntity event) {
-        user = loadTheLazy(user);
-        if (user.getEvents().contains(event)) {
-            user.getEvents().remove(event);
-            return userRepository.save(user);
+    @Transactional
+    public UserEntity makeAdmin(UserEntity toAdd, EventEntity event, UserEntity userAddingThem) {
+        if (!isAnAdmin(userAddingThem, event)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can add new admins");
+        } if (event.getAdminUsers().size() > 9) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Max Admins reached");
+        } if (event.getAdminUsers().contains(toAdd)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User is already Admin");
         }
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "User was never an Admin");
+        toAdd = loadTheLazy(toAdd);
+        if (!toAdd.getEvents().contains(event)) {
+            toAdd.getEvents().add(event);
+            toAdd = userRepository.save(toAdd);
+        }
+        event.getAdminUsers().add(toAdd);
+        eventRepository.save(event);
+        return toAdd;
+    }
+//    @Override
+//    public EventEntity removeAdmin(EventEntity eventEntity, UserEntity toRemove) {
+//        if (!isAnAdmin(eventEntity, toRemove)) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not an admin"); //Tanken är att bara en själv kallar remove
+//        }
+//        toRemove = userService.removeAdmin(toRemove, eventEntity);
+//        eventEntity.getAdminUsers().remove(toRemove);
+//        return eventRepository.save(eventEntity);
+//    }
+
+    @Override
+    public UserEntity removeAdmin(UserEntity toRemove, EventEntity event) {
+        toRemove = loadTheLazy(toRemove);
+        if (!isAnAdmin(toRemove, event)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not an admin"); //Tanken är att bara en själv kallar remove
+        }
+        if (toRemove.getEvents().contains(event)) {
+            toRemove.getEvents().remove(event);
+            toRemove = userRepository.save(toRemove);
+        } else {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User was never an Admin");
+        }
+        event.getAdminUsers().remove(toRemove);
+        eventRepository.save(event);
+        return toRemove;
     }
 }
+//    @Override
+//    public EventEntity addAdmin(EventEntity eventEntity, UserEntity toAdd, UserEntity userAddingThem) {
+//        if (!isAnAdmin(eventEntity, userAddingThem)) {
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can add new admins");
+//        }
+//        if (eventEntity.getAdminUsers().size() > 9) {
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Max Admins reached");
+//        }
+//        userService.makeAdmin(toAdd, eventEntity);
+//        eventEntity.getAdminUsers().add(toAdd);
+//        return eventRepository.save(eventEntity);
+//    }
+
+
+

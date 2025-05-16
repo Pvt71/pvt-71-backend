@@ -117,7 +117,9 @@ public class TimeStampTests {
     public void testCreatingChallengeToEventThatEndsAfterTheEventShouldGive400() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         UserEntity user = fixAndSaveUser();
-        userService.makeAdmin(user, testEvent);
+        user = userService.loadTheLazy(user);
+
+        user.getEvents().add(testEvent);
         testEvent.getAdminUsers().add(user);
 
         testEvent = eventService.save(testEvent, user);
@@ -146,7 +148,9 @@ public class TimeStampTests {
         testEvent.getDates().setStartsAt(LocalDateTime.now().plusDays(30));
 
         UserEntity user = fixAndSaveUser();
-        userService.makeAdmin(user, testEvent);
+        user = userService.loadTheLazy(user);
+
+        user.getEvents().add(testEvent);
         testEvent.getAdminUsers().add(user);
 
         String eventJson = objectMapper.writeValueAsString(testEvent);
@@ -168,7 +172,9 @@ public class TimeStampTests {
         testEvent.getDates().setStartsAt(LocalDateTime.now().plusDays(30));
 
         UserEntity user = fixAndSaveUser();
-        userService.makeAdmin(user, testEvent);
+        user = userService.loadTheLazy(user);
+
+        user.getEvents().add(testEvent);
         testEvent.getAdminUsers().add(user);
 
 
@@ -190,7 +196,9 @@ public class TimeStampTests {
         testEvent.getDates().setStartsAt(LocalDateTime.now().plusDays(30));
 
         UserEntity user = fixAndSaveUser();
-        userService.makeAdmin(user, testEvent);
+        user = userService.loadTheLazy(user);
+
+        user.getEvents().add(testEvent);
         testEvent.getAdminUsers().add(user);
 
         String eventJson = objectMapper.writeValueAsString(testEvent);
@@ -216,7 +224,8 @@ public class TimeStampTests {
         testEvent.getDates().setStartsAt(LocalDateTime.now().plusDays(30));
 
         UserEntity user = fixAndSaveUser();
-        userService.makeAdmin(user, testEvent);
+        user = userService.loadTheLazy(user);
+        user.getEvents().add(testEvent);
         testEvent.getAdminUsers().add(user);
 
         testEvent = eventService.save(testEvent, user);
@@ -238,7 +247,8 @@ public class TimeStampTests {
         testEvent.getDates().setStartsAt(LocalDateTime.now().minusDays(1));
 
         UserEntity user = fixAndSaveUser();
-        userService.makeAdmin(user, testEvent);
+        user = userService.loadTheLazy(user);
+        user.getEvents().add(testEvent);
         testEvent.getAdminUsers().add(user);
 
         String eventJson = objectMapper.writeValueAsString(testEvent);

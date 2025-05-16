@@ -26,13 +26,6 @@ public interface EventService {
     EventEntity getDefaultEvent(String school);
 
     EventEntity loadTheLazy(EventEntity toLoad);
-
-    EventEntity addAdmin(EventEntity eventEntity, UserEntity toAdd, UserEntity userAddingThem);
-
-    EventEntity removeAdmin(EventEntity eventEntity, UserEntity toRemove);
-
-    boolean isAnAdmin(EventEntity eventEntity, UserEntity userEntity);
-
     List<EventEntity> findAllBySchool(String school);
 
 }

@@ -86,7 +86,7 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
             if (!challengeAttemptEntity.getChallenge().getCreator().equals(acceptedBy)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the challenge creator can accept this attempt");
             }
-        } else if (!eventService.isAnAdmin(challengeAttemptEntity.getChallenge().getEvent(), acceptedBy)) {
+        } else if (!userService.isAnAdmin(acceptedBy, challengeAttemptEntity.getChallenge().getEvent() )) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can accept this attempt");
         } if (challengeAttemptEntity.getStatus() == Status.ACCEPTED) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Attempt is already accepted");
@@ -142,7 +142,6 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
     private ChallengeAttemptEntity addChallengeAttemptToChallenge(ChallengeAttemptEntity challengeAttemptEntity, ChallengeEntity challengeEntity ) {
         challengeEntity.getAttempts().add(challengeAttemptEntity);
         challengeAttemptEntity.setStatus(Status.PENDING);
-        challengeService.save(challengeEntity, challengeEntity.getCreator());
         challengeService.save(challengeEntity, challengeEntity.getCreator());
         return challengeAttemptEntity;
     }

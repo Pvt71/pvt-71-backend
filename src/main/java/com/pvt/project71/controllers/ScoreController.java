@@ -2,6 +2,7 @@ package com.pvt.project71.controllers;
 
 
 import com.pvt.project71.domain.dto.ScoreDto;
+import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.domain.entities.score.ScoreId;
 import com.pvt.project71.mappers.mapperimpl.ScoreMapper;
@@ -12,8 +13,11 @@ import com.pvt.project71.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,13 +42,23 @@ public class ScoreController {
     //TODO: Add functionality to fetch by event and remove by event after discussing with group
 
 
-    @PostMapping("/scores")
-    public ResponseEntity<ScoreDto> createScore(@Valid  @RequestBody ScoreDto scoreDto) {
-        Optional<ScoreEntity> scoredOpt = scoreService.create(scoreDto);
-        //If e-mail does not belong to an user or if there is no event with provided event id
-        if (scoredOpt.isEmpty())
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        return  new ResponseEntity<>(scoreMapper.mapTo(scoredOpt.get()), HttpStatus.CREATED);
+    @PostMapping("/events/{eventId}/join")
+    public ResponseEntity<ScoreDto> createScore(@PathVariable("eventId") Integer eventId, @AuthenticationPrincipal Jwt userToken) {
+        if (!jwtService.isTokenValid(userToken)) {
+            return  new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return  new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } if (!eventService.isExists(eventId)) {
+            return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        ScoreId id = new ScoreId(user.get(), eventService.findOne(eventId).get());
+        if (scoreService.findOne(id).isPresent()) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        ScoreEntity scoredOpt = scoreService.create(ScoreEntity.builder().scoreId(id).build());
+        return  new ResponseEntity<>(scoreMapper.mapTo(scoredOpt), HttpStatus.CREATED);
     }
     //NOTE: The Dto diagram shows that there is no need for a read many
     //as (user,event) maps to one score.
@@ -77,16 +91,5 @@ public class ScoreController {
         return new ResponseEntity<>(scores,HttpStatus.OK);
     }
 
-    //delete provided email and event
-    @DeleteMapping("/scores/{email}/{eventId}")
-    public ResponseEntity deleteScore(@NotBlank @Email @PathVariable String email, @PathVariable int eventId) {
-        scoreService.delete(email,eventId);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
-    }
-    @DeleteMapping("/scores")
-    public ResponseEntity deleteScore(@Valid @RequestBody ScoreDto scoreDto) {
-        scoreService.delete(scoreMapper.mapFrom(scoreDto));
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
-    }
 
 }

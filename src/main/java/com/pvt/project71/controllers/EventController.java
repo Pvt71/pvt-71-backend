@@ -77,11 +77,13 @@ public class EventController {
         if (creator.isEmpty()) {
             return new ResponseEntity<EventDto>(HttpStatus.UNAUTHORIZED);
         }
-        userService.makeAdmin(creator.get(), eventEntity);
+        UserEntity user = creator.get();
+        user = userService.loadTheLazy(user);
+        user.getEvents().add(eventEntity);
         eventEntity.setAdminUsers(new ArrayList<>());
-        eventEntity.getAdminUsers().add(creator.get());
-        eventEntity.setSchool(creator.get().getSchool());
-        EventEntity savedEvent = eventService.save(eventEntity, creator.get());
+        eventEntity.getAdminUsers().add(user);
+        eventEntity.setSchool(user.getSchool());
+        EventEntity savedEvent = eventService.save(eventEntity, user);
         return new ResponseEntity<>(eventMapper.mapTo(savedEvent), HttpStatus.CREATED);
     }
 
@@ -303,7 +305,8 @@ public class EventController {
         if (user.isEmpty()) {
             return new ResponseEntity<EventDto>(HttpStatus.UNAUTHORIZED);
         }
-        eventEntity = eventService.addAdmin(eventEntity, toAdd.get(), user.get());
+        userService.makeAdmin(toAdd.get(), eventEntity, user.get());
+        eventEntity = eventService.findOne(eventEntity.getId()).get();
         return new ResponseEntity<>(eventMapper.mapTo(eventEntity), HttpStatus.OK);
     }
 
@@ -333,7 +336,8 @@ public class EventController {
         if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        eventEntity = eventService.removeAdmin(eventEntity, user.get());
+        userService.removeAdmin( user.get(), eventEntity);
+        eventEntity = eventService.findOne(eventEntity.getId()).get();
         return new ResponseEntity<>(eventMapper.mapTo(eventEntity), HttpStatus.OK);
     }
 
