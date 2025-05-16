@@ -122,6 +122,7 @@ public class EventChallengeIntegrationTests {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         String eventJson = objectMapper.writeValueAsString(testEvent);
         UserEntity user = fixAndSaveUser();
+        user = userService.loadTheLazy(user);
         user.getEvents().add(testEvent);
         testEvent.getAdminUsers().add(user);
         testEvent = eventService.save(testEvent, user);
