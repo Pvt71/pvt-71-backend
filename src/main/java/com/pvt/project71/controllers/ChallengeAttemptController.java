@@ -53,6 +53,16 @@ public class ChallengeAttemptController {
                 .build();
         return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.submit(challengeAttemptEntity)), HttpStatus.CREATED);
     }
+    @PostMapping("/challenges/{id}/submit")
+    public ResponseEntity<ChallengeAttemptDto> submitChallengeAttemptWithoutContet(@PathVariable("id") Integer id
+            , @AuthenticationPrincipal Jwt userToken) {
+        UserEntity user = checkAndRetrieveUserFromToken(userToken);
+
+        ChallengeAttemptEntity challengeAttemptEntity = ChallengeAttemptEntity.builder()
+                .id(new ChallengeAttemptId(id, user.getEmail())).submittedAt(LocalDateTime.now()).content("")
+                .build();
+        return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.submit(challengeAttemptEntity)), HttpStatus.CREATED);
+    }
 
     @PostMapping("/challenges/{id}/sync/{content}")
     public ResponseEntity<ChallengeAttemptDto> syncWithPairContent(@PathVariable("id") Integer id, @PathVariable("content") String content

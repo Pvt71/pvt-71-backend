@@ -239,7 +239,7 @@ public class ChallengeAttemptTests {
         UserEntity user = fixAndSaveUser();
         challengeEntity.setCreator(user);
         challengeEntity = challengeService.save(challengeEntity, user);
-        mockMvc.perform(post("/challenges/" + challengeEntity.getId() + "/submit/" + CONTENT)
+        mockMvc.perform(post("/challenges/" + challengeEntity.getId() + "/submit")
                 .with(jwt().jwt(getOtherUserToken())));
         mockMvc.perform(patch("/challenges/" + challengeEntity.getId() + "/accept/"+ getOtherUserToken().getSubject())
                 .with(jwt().jwt(getUserToken())));
