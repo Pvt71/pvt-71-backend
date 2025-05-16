@@ -90,7 +90,7 @@ public class ScoreController {
         List<ScoreDto> scores = scoreOpt.get().stream().map(scoreMapper::mapTo).toList();
         return new ResponseEntity<>(scores,HttpStatus.OK);
     }
-    @GetMapping("/scoreboard/mySchool")
+    @GetMapping("/scores/mySchool")
     public ResponseEntity<List<ScoreDto>> getAllScoresForSchool(@AuthenticationPrincipal Jwt userToken) {
         if (!jwtService.isTokenValid(userToken)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
