@@ -43,6 +43,7 @@ public class ScoreServiceImpl implements ScoreService {
         scoreEntity = scoreRepository.save(scoreEntity);
         user.getScores().add(scoreEntity);
         event.getScores().add(scoreEntity);
+        event.setParticipants(event.getParticipants() + 1);
         if (event.isDefault()) {
             eventService.save(event, null);
         } else {

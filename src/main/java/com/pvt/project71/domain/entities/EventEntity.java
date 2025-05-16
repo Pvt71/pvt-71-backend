@@ -33,6 +33,8 @@ public class EventEntity {
 
     private String school;
 
+    private Integer participants;
+
     private boolean isDefault = false;
 
     @Lob

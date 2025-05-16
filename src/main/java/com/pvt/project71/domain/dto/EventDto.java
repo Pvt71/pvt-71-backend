@@ -21,6 +21,8 @@ public class EventDto {
 
     private String bannerUrl;
 
+    private Integer participants;
+
     private String description;
 
     private String school;

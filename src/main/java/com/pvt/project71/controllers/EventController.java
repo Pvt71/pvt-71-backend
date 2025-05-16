@@ -71,6 +71,7 @@ public class EventController {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         event.getDates().setCreatedAt(null);
+        event.setParticipants(0);
         EventEntity eventEntity = eventMapper.mapFrom(event);
 
         Optional<UserEntity> creator = userService.findOne(userToken.getSubject());
@@ -177,6 +178,7 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         EventEntity found = eventService.findOne(id).get();
+        eventDto.setParticipants(found.getParticipants());
         eventDto.setId(id);
         eventDto.setDates(found.getDates());
         eventDto.getDates().setUpdatedAt(LocalDateTime.now());
