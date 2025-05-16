@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -17,14 +18,27 @@ public class ChallengeAttemptEntity {
     @EmbeddedId
     ChallengeAttemptId id;
 
-    Status status;
+    private Status status;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    LocalDateTime submittedAt;
-    String content;
+    private LocalDateTime submittedAt;
+    private String content;
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("challengeId")
     @JoinColumn(name = "challenge_id", insertable=false, updatable=false)
-    ChallengeEntity challenge;
+    private ChallengeEntity challenge;
 
     private boolean isContentHidden;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChallengeAttemptEntity)) return false;
+        ChallengeAttemptEntity other = (ChallengeAttemptEntity) o;
+        return Objects.equals(other.id, id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Integer> {
@@ -18,10 +19,11 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
 
     List<ChallengeEntity> findByEventName(String eventName);
     @Query("""
-    SELECT c FROM ChallengeEntity c
+    SELECT c, ca FROM ChallengeEntity c
+    LEFT JOIN ChallengeAttemptEntity ca ON ca.challenge.id = c.id AND ca.id.userEmail = :userEmail
     WHERE c.event.school = :school
-      AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
+    AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
     ORDER BY c.dates.updatedAt DESC
 """)
-    List<ChallengeEntity> findAllByEventSchool(String school);
+    List<Object[]> findAllByEventSchool(String school, String userEmail);
 }

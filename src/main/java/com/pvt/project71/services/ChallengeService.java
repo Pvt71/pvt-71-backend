@@ -18,6 +18,6 @@ public interface ChallengeService {
 
     ChallengeEntity partialUpdate(Integer id, ChallengeEntity challengeEntity, UserEntity doneBy);
 
-    List<ChallengeEntity> getChallenges(String email, Integer eventId, String eventName);
+    List<ChallengeEntity> getChallenges(String email, Integer eventId, String eventName, UserEntity userWhoWantsThem);
 
 }

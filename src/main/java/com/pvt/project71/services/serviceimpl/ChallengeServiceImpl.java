@@ -1,8 +1,6 @@
 package com.pvt.project71.services.serviceimpl;
 
-import com.pvt.project71.domain.entities.ChallengeEntity;
-import com.pvt.project71.domain.entities.EventEntity;
-import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.*;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
@@ -57,7 +55,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 challengeEntity.getDates().setCreatedAt(LocalDateTime.now());
                 challengeEntity.getDates().setUpdatedAt(challengeEntity.getDates().getCreatedAt());
             }
-
+            challengeEntity.setStatus(null);
             if (challengeEntity.getDates().getStartsAt() == null) {
                 challengeEntity.getDates().setStartsAt(challengeEntity.getDates().getCreatedAt());
             } if (!checkValidDate(challengeEntity, defaultEvent)) {
@@ -147,18 +145,28 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public List<ChallengeEntity> getChallenges(String email, Integer eventId, String school) {
-        if (eventId != null && email != null) {
-            return challengeRepository.findByCreatorEmailAndEventId(email, eventId);
-        } else if (eventId != null) {
-            return challengeRepository.findChallengeEntitiesByEvent_Id(eventId);
-        } else if (email != null) {
-            return challengeRepository.findByCreatorEmail(email);
-        } else if (school != null) {
-            return challengeRepository.findAllByEventSchool(school);
-        }
+    public List<ChallengeEntity> getChallenges(String email, Integer eventId, String school, UserEntity userWhoWantsThem) {
         List<ChallengeEntity> toReturn = new ArrayList<>();
-        challengeRepository.findAll().forEach(toReturn::add);
+        List<Object[]> rows = new ArrayList<>();
+        if (eventId != null && email != null) {
+            toReturn = challengeRepository.findByCreatorEmailAndEventId(email, eventId);
+        } else if (eventId != null) {
+            toReturn = challengeRepository.findChallengeEntitiesByEvent_Id(eventId);
+        } else if (email != null) {
+            toReturn = challengeRepository.findByCreatorEmail(email);
+        } else if (school != null) {
+            rows = challengeRepository.findAllByEventSchool(school, userWhoWantsThem.getEmail());
+            for (Object[] row : rows) {
+                ChallengeEntity challenge = (ChallengeEntity) row[0];
+                ChallengeAttemptEntity attempt = (ChallengeAttemptEntity) row[1];
+                if (attempt != null) {
+                    challenge.setStatus(attempt.getStatus());
+                }
+                toReturn.add(challenge);
+            }
+        } else {
+            challengeRepository.findAll().forEach(toReturn::add);
+        }
         return toReturn;
     }
 

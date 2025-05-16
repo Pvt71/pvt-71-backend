@@ -3,6 +3,7 @@ package com.pvt.project71.domain.entities;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pvt.project71.domain.enums.ProofType;
 import com.pvt.project71.domain.TimeStamps;
+import com.pvt.project71.domain.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,7 +37,7 @@ public class ChallengeEntity {
     @JoinColumn(name = "creator_email", nullable = false)
     private UserEntity creator;
 
-    @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     List<ChallengeAttemptEntity> attempts;
 
 
@@ -44,4 +45,6 @@ public class ChallengeEntity {
     private String description;
     private ProofType proofType;
     private boolean isSocial;
+    private Status status;
+
 }

@@ -2,6 +2,7 @@ package com.pvt.project71.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pvt.project71.domain.enums.ProofType;
+import com.pvt.project71.domain.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,4 +33,6 @@ public class ChallengeDto {
     private ProofType proofType;
     private Integer maxCompletions;
     private boolean isSocial;
+
+    private Status status;
 }

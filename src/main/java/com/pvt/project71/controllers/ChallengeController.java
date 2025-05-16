@@ -250,7 +250,7 @@ public class ChallengeController {
         } if (school == null) {
             school = user.get().getSchool();
         }
-        List<ChallengeEntity> challenges = challengeService.getChallenges(email, eventId, school);
+        List<ChallengeEntity> challenges = challengeService.getChallenges(email, eventId, school, user.get());
         List<ChallengeDto> dtos = challenges.stream()
                 .map(challengeMapper::mapTo)
                 .collect(Collectors.toList());
