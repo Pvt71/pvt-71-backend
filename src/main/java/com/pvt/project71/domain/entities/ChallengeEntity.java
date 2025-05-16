@@ -43,5 +43,5 @@ public class ChallengeEntity {
     private Integer points;
     private String description;
     private ProofType proofType;
-
+    private boolean isSocial;
 }

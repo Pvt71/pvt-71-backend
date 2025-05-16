@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle.all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.pvt_71_frontend",
+      "sha1_cert_fingerprints":
+      ["75:A8:7F:4C:40:0E:C8:01:CB:5F:D0:DF:A4:E3:61:A9:A1:9B:DD:23"]
+    }
+  }
+]

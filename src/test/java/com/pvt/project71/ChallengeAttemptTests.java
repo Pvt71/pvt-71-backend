@@ -294,4 +294,26 @@ public class ChallengeAttemptTests {
                 .andExpect(jsonPath("$[3]").doesNotExist());
 
     }
+    @Test
+    public void testAcceptingAcceptingYourOwnChallengeAttemptInAnEventYouAreAdminInGives403() throws Exception {
+        UserEntity user = fixAndSaveUser();
+        EventEntity eventEntity = TestDataUtil.createTestEventEntityA();
+        userService.makeAdmin(user, eventEntity);
+        eventEntity.getAdminUsers().add(user);
+        eventEntity = eventService.save(eventEntity, user);
+
+        UserEntity userB = TestDataUtil.createValidTestUserEntity();
+        userB.setEmail("test2@test.com");
+        userB = userService.save(userB);
+        eventEntity = eventService.addAdmin(eventEntity, userB, user);
+
+        ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
+        challengeEntity.setCreator(user);
+        challengeService.save(challengeEntity, user);
+        Jwt userBJwt = jwtService.mockOauth2(userB, 1, ChronoUnit.MINUTES);
+        mockMvc.perform(post("/challenges/" + challengeEntity.getId() + "/submit/" + CONTENT)
+                .with(jwt().jwt(userBJwt)));
+        mockMvc.perform(patch("/challenges/"+ challengeEntity.getId() + "/accept/"+userB.getEmail())
+                        .with(jwt().jwt(userBJwt))).andExpect(status().isForbidden());
+    }
 }

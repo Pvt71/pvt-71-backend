@@ -86,17 +86,25 @@ public class EventController {
     }
 
     /**
-     * Get existing Events that are active or upcoming. This can optionally also send a school as a query param to specify
-     * to only retrieve events from that school. If school is specified, no expired events or default events are retrieved.
+     * Get existing Events that are active or upcoming based on users school. This can optionally also send a school as a query param
+     * to override the users school.
      * <p><b>GET</b><code>/events</code></p>
      * @return a list of Events with status 200.
      */
     @GetMapping(path = "/events")
     public ResponseEntity<List<EventDto>> listEvents(
-            @RequestParam(value = "school", required = false) String school) {
+            @RequestParam(value = "school", required = false) String school,
+            @AuthenticationPrincipal Jwt userToken) {
 
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         List<EventEntity> events = (school == null)
-                ? eventService.findAll()
+                ? eventService.findAllBySchool(user.get().getSchool())
                 : eventService.findAllBySchool(school);
 
         List<EventDto> dtos = events.stream()

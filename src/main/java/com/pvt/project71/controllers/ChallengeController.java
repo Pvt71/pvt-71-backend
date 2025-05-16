@@ -239,8 +239,18 @@ public class ChallengeController {
     @GetMapping("/challenges")
     public ResponseEntity<List<ChallengeDto>> getChallenges(@RequestParam(value = "user", required = false) String email,
                                                             @RequestParam(value = "eventId", required = false) Integer eventId,
-                                                            @RequestParam(value = "eventName", required = false) String eventName) {
-        List<ChallengeEntity> challenges = challengeService.getChallenges(email, eventId, eventName);
+                                                            @RequestParam(value = "school", required = false) String school,
+                                                            @AuthenticationPrincipal Jwt userToken) {
+        if (!jwtService.isTokenValid(userToken)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } if (school == null) {
+            school = user.get().getSchool();
+        }
+        List<ChallengeEntity> challenges = challengeService.getChallenges(email, eventId, school);
         List<ChallengeDto> dtos = challenges.stream()
                 .map(challengeMapper::mapTo)
                 .collect(Collectors.toList());

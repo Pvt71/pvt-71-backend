@@ -124,6 +124,7 @@ public class TestDataUtil {
                 .description("TestDescription")
                 .dates(createTimeStampForTest())
                 .adminUsers(new ArrayList<>())
+                .school(SCHOOL_NAME)
                 .build();
     }
     public static EventDto createTestEventDtoA() {
@@ -131,6 +132,7 @@ public class TestDataUtil {
                 .name("TestEventA")
                 .description("TestDescription")
                 .dates(createTimeStampForTest())
+                .school(SCHOOL_NAME)
                 .build();
     }
     public static EventEntity createTestEventEntityB() {
@@ -139,12 +141,14 @@ public class TestDataUtil {
                 .description("TestDescription")
                 .dates(createTimeStampForTest())
                 .adminUsers(new ArrayList<>())
+                .school(SCHOOL_NAME)
                 .build();
     }
     public static EventDto createTestEventDtoB() {
         return EventDto.builder()
                 .name("TestEventB")
                 .description("TestDescription")
+                .school(SCHOOL_NAME)
                 .dates(createTimeStampForTest())
                 .build();
     }

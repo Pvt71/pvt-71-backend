@@ -282,7 +282,7 @@ public class ChallengeTests {
 
         ChallengeEntity saved = challengeService.save(testChallenge, testUser);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/challenges")).andExpect(MockMvcResultMatchers.status().isOk())
+        mockMvc.perform(MockMvcRequestBuilders.get("/challenges").with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(saved.getName()));
     }
 
