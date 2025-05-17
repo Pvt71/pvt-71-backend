@@ -186,6 +186,14 @@ public class TestDataUtil {
                 requester(userA).receiver(userD).status(Status.ACCEPTED).build();
     }
 
+    public static FriendshipEntity createTestAcceptedFriendshipEntityB() {
+        UserEntity userA = createValidTestUserEntity();
+        UserEntity userB = createValidTestUserEntityB();
+
+        return FriendshipEntity.builder().id(new FriendshipId(userA.getEmail(), userB.getEmail())).
+                requester(userA).receiver(userB).status(Status.ACCEPTED).build();
+    }
+
     public static FriendshipDto createTestPendingFriendshipDtoA() {
         UserDto userA = createValidTestUserDtoA();
         UserDto userB = createValidTestUserDtoB();

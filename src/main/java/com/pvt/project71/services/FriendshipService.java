@@ -1,8 +1,8 @@
 package com.pvt.project71.services;
 
+import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.FriendshipEntity;
 import com.pvt.project71.domain.entities.FriendshipId;
-import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.enums.Status;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,11 @@ public interface FriendshipService {
 
     FriendshipEntity save(FriendshipEntity friendshipEntity);
 
-    List<FriendshipEntity> findAllByStatus(String email, Status status);
+    List<UserDto> findAllByStatus(String email, Status status);
+
+    FriendshipEntity findSpecificFriendRequest(String receiverEmail);
+
+    FriendshipEntity findFriendship(String email1, String email2);
 
     Optional<FriendshipEntity> findOne(FriendshipId id);
 
