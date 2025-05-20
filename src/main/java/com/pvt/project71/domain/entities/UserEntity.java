@@ -52,6 +52,10 @@ public class UserEntity {
     @JsonIgnore
     private List<ScoreEntity> scores;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<BadgeEntity> badges;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

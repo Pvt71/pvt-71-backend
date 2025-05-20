@@ -1,11 +1,15 @@
 package com.pvt.project71.services.serviceimpl;
 
 import com.pvt.project71.domain.TimeStamps;
+import com.pvt.project71.domain.entities.BadgeEntity;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.repositories.EventRepository;
+import com.pvt.project71.repositories.ScoreRepository;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.UserService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
@@ -26,15 +30,21 @@ import java.util.stream.StreamSupport;
 @Service
 public class EventServiceImpl implements EventService {
 
+    private final ScoreRepository scoreRepository;
+    private final ScoreService scoreService;
+    private final EventService eventService;
     private EventRepository eventRepository;
     private UserService userService;
     private static final Duration MAX_PRE_CREATION_TIME = Duration.ofDays(30);
     private static final Duration MIN_DURATION_HOURS = Duration.ofHours(24);
     private static final Duration MAX_DURATION_DAYS = Duration.ofDays(365);
 
-    public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService) {
+    public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService, ScoreRepository scoreRepository, ScoreService scoreService, EventService eventService) {
         this.eventRepository = eventRepository;
         this.userService = userService;
+        this.scoreRepository = scoreRepository;
+        this.scoreService = scoreService;
+        this.eventService = eventService;
     }
 
     @Override
@@ -95,6 +105,7 @@ public class EventServiceImpl implements EventService {
             Optional.ofNullable(eventEntity.getName()).ifPresent(existingEvent::setName);
             Optional.ofNullable(eventEntity.getDescription()).ifPresent(existingEvent::setDescription);
             Optional.ofNullable(eventEntity.getBannerImage()).ifPresent(existingEvent::setBannerImage);
+            Optional.ofNullable(eventEntity.getBadge()).ifPresent(existingEvent::setBadge);
             return eventRepository.save(existingEvent);
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event does not exist!"));
     }
@@ -149,6 +160,34 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findBySchool(school);
     }
 
+    @Override
+    public void giveBadges(EventEntity finishedEvent) {
+        BadgeEntity templateBadge = finishedEvent.getBadge();
+        if(templateBadge.isHasBeenGiven()){
+            return;
+        }
+
+        List<ScoreEntity> scores = scoreService.findAllByEvent(finishedEvent.getId()).get();
+        int numberOfLoops = Math.min(scores.size(), templateBadge.getMaxReceivers());
+
+        for(int i = 0; i < numberOfLoops; i++){
+            UserEntity user = scores.get(i).getScoreId().getUser();
+
+            if(user.getBadges() == null){
+                user.setBadges(new ArrayList<>());
+            }
+
+            BadgeEntity badge = BadgeEntity.builder()
+                    .badgeName(templateBadge.getBadgeName()).image(templateBadge.getImage())
+                    .event(finishedEvent).user(user).build();
+
+            user.getBadges().add(badge);
+            userService.save(user);
+        }
+
+        templateBadge.setHasBeenGiven(true);
+        eventService.save(finishedEvent, finishedEvent.getAdminUsers().get(0));
+    }
 
 
 }

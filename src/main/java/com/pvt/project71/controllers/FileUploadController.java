@@ -1,5 +1,6 @@
 package com.pvt.project71.controllers;
 
+import com.pvt.project71.domain.entities.BadgeEntity;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.services.EventService;
@@ -16,6 +17,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -42,6 +45,84 @@ public class FileUploadController {
         this.jwtService = jwtService;
     }
 
+    //EVENT BADGES
+    @PostMapping("/events/{id}/badge")
+    public ResponseEntity<Void> uploadEventBadge(
+            @PathVariable Integer id,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("name") String badgeName,
+            @AuthenticationPrincipal Jwt userToken) throws IOException {
+
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Optional<EventEntity> optionalEvent = eventService.findOne(id);
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        imageValidator.validate(file);
+
+        EventEntity event = optionalEvent.get();
+        BadgeEntity badge = BadgeEntity.builder().badgeName(badgeName).image(file.getBytes()).event(event).hasBeenGiven(false).build();
+
+        eventService.partialUpdate(event.getId(), event, user.get());
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/events/{id}/badge")
+    public ResponseEntity<byte[]> getEventBadges(@PathVariable Integer id) {
+        Optional<EventEntity> optionalEvent = eventService.findOne(id);
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        BadgeEntity badge = optionalEvent.get().getBadge();
+
+        if (badge == null || badge.getImage() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity
+                .ok()
+                .header("Content-Type", "image/jpeg")
+                .body(badge.getImage());
+    }
+
+    @DeleteMapping("/events/{id}/badge")
+    public ResponseEntity<Void> deleteBadgeFromEvent(
+            @PathVariable Integer id,
+            @PathVariable Long badgeId,
+            @AuthenticationPrincipal Jwt userToken) {
+
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Optional<EventEntity> optionalEvent = eventService.findOne(id);
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        EventEntity event = optionalEvent.get();
+
+        if(!userService.isAnAdmin(user.get(), event)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        event.setBadge(null);
+        eventService.partialUpdate(id, event, event.getAdminUsers().get(0));
+        return ResponseEntity.noContent().build();
+    }
 
     //EVENT BANNER UPLOAD/GET
     @PostMapping("/events/{id}/banner")
