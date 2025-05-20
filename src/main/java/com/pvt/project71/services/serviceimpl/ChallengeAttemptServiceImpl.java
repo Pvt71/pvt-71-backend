@@ -38,7 +38,8 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
         Optional<ChallengeEntity> challengeEntity = challengeService.find(challengeAttemptEntity.getId().getChallengeId());
         if (challengeEntity.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Challenge doesnt exist");
-        } else if (challengeAttemptRepository.findById(challengeAttemptEntity.getId()).isPresent()) {
+        } else if (challengeAttemptRepository.findById(challengeAttemptEntity.getId()).isPresent()
+                && challengeAttemptRepository.findById(challengeAttemptEntity.getId()).get().getStatus() != Status.REJECTED) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Submission already exists");
         }
         challengeAttemptEntity.setChallenge(challengeEntity.get());
@@ -105,6 +106,24 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
     }
 
     @Override
+    public ChallengeAttemptEntity reject(ChallengeAttemptEntity challengeAttemptEntity, UserEntity rejectedBy) {
+        if(challengeAttemptEntity.getChallenge().getEvent().isDefault()) {
+            if (!challengeAttemptEntity.getChallenge().getCreator().equals(rejectedBy)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the challenge creator can reject this attempt");
+            }
+        } else if (!userService.isAnAdmin(rejectedBy, challengeAttemptEntity.getChallenge().getEvent() )) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can reject this attempt");
+        } if (challengeAttemptEntity.getStatus() == Status.ACCEPTED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Attempt is already accepted");
+        } if (challengeAttemptEntity.getId().getUserEmail().equals(rejectedBy.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin can not reject their own attempt");
+        }
+        challengeAttemptEntity.setStatus(Status.REJECTED);
+        return challengeAttemptRepository.save(challengeAttemptEntity);
+    }
+
+
+    @Override
     public List<ChallengeAttemptEntity> getAttemptsUserCanAllow(UserEntity user) {
         user = userService.loadTheLazy(user);
         Set<ChallengeAttemptEntity> set = new HashSet<>(challengeAttemptRepository.findAllByChallengeCreatorAndChallengeProofTypeAndStatus(user, ProofType.REQUEST,
@@ -140,7 +159,9 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
     }
 
     private ChallengeAttemptEntity addChallengeAttemptToChallenge(ChallengeAttemptEntity challengeAttemptEntity, ChallengeEntity challengeEntity ) {
-        challengeEntity.getAttempts().add(challengeAttemptEntity);
+        if (!challengeEntity.getAttempts().contains(challengeAttemptEntity)) {
+            challengeEntity.getAttempts().add(challengeAttemptEntity);
+        }
         challengeAttemptEntity.setStatus(Status.PENDING);
         challengeService.save(challengeEntity, challengeEntity.getCreator());
         return challengeAttemptEntity;
