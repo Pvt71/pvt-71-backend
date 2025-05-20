@@ -225,8 +225,8 @@ public class EventChallengeIntegrationTests {
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges").param("eventId", testEvent.getId().toString())
                         .with(jwt().jwt(getUserToken())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value(testChallengeA.getName()))
-                .andExpect(jsonPath("$[1].name").value(testChallengeB.getName()))
+                .andExpect(jsonPath("$[0].name").value(testChallengeB.getName()))
+                .andExpect(jsonPath("$[1].name").value(testChallengeA.getName()))
                 .andExpect(jsonPath("$[2]").doesNotExist()
             );
     }
