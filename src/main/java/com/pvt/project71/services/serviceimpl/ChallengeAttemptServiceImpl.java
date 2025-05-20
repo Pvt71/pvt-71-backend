@@ -42,7 +42,7 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Submission already exists");
         }
         challengeAttemptEntity.setChallenge(challengeEntity.get());
-        if (challengeAttemptEntity.getChallenge().getCreator().getEmail().equals(challengeAttemptEntity.getId().getUserEmail())) {
+        if (challengeAttemptEntity.getChallenge().getCreator().getEmail().trim().equalsIgnoreCase((challengeAttemptEntity.getId().getUserEmail().trim()))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User can not attempt their own created challenge");
         }
 
