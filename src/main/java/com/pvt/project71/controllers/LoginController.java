@@ -46,5 +46,14 @@ public class LoginController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(token,HttpStatus.OK);
     }
+    @GetMapping("/login/cred/{email}/google/{authtoken}")
+    public ResponseEntity<String> loginWithToken(@NotBlank @Email @PathVariable String email, @PathVariable String sestoken){
+        Optional<UserEntity> userOpt = userService.findOne(email);
+        if (userOpt.isEmpty() || sestoken == null || sestoken.isBlank())
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        UserEntity user = userOpt.get();
+        String token = jwtService.mockOauth2(user,1, ChronoUnit.HOURS).getTokenValue();
+        return new ResponseEntity<>(token,HttpStatus.OK);
+    }
 
 }
