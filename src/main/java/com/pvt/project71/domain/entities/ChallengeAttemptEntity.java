@@ -27,6 +27,8 @@ public class ChallengeAttemptEntity {
     @JoinColumn(name = "challenge_id", insertable=false, updatable=false)
     private ChallengeEntity challenge;
 
+    private String username;
+
     private boolean isContentHidden;
 
     @Override

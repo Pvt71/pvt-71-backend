@@ -159,9 +159,10 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
     }
 
     private ChallengeAttemptEntity addChallengeAttemptToChallenge(ChallengeAttemptEntity challengeAttemptEntity, ChallengeEntity challengeEntity ) {
-        if (!challengeEntity.getAttempts().contains(challengeAttemptEntity)) {
-            challengeEntity.getAttempts().add(challengeAttemptEntity);
+        if (challengeEntity.getAttempts().contains(challengeAttemptEntity)) {
+            challengeEntity.getAttempts().remove(challengeAttemptEntity);
         }
+        challengeEntity.getAttempts().add(challengeAttemptEntity);
         challengeAttemptEntity.setStatus(Status.PENDING);
         challengeService.save(challengeEntity, challengeEntity.getCreator());
         return challengeAttemptEntity;

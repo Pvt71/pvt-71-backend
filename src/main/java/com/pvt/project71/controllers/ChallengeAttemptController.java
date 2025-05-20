@@ -49,7 +49,7 @@ public class ChallengeAttemptController {
         UserEntity user = checkAndRetrieveUserFromToken(userToken);
 
         ChallengeAttemptEntity challengeAttemptEntity = ChallengeAttemptEntity.builder()
-                .id(new ChallengeAttemptId(id, user.getEmail())).submittedAt(LocalDateTime.now()).content(content)
+                .id(new ChallengeAttemptId(id, user.getEmail())).submittedAt(LocalDateTime.now()).content(content).username(user.getUsername())
                 .build();
         return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.submit(challengeAttemptEntity)), HttpStatus.CREATED);
     }
@@ -59,7 +59,7 @@ public class ChallengeAttemptController {
         UserEntity user = checkAndRetrieveUserFromToken(userToken);
 
         ChallengeAttemptEntity challengeAttemptEntity = ChallengeAttemptEntity.builder()
-                .id(new ChallengeAttemptId(id, user.getEmail())).submittedAt(LocalDateTime.now()).content("")
+                .id(new ChallengeAttemptId(id, user.getEmail())).submittedAt(LocalDateTime.now()).content("").username(user.getUsername())
                 .build();
         return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.submit(challengeAttemptEntity)), HttpStatus.CREATED);
     }
