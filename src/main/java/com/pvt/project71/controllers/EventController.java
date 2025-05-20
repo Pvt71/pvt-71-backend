@@ -107,8 +107,8 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         List<EventEntity> events = (school == null)
-                ? eventService.findAllBySchool(user.get().getSchool())
-                : eventService.findAllBySchool(school);
+                ? eventService.findAllBySchool(user.get().getSchool(), user.get())
+                : eventService.findAllBySchool(school, user.get());
 
         List<EventDto> dtos = events.stream()
                 .map(eventMapper::mapTo)
