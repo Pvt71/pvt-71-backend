@@ -82,6 +82,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public Optional<EventEntity> findOneByName(String name) {
+        return eventRepository.findByName(name);
+    }
+
+    @Override
     public boolean isExists(Integer id) {
         return eventRepository.existsById(id);
     }

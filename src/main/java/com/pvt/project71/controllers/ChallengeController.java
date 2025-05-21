@@ -44,7 +44,7 @@ public class ChallengeController {
      *                     <li><b>name</b> (String, Required)</li>
      *                     <li><b>description</b> (String, Optional)</li>
      *                     <li><b>event</b> (an event json, Optional). The event Json only needs the events id field and nothing else.
-     *                     If and event is not provided it will fallback to the global event</li>
+     *                     If and event is not provided or an event is provided with id 0 it will fall back to the global event</li>
      *                     <li><b>points</b> (Integer, Required), must be larger than 0</li>
      *                     <li><b>dates</b>(List of dates, required) in format "yyyy-mm-ddThh:mm"<ul>
      *                         <li><b>startsAt</b>(date, optional), if left null it will start at creation, or when the event starts if it haven't yet.
@@ -255,5 +255,38 @@ public class ChallengeController {
                 .map(challengeMapper::mapTo)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
+    }
+
+    /**
+     * Get all the challenges completed by a user. If a user is passed in the optional query it will grab its completed challenges.
+     * Otherwise, it will grab the completed challenges from the user linked with the token.
+     * <p><b>GET</b><code>/challenges/completed?user=email</code> can also just be <code>/challenges/completed</code></p>
+     * @param email (String, Optional). User to get its completed challenges.
+     * @param userToken Token sent of user retrieving them, is only really needed if the optional param isn't used.
+     * @return A list of completed challenges still in the database sorted on submission date.
+     */
+    @GetMapping("/challenges/completed")
+    public ResponseEntity<List<ChallengeDto>> getCompletedChallenges(@RequestParam(value = "user", required = false) String email,
+                                                                     @AuthenticationPrincipal Jwt userToken) {
+        Optional<UserEntity> user;
+        if (email == null) {
+            if (!jwtService.isTokenValid(userToken)){
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            user = userService.findOne(userToken.getSubject());
+            if (user.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+        } else {
+            user = userService.findOne(email);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        }
+        List<ChallengeEntity> challenges = challengeService.getCompleted(user.get());
+        List<ChallengeDto> dtos = challenges.stream()
+                .map(challengeMapper::mapTo)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 }

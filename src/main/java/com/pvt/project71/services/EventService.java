@@ -15,6 +15,7 @@ public interface EventService {
     List<EventEntity> findAll();
 
     Optional<EventEntity> findOne(Integer id);
+    Optional<EventEntity> findOneByName(String name);
 
     boolean isExists(Integer id);
 
