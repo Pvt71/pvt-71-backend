@@ -62,10 +62,7 @@ public class EventEntity {
     private List<ScoreEntity> scores;
 
 
-    @OneToOne(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private BadgeEntity badge;
-
+    private byte[] badgePicture;
 
     @Override
     public boolean equals(Object o) {

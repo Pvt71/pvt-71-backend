@@ -68,10 +68,9 @@ public class FileUploadController {
         imageValidator.validate(file);
 
         EventEntity event = optionalEvent.get();
-        BadgeEntity badge = BadgeEntity.builder().image(file.getBytes()).event(event).build();
+        event.setBadgePicture(file.getBytes());
 
         eventService.partialUpdate(event.getId(), event, user.get());
-
         return ResponseEntity.ok().build();
     }
 
@@ -82,16 +81,11 @@ public class FileUploadController {
             return ResponseEntity.notFound().build();
         }
 
-        BadgeEntity badge = optionalEvent.get().getBadge();
-
-        if (badge == null || badge.getImage() == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         return ResponseEntity
                 .ok()
                 .header("Content-Type", "image/jpeg")
-                .body(badge.getImage());
+                .body(optionalEvent.get().getBadgePicture());
+
     }
 
     @DeleteMapping("/events/{id}/badge")
@@ -118,7 +112,7 @@ public class FileUploadController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        event.setBadge(null);
+        event.setBadgePicture(null);
         eventService.partialUpdate(id, event, event.getAdminUsers().get(0));
         return ResponseEntity.noContent().build();
     }

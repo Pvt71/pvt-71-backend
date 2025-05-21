@@ -18,15 +18,11 @@ public class BadgeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String badgeName;
+    private String description;
 
     @Lob
     @Column(name = "image", columnDefinition = "LONGBLOB")
     private byte[] image;
-
-    @OneToOne
-    @JoinColumn(name = "event_id")
-    private EventEntity event;
 
     @ManyToOne
     @JoinColumn(name = "user_email")

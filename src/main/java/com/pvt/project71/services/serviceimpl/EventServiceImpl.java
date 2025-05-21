@@ -105,7 +105,7 @@ public class EventServiceImpl implements EventService {
             Optional.ofNullable(eventEntity.getName()).ifPresent(existingEvent::setName);
             Optional.ofNullable(eventEntity.getDescription()).ifPresent(existingEvent::setDescription);
             Optional.ofNullable(eventEntity.getBannerImage()).ifPresent(existingEvent::setBannerImage);
-            Optional.ofNullable(eventEntity.getBadge()).ifPresent(existingEvent::setBadge);
+            Optional.ofNullable(eventEntity.getBadgePicture()).ifPresent(existingEvent::setBadgePicture);
             return eventRepository.save(existingEvent);
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event does not exist!"));
     }
@@ -162,8 +162,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void giveBadges(EventEntity finishedEvent) {
-        BadgeEntity templateBadge = finishedEvent.getBadge();
-
         List<ScoreEntity> scores = scoreService.findAllByEvent(finishedEvent.getId()).get();
 
         for(int i = 0; i < scores.size(); i++){
@@ -174,14 +172,14 @@ public class EventServiceImpl implements EventService {
             }
 
             BadgeEntity badge = BadgeEntity.builder()
-                    .badgeName(templateBadge.getBadgeName()).image(templateBadge.getImage())
-                    .event(finishedEvent).user(user).build();
+                    .description("You finished in place " + i + " in event: " + finishedEvent.getName())
+                    .image(finishedEvent.getBadgePicture())
+                    .user(user)
+                    .build();
 
             user.getBadges().add(badge);
             userService.save(user);
         }
-
-        eventService.save(finishedEvent, finishedEvent.getAdminUsers().get(0));
     }
 
 

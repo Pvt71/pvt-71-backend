@@ -66,6 +66,8 @@ public class UserServiceImpl implements UserService {
             user.setChallenges(new ArrayList<>());
         } if (user.getScores() == null) {
             user.setScores(new ArrayList<>());
+        } if (user.getBadges() == null) {
+            user.setBadges(new ArrayList<>());
         }
 
         user = userRepository.save(user);
