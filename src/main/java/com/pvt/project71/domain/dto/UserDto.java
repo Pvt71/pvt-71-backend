@@ -1,5 +1,6 @@
 package com.pvt.project71.domain.dto;
 
+import com.pvt.project71.domain.entities.BadgeEntity;
 import com.pvt.project71.domain.entities.EventEntity;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -28,4 +29,5 @@ public class UserDto {
 
     private String profilePictureUrl;
 
+    private List<BadgeDto> badges;
 }

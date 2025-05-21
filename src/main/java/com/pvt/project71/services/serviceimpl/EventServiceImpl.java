@@ -160,6 +160,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public void giveBadges(EventEntity finishedEvent) {
         List<ScoreEntity> scores = scoreRepository.findAllByScoreIdEventId(finishedEvent.getId());
 
@@ -171,7 +172,7 @@ public class EventServiceImpl implements EventService {
             }
 
             BadgeEntity badge = BadgeEntity.builder()
-                    .description("You finished in " + (i+1) + " place in event: " + finishedEvent.getName())
+                    .description("You were rank " + (i+1) + " in event: " + finishedEvent.getName())
                     .image(finishedEvent.getBadgePicture())
                     .user(user)
                     .build();
@@ -180,6 +181,4 @@ public class EventServiceImpl implements EventService {
             userRepository.save(user);
         }
     }
-
-
 }
