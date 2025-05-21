@@ -17,6 +17,7 @@ public interface ChallengeAttemptService {
     Optional<ChallengeAttemptEntity> find(ChallengeAttemptId challengeAttemptId);
     ChallengeAttemptEntity save(ChallengeAttemptEntity challengeAttemptEntity);
     ChallengeAttemptEntity accept(ChallengeAttemptEntity challengeAttemptEntity, UserEntity acceptedBy);
+    ChallengeAttemptEntity reject(ChallengeAttemptEntity challengeAttemptEntity, UserEntity rejectedBy);
     List<ChallengeAttemptEntity> getAttemptsUserCanAllow(UserEntity user);
     List<ChallengeAttemptEntity> getAttemptsSubmittedByUser(String userEmail);
 

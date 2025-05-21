@@ -61,6 +61,9 @@ public class EventEntity {
     @JsonIgnore
     private List<ScoreEntity> scores;
 
+    private boolean areYouAdmin;
+
+
     @Lob
     @Column(name = "badgePicture", columnDefinition = "LONGBLOB")
     private byte[] badgePicture;

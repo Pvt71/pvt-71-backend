@@ -91,6 +91,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public Optional<EventEntity> findOneByName(String name) {
+        return eventRepository.findByName(name);
+    }
+
+    @Override
     public boolean isExists(Integer id) {
         return eventRepository.existsById(id);
     }
@@ -155,8 +160,14 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
-    public List<EventEntity> findAllBySchool(String school) {
-        return eventRepository.findBySchool(school);
+    public List<EventEntity> findAllBySchool(String school, UserEntity whoWantsThem) {
+        List<EventEntity> events = eventRepository.findBySchool(school);
+        for (EventEntity e : events) {
+            if (e.getAdminUsers().contains(whoWantsThem)) {
+                e.setAreYouAdmin(true);
+            }
+        }
+        return events;
     }
 
     @Override

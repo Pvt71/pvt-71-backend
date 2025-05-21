@@ -91,12 +91,13 @@ public class ChallengeAttemptTests {
     public void testCreatingEntityAndMapToDTOIsDoneCorrectly() {
         ChallengeAttemptEntity challengeAttemptEntity = ChallengeAttemptEntity.builder()
                 .id(new ChallengeAttemptId(1, TestDataUtil.createValidTestUserEntity().getEmail()))
-                .status(Status.ACCEPTED).challenge(TestDataUtil.createChallengeEnitityA()).build();
+                .status(Status.ACCEPTED).challenge(TestDataUtil.createChallengeEnitityA()).username("A").build();
         ChallengeAttemptDto challengeAttemptDto = challengeAttemptMapper.mapTo(challengeAttemptEntity);
         assertAll(
                 () -> assertEquals(TestDataUtil.createValidTestUserEntity().getEmail(), challengeAttemptDto.getId().getUserEmail()),
                 () -> assertEquals(1, challengeAttemptDto.getId().getChallengeId()),
-                () -> assertEquals(challengeAttemptEntity.getStatus(), challengeAttemptDto.getStatus())
+                () -> assertEquals(challengeAttemptEntity.getStatus(), challengeAttemptDto.getStatus()),
+                () -> assertEquals(challengeAttemptEntity.getUsername(), challengeAttemptDto.getUsername())
         );
     }
     @Test
@@ -125,7 +126,8 @@ public class ChallengeAttemptTests {
                         jsonPath("$.status").value("PENDING"),
                         jsonPath("$.id.userEmail").value(getOtherUserToken().getSubject()),
                         jsonPath("$.id.challengeId").value(challengeEntity.getId()),
-                        jsonPath("$.content").value(CONTENT));
+                        jsonPath("$.content").value(CONTENT),
+                        jsonPath("$.username").value(TestDataUtil.createValidTestUserEntityB().getUsername()));
     }
     @Test
     public void testSubmittingAnAttemptToANonExistingChallengeShouldGive404() throws Exception {
@@ -187,6 +189,53 @@ public class ChallengeAttemptTests {
                         jsonPath("$.id.userEmail").value(getOtherUserToken().getSubject()),
                         jsonPath("$.id.challengeId").value(challengeEntity.getId()),
                         jsonPath("$.content").value(CONTENT));
+    }
+    @Test
+    public void testRejectingASubmittedAttempt() throws Exception{
+        ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
+        UserEntity user = fixAndSaveUser();
+        challengeEntity.setCreator(user);
+        challengeEntity = challengeService.save(challengeEntity, user);
+        mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT).with(jwt().jwt(getOtherUserToken())));
+        mockMvc.perform(patch("/challenges/" + challengeEntity.getId() + "/reject/" + getOtherUserToken().getSubject())
+                        .with(jwt().jwt(getUserToken())))
+                .andExpect(status().isOk())
+                .andExpectAll(
+                        jsonPath("$.status").value("REJECTED"),
+                        jsonPath("$.id.userEmail").value(getOtherUserToken().getSubject()),
+                        jsonPath("$.id.challengeId").value(challengeEntity.getId()),
+                        jsonPath("$.content").value(CONTENT));
+    }
+    @Test
+    public void testAttemptingARejectedAttemptAgain() throws Exception {
+        ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
+        UserEntity user = fixAndSaveUser();
+        challengeEntity.setCreator(user);
+        challengeEntity = challengeService.save(challengeEntity, user);
+        mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT).with(jwt().jwt(getOtherUserToken())));
+        mockMvc.perform(patch("/challenges/" + challengeEntity.getId() + "/reject/" + getOtherUserToken().getSubject())
+                .with(jwt().jwt(getUserToken())));
+        mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT).with(jwt().jwt(getOtherUserToken())))
+                .andExpect(status().isCreated())
+                .andExpectAll(
+                        jsonPath("$.status").value("PENDING"),
+                        jsonPath("$.id.userEmail").value(getOtherUserToken().getSubject()),
+                        jsonPath("$.id.challengeId").value(challengeEntity.getId()),
+                        jsonPath("$.content").value(CONTENT));
+    }
+    @Test
+    public void testAttemptingARejectedAttemptAgainUpdatesInChallenges() throws Exception {
+        ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
+        UserEntity user = fixAndSaveUser();
+        challengeEntity.setCreator(user);
+        challengeEntity = challengeService.save(challengeEntity, user);
+        mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT).with(jwt().jwt(getOtherUserToken())));
+        mockMvc.perform(patch("/challenges/" + challengeEntity.getId() + "/reject/" + getOtherUserToken().getSubject())
+                .with(jwt().jwt(getUserToken())));
+        mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT).with(jwt().jwt(getOtherUserToken())));
+        challengeEntity = challengeService.find(challengeEntity.getId()).get();
+        assertEquals(Status.PENDING, challengeEntity.getAttempts().get(0).getStatus());
+
     }
     @Test
     public void testAcceptingAnUnsubmittedAttemptShouldGive404() throws Exception {

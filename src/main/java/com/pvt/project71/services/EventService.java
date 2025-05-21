@@ -15,6 +15,7 @@ public interface EventService {
     List<EventEntity> findAll();
 
     Optional<EventEntity> findOne(Integer id);
+    Optional<EventEntity> findOneByName(String name);
 
     boolean isExists(Integer id);
 
@@ -26,7 +27,7 @@ public interface EventService {
     EventEntity getDefaultEvent(String school);
 
     EventEntity loadTheLazy(EventEntity toLoad);
-    List<EventEntity> findAllBySchool(String school);
+    List<EventEntity> findAllBySchool(String school, UserEntity whoWantsThem);
 
     void giveBadges(EventEntity finishedEvent);
 }

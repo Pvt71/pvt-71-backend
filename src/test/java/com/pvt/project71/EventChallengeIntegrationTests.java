@@ -116,7 +116,17 @@ public class EventChallengeIntegrationTests {
         assertFalse(eventService.loadTheLazy(eventService.getDefaultEvent(TestDataUtil.SCHOOL_NAME)).getChallenges().isEmpty());
 
     }
-
+    @Test
+    public void testCreatingChallengeAndSendInEventWithIdZeroGivesDefaultEvent() throws Exception {
+        ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
+        testChallenge.setEvent(EventEntity.builder().id(0).build());
+        String challengeJson = objectMapper.writeValueAsString(testChallenge);
+        fixAndSaveUser();
+        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated())
+                .andExpect(jsonPath("$.event.id")
+                        .value(eventService.getDefaultEvent(TestDataUtil.createValidTestUserEntity().getSchool()).getId()));
+    }
     @Test
     public void testAddingChallengeToCustomEventWorks() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
@@ -192,7 +202,7 @@ public class EventChallengeIntegrationTests {
     public void testAddingChallengeToNonExistingEventShouldGive404() throws Exception {
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
 
-        testChallenge.setEvent(EventEntity.builder().id(0).build());
+        testChallenge.setEvent(EventEntity.builder().id(-1).build());
 
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
@@ -225,8 +235,8 @@ public class EventChallengeIntegrationTests {
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges").param("eventId", testEvent.getId().toString())
                         .with(jwt().jwt(getUserToken())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value(testChallengeA.getName()))
-                .andExpect(jsonPath("$[1].name").value(testChallengeB.getName()))
+                .andExpect(jsonPath("$[0].name").value(testChallengeB.getName()))
+                .andExpect(jsonPath("$[1].name").value(testChallengeA.getName()))
                 .andExpect(jsonPath("$[2]").doesNotExist()
             );
     }

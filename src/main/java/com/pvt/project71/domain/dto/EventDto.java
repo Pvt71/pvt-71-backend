@@ -29,5 +29,7 @@ public class EventDto {
 
     private TimeStamps dates;
 
+    private boolean areYouAdmin;
+
 
 }

@@ -20,4 +20,5 @@ public interface ChallengeService {
 
     List<ChallengeEntity> getChallenges(String email, Integer eventId, String eventName, UserEntity userWhoWantsThem);
 
+    List<ChallengeEntity> getCompleted(UserEntity user);
 }

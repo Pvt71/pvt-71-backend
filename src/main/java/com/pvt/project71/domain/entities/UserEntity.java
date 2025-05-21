@@ -61,7 +61,7 @@ public class UserEntity {
         if (this == o) return true;
         if (!(o instanceof UserEntity)) return false;
         UserEntity other = (UserEntity) o;
-        return other.getEmail().equals(email);
+        return other.getEmail().trim().equalsIgnoreCase(email.trim());
     }
 
     @Override
