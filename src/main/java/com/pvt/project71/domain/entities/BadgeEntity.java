@@ -20,10 +20,6 @@ public class BadgeEntity {
 
     private String badgeName;
 
-    private int maxReceivers;
-
-    private boolean hasBeenGiven;
-
     @Lob
     @Column(name = "image", columnDefinition = "LONGBLOB")
     private byte[] image;

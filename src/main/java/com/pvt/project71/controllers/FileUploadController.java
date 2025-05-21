@@ -50,7 +50,6 @@ public class FileUploadController {
     public ResponseEntity<Void> uploadEventBadge(
             @PathVariable Integer id,
             @RequestParam("file") MultipartFile file,
-            @RequestParam("name") String badgeName,
             @AuthenticationPrincipal Jwt userToken) throws IOException {
 
         if (!jwtService.isTokenValid(userToken)) {
@@ -69,7 +68,7 @@ public class FileUploadController {
         imageValidator.validate(file);
 
         EventEntity event = optionalEvent.get();
-        BadgeEntity badge = BadgeEntity.builder().badgeName(badgeName).image(file.getBytes()).event(event).hasBeenGiven(false).build();
+        BadgeEntity badge = BadgeEntity.builder().image(file.getBytes()).event(event).build();
 
         eventService.partialUpdate(event.getId(), event, user.get());
 

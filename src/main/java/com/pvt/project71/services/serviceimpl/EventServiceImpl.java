@@ -163,14 +163,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public void giveBadges(EventEntity finishedEvent) {
         BadgeEntity templateBadge = finishedEvent.getBadge();
-        if(templateBadge.isHasBeenGiven()){
-            return;
-        }
 
         List<ScoreEntity> scores = scoreService.findAllByEvent(finishedEvent.getId()).get();
-        int numberOfLoops = Math.min(scores.size(), templateBadge.getMaxReceivers());
 
-        for(int i = 0; i < numberOfLoops; i++){
+        for(int i = 0; i < scores.size(); i++){
             UserEntity user = scores.get(i).getScoreId().getUser();
 
             if(user.getBadges() == null){
@@ -185,7 +181,6 @@ public class EventServiceImpl implements EventService {
             userService.save(user);
         }
 
-        templateBadge.setHasBeenGiven(true);
         eventService.save(finishedEvent, finishedEvent.getAdminUsers().get(0));
     }
 
