@@ -46,7 +46,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     @Transactional
     public ChallengeEntity save(ChallengeEntity challengeEntity, UserEntity doneBy) {
-        if (challengeEntity.getEvent() == null) {
+        if (challengeEntity.getEvent() == null || challengeEntity.getEvent().getId() < 1) {
             EventEntity defaultEvent = eventService.getDefaultEvent(doneBy.getSchool());
             if (challengeEntity.getAttempts() == null) {
                 challengeEntity.setAttempts(new ArrayList<>());

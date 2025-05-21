@@ -116,7 +116,17 @@ public class EventChallengeIntegrationTests {
         assertFalse(eventService.loadTheLazy(eventService.getDefaultEvent(TestDataUtil.SCHOOL_NAME)).getChallenges().isEmpty());
 
     }
-
+    @Test
+    public void testCreatingChallengeAndSendInEventWithIdZeroGivesDefaultEvent() throws Exception {
+        ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
+        testChallenge.setEvent(EventEntity.builder().id(0).build());
+        String challengeJson = objectMapper.writeValueAsString(testChallenge);
+        fixAndSaveUser();
+        mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated())
+                .andExpect(jsonPath("$.event.id")
+                        .value(eventService.getDefaultEvent(TestDataUtil.createValidTestUserEntity().getSchool()).getId()));
+    }
     @Test
     public void testAddingChallengeToCustomEventWorks() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
