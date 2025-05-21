@@ -61,7 +61,8 @@ public class EventEntity {
     @JsonIgnore
     private List<ScoreEntity> scores;
 
-
+    @Lob
+    @Column(name = "badgePicture", columnDefinition = "LONGBLOB")
     private byte[] badgePicture;
 
     @Override

@@ -52,7 +52,7 @@ public class UserEntity {
     @JsonIgnore
     private List<ScoreEntity> scores;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<BadgeEntity> badges;
 

@@ -171,7 +171,7 @@ public class EventServiceImpl implements EventService {
             }
 
             BadgeEntity badge = BadgeEntity.builder()
-                    .description("You finished in place " + i + " in event: " + finishedEvent.getName())
+                    .description("You finished in " + (i+1) + " place in event: " + finishedEvent.getName())
                     .image(finishedEvent.getBadgePicture())
                     .user(user)
                     .build();
