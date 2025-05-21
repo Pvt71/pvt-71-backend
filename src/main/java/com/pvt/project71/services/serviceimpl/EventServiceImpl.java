@@ -32,8 +32,6 @@ import java.util.stream.StreamSupport;
 public class EventServiceImpl implements EventService {
 
     private final ScoreRepository scoreRepository;
-    private final ScoreService scoreService;
-    private final EventService eventService;
     private final UserRepository userRepository;
     private EventRepository eventRepository;
     private UserService userService;
@@ -41,12 +39,10 @@ public class EventServiceImpl implements EventService {
     private static final Duration MIN_DURATION_HOURS = Duration.ofHours(24);
     private static final Duration MAX_DURATION_DAYS = Duration.ofDays(365);
 
-    public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService, ScoreRepository scoreRepository, ScoreService scoreService, EventService eventService, UserRepository userRepository) {
+    public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService, ScoreRepository scoreRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
         this.userService = userService;
         this.scoreRepository = scoreRepository;
-        this.scoreService = scoreService;
-        this.eventService = eventService;
         this.userRepository = userRepository;
     }
 
@@ -165,7 +161,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void giveBadges(EventEntity finishedEvent) {
-        List<ScoreEntity> scores = scoreService.findAllByEvent(finishedEvent.getId()).get();
+        List<ScoreEntity> scores = scoreRepository.findAllByScoreIdEventId(finishedEvent.getId());
 
         for(int i = 0; i < scores.size(); i++){
             UserEntity user = scores.get(i).getScoreId().getUser();
