@@ -2,6 +2,7 @@ package com.pvt.project71.controllers;
 
 
 import com.pvt.project71.domain.dto.ScoreDto;
+import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.domain.entities.score.ScoreId;
@@ -91,7 +92,7 @@ public class ScoreController {
         return new ResponseEntity<>(scores,HttpStatus.OK);
     }
     @GetMapping("/scores/mySchool")
-    public ResponseEntity<List<ScoreDto>> getAllScoresForSchool(@AuthenticationPrincipal Jwt userToken) {
+    public ResponseEntity<List<ScoreDto>> getAllScoresForOwnSchool(@AuthenticationPrincipal Jwt userToken) {
         if (!jwtService.isTokenValid(userToken)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } Optional<UserEntity> user = userService.findOne(userToken.getSubject());
@@ -101,6 +102,19 @@ public class ScoreController {
         List<ScoreEntity> scoreEntities = scoreService.findAllByEvent(eventService.getDefaultEvent(user.get().getSchool())
                 .getId()).get();
         List<ScoreDto> scores = scoreEntities.stream().map(scoreMapper::mapTo).toList();
+        return new ResponseEntity<>(scores, HttpStatus.OK);
+    }
+    @GetMapping("/scores/university/{universityName}")
+    public ResponseEntity<List<ScoreDto>> getAllScoresForSchool(@PathVariable("universityName") String universityName) {
+        Optional<EventEntity> schoolEvent = eventService.findOneByName(universityName);
+        if (schoolEvent.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Optional<List<ScoreEntity>> scoreEntities = scoreService.findAllByEvent(schoolEvent.get().getId());
+        if (scoreEntities.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        List<ScoreDto> scores = scoreEntities.get().stream().map(scoreMapper::mapTo).toList();
         return new ResponseEntity<>(scores, HttpStatus.OK);
     }
 
