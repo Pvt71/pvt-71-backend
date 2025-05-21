@@ -26,6 +26,6 @@ public interface EventService {
     EventEntity getDefaultEvent(String school);
 
     EventEntity loadTheLazy(EventEntity toLoad);
-    List<EventEntity> findAllBySchool(String school);
+    List<EventEntity> findAllBySchool(String school, UserEntity whoWantsThem);
 
 }

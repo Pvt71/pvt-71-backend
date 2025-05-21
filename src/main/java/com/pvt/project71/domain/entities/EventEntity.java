@@ -61,6 +61,9 @@ public class EventEntity {
     @JsonIgnore
     private List<ScoreEntity> scores;
 
+    private boolean areYouAdmin;
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

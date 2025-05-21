@@ -11,17 +11,37 @@ import java.util.Objects;
 
 @Repository
 public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Integer> {
+    @Query("""
+    SELECT c, ca FROM ChallengeEntity c
+    LEFT JOIN ChallengeAttemptEntity ca ON ca.challenge.id = c.id AND ca.id.userEmail = :userWhoWants
+    WHERE c.creator.email = :email
+    AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
+    ORDER BY c.dates.updatedAt DESC
+""")
+    List<Object[]> findByCreatorEmail(String email, String userWhoWants);
+    @Query("""
+    SELECT c, ca FROM ChallengeEntity c
+    LEFT JOIN ChallengeAttemptEntity ca ON ca.challenge.id = c.id AND ca.id.userEmail = :userEmail
+    WHERE c.event.id = :id
+    AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
+    ORDER BY c.dates.updatedAt DESC
+""")
+    List<Object[]> findChallengeEntitiesByEvent_Id(Integer id, String userEmail);
+    @Query("""
+    SELECT c, ca FROM ChallengeEntity c
+    LEFT JOIN ChallengeAttemptEntity ca ON ca.challenge.id = c.id AND ca.id.userEmail = :userWhoWants
+    WHERE c.creator.email = :email
+    AND c.event.id = :id
+    AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
+    ORDER BY c.dates.updatedAt DESC
+""")
+    List<Object[]> findByCreatorEmailAndEventId(String email, Integer id, String userWhoWants);
 
-    List<ChallengeEntity> findByCreatorEmail(String email);
-
-    List<ChallengeEntity> findChallengeEntitiesByEvent_Id(Integer id);
-    List<ChallengeEntity> findByCreatorEmailAndEventId(String email, Integer id);
-
-    List<ChallengeEntity> findByEventName(String eventName);
     @Query("""
     SELECT c, ca FROM ChallengeEntity c
     LEFT JOIN ChallengeAttemptEntity ca ON ca.challenge.id = c.id AND ca.id.userEmail = :userEmail
     WHERE c.event.school = :school
+    AND c.event.isDefault = true
     AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
     ORDER BY c.dates.updatedAt DESC
 """)

@@ -149,23 +149,21 @@ public class ChallengeServiceImpl implements ChallengeService {
         List<ChallengeEntity> toReturn = new ArrayList<>();
         List<Object[]> rows = new ArrayList<>();
         if (eventId != null && email != null) {
-            toReturn = challengeRepository.findByCreatorEmailAndEventId(email, eventId);
+            rows = challengeRepository.findByCreatorEmailAndEventId(email, eventId, userWhoWantsThem.getEmail());
         } else if (eventId != null) {
-            toReturn = challengeRepository.findChallengeEntitiesByEvent_Id(eventId);
+            rows = challengeRepository.findChallengeEntitiesByEvent_Id(eventId, userWhoWantsThem.getEmail());
         } else if (email != null) {
-            toReturn = challengeRepository.findByCreatorEmail(email);
+            rows = challengeRepository.findByCreatorEmail(email, userWhoWantsThem.getEmail());
         } else if (school != null) {
             rows = challengeRepository.findAllByEventSchool(school, userWhoWantsThem.getEmail());
-            for (Object[] row : rows) {
-                ChallengeEntity challenge = (ChallengeEntity) row[0];
-                ChallengeAttemptEntity attempt = (ChallengeAttemptEntity) row[1];
-                if (attempt != null) {
-                    challenge.setStatus(attempt.getStatus());
-                }
-                toReturn.add(challenge);
+        }
+        for (Object[] row : rows) {
+            ChallengeEntity challenge = (ChallengeEntity) row[0];
+            ChallengeAttemptEntity attempt = (ChallengeAttemptEntity) row[1];
+            if (attempt != null) {
+                challenge.setStatus(attempt.getStatus());
             }
-        } else {
-            challengeRepository.findAll().forEach(toReturn::add);
+            toReturn.add(challenge);
         }
         return toReturn;
     }

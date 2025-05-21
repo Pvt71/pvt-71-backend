@@ -49,7 +49,7 @@ public class ChallengeAttemptController {
         UserEntity user = checkAndRetrieveUserFromToken(userToken);
 
         ChallengeAttemptEntity challengeAttemptEntity = ChallengeAttemptEntity.builder()
-                .id(new ChallengeAttemptId(id, user.getEmail())).submittedAt(LocalDateTime.now()).content(content)
+                .id(new ChallengeAttemptId(id, user.getEmail())).submittedAt(LocalDateTime.now()).content(content).username(user.getUsername())
                 .build();
         return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.submit(challengeAttemptEntity)), HttpStatus.CREATED);
     }
@@ -59,7 +59,7 @@ public class ChallengeAttemptController {
         UserEntity user = checkAndRetrieveUserFromToken(userToken);
 
         ChallengeAttemptEntity challengeAttemptEntity = ChallengeAttemptEntity.builder()
-                .id(new ChallengeAttemptId(id, user.getEmail())).submittedAt(LocalDateTime.now()).content("")
+                .id(new ChallengeAttemptId(id, user.getEmail())).submittedAt(LocalDateTime.now()).content("").username(user.getUsername())
                 .build();
         return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.submit(challengeAttemptEntity)), HttpStatus.CREATED);
     }
@@ -88,6 +88,17 @@ public class ChallengeAttemptController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Attempt doesnt exist");
         }
         return new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.accept(attemptToAccept.get(), user)), HttpStatus.OK);
+    }
+
+    @PatchMapping("/challenges/{id}/reject/{userEmail}")
+    public ResponseEntity<ChallengeAttemptDto> rejectChallengeAttempt(@PathVariable("id") Integer id, @PathVariable("userEmail") String email,
+                                                                        @AuthenticationPrincipal Jwt userToken) {
+        UserEntity user = checkAndRetrieveUserFromToken(userToken);
+        Optional<ChallengeAttemptEntity> attemptToReject = challengeAttemptService.find(new ChallengeAttemptId(id, email));
+        if (attemptToReject.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Attempt doesnt exist");
+        }
+        return  new ResponseEntity<>(challengeAttemptMapper.mapTo(challengeAttemptService.reject(attemptToReject.get(), user)), HttpStatus.OK);
     }
 
     @GetMapping("/challenges/pending")
