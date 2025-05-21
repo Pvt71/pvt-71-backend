@@ -90,29 +90,19 @@ public class FileUploadController {
 
     @DeleteMapping("/events/{id}/badge")
     public ResponseEntity<Void> deleteBadgeFromEvent(
-            @PathVariable Integer id,
-            @PathVariable Long badgeId,
-            @AuthenticationPrincipal Jwt userToken) {
-
-        if (!jwtService.isTokenValid(userToken)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
-        if (user.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
+            @PathVariable Integer id) {
         Optional<EventEntity> optionalEvent = eventService.findOne(id);
         if (optionalEvent.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        EventEntity event = optionalEvent.get();
 
-        if(!userService.isAnAdmin(user.get(), event)){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        EventEntity event = optionalEvent.get();
+        event.setBadgePicture(null);
+
+        if (event.getAdminUsers() == null || event.getAdminUsers().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        event.setBadgePicture(null);
         eventService.partialUpdate(id, event, event.getAdminUsers().get(0));
         return ResponseEntity.noContent().build();
     }

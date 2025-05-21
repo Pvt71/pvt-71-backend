@@ -51,7 +51,7 @@ public class FileUploadTests {
     }
 
     @Test
-    public void testUploadEventBadgetShouldSucceed() throws Exception {
+    public void testUploadEventBadgeShouldSucceed() throws Exception {
         // Arrange
         byte[] imageBytes = new byte[1024];
         MockMultipartFile file = new MockMultipartFile("file", "banner.jpg", "image/jpeg", imageBytes);
@@ -72,6 +72,85 @@ public class FileUploadTests {
                         .file(file)
                         .header("Authorization", "Bearer " + jwt.getTokenValue()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testUploadEventBadgeWithInvalidFileTypeShouldFail() throws Exception {
+        byte[] invalidFileBytes = "NotValid".getBytes();
+        MockMultipartFile file = new MockMultipartFile("file", "invalid.txt", "text/plain", invalidFileBytes);
+
+        Jwt jwt = getUserToken();
+
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
+        userService.save(user);
+
+        EventEntity event = TestDataUtil.createTestEventEntityA();
+        event.setAdminUsers(List.of(user));
+        eventService.save(event, user);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .multipart("/uploads/events/" + event.getId() + "/badge")
+                        .file(file)
+                        .header("Authorization", "Bearer " + jwt.getTokenValue()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testGetEventBadgeShouldReturnImage() throws Exception {
+        byte[] imageBytes = new byte[1024];
+        MockMultipartFile file = new MockMultipartFile("file", "banner.jpg", "image/jpeg", imageBytes);
+
+        Jwt jwt = getUserToken();
+
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
+        userService.save(user);
+
+        EventEntity event = TestDataUtil.createTestEventEntityA();
+        event.setAdminUsers(List.of(user));
+        eventService.save(event, user);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .multipart("/uploads/events/" + event.getId() + "/badge")
+                        .file(file)
+                        .header("Authorization", "Bearer " + jwt.getTokenValue()))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/uploads/events/" + event.getId() + "/badge"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/jpeg"));
+    }
+    @Test
+    public void testGetEventBadgeWithInvalidIdShouldReturnNotFound() throws Exception {
+        // Act
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/uploads/events/999/badge"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testDeleteEventBadgeShouldSucceed() throws Exception {
+        byte[] imageBytes = new byte[1024];
+        MockMultipartFile file = new MockMultipartFile("file", "banner.jpg", "image/jpeg", imageBytes);
+
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
+        userService.save(user);
+
+        Jwt jwt = getUserToken();
+
+        EventEntity event = TestDataUtil.createTestEventEntityA();
+        event.setAdminUsers(List.of(user));
+        eventService.save(event, user);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .multipart("/uploads/events/" + event.getId() + "/badge")
+                        .file(file)
+                        .header("Authorization", "Bearer " + jwt.getTokenValue()))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/uploads/events/" + event.getId() + "/badge"))
+                .andExpect(status().isNoContent());
     }
 
     @Test
