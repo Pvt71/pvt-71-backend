@@ -1,5 +1,6 @@
 package com.pvt.project71;
 
+import com.pvt.project71.domain.TimeStamps;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.entities.score.ScoreEntity;
@@ -20,7 +21,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -28,6 +31,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -74,7 +78,6 @@ public class BadgeTests {
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/users/" + user.getEmail())
-                        .contentType(MediaType.APPLICATION_JSON)
                         .with(jwt().jwt(getUserToken(user)))
         ).andExpect(jsonPath("$.badges", hasSize(1))
         ).andExpect(jsonPath("$.badges[0].description").value("You were rank 1 in event: " + testEvent.getName()));

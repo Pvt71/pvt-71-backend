@@ -7,6 +7,7 @@ import com.pvt.project71.mappers.Mapper;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
+import jdk.jfr.Event;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -86,6 +87,48 @@ public class EventController {
         eventEntity.setSchool(user.getSchool());
         EventEntity savedEvent = eventService.save(eventEntity, user);
         return new ResponseEntity<>(eventMapper.mapTo(savedEvent), HttpStatus.CREATED);
+    }
+
+    /**
+     * Sends badges once an event has finished.
+     * <p><b>POST</b><code>/events/{id}/sendBadges</code></p>
+     * @param id An Event Id.
+     * @param userToken Token to verify user and link as creator.
+     * @return ResponseEntity with status 200.
+     *
+     * <p><b>Possible Errors:</b></p><ul>
+     *     <li><b>400 Bad Request</b> - If no dates or if the event has not yet finished.</li>
+     *     <li><b>401 Unauthorized</b> - Missing or invalid token.</li>
+     *     <li><b>404 Not Found</b> - No event with the id was found.</li>
+     * </ul>
+     */
+    @PostMapping(path = "/events/{id}/sendBadges")
+    public ResponseEntity<Void> createEvent(@PathVariable("id") Integer id, @AuthenticationPrincipal Jwt userToken) {
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<UserEntity> creator = userService.findOne(userToken.getSubject());
+        if (creator.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Optional<EventEntity> optEvent = eventService.findOne(id);
+        if(optEvent.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        EventEntity event = optEvent.get();
+        if (event.getDates() == null || event.getDates().getEndsAt() == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        //Event must be finished to send badges
+        if (LocalDateTime.now().isBefore(event.getDates().getEndsAt())){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        eventService.giveBadges(event);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
