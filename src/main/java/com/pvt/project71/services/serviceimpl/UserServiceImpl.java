@@ -113,6 +113,7 @@ public class UserServiceImpl implements UserService {
             //If attribute exists and not null, update said attribute
             Optional.ofNullable(userEntity.getUsername()).ifPresent(existingUser::setUsername);
             Optional.ofNullable(userEntity.getProfilePicture()).ifPresent(existingUser::setProfilePicture);
+            Optional.ofNullable(userEntity.getProfilePictureThumbnail()).ifPresent(existingUser::setProfilePictureThumbnail);
             Optional.ofNullable(userEntity.getSchool()).ifPresent(existingUser::setSchool);
 
             return userRepository.save(existingUser);

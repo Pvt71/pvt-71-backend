@@ -38,6 +38,10 @@ public class UserEntity {
     @Column(name = "profile_picture", columnDefinition = "LONGBLOB")
     private byte[] profilePicture;
 
+    @Lob
+    @Column(name = "profile_picture_thumbnail", columnDefinition = "LONGBLOB")
+    private byte[] profilePictureThumbnail;
+
     @ManyToMany(mappedBy = "adminUsers", cascade = CascadeType.REMOVE)
     @JsonIgnore
     private List<EventEntity> events;

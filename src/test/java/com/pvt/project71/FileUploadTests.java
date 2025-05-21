@@ -5,8 +5,6 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.UserService;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,7 +13,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.nio.file.Files;
@@ -53,13 +50,11 @@ public class FileUploadTests {
 
     @Test
     public void testUploadEventBannerWithValidJwtShouldSucceed() throws Exception {
-        // Arrange
         byte[] imageBytes = new byte[1024];
         MockMultipartFile file = new MockMultipartFile("file", "banner.jpg", "image/jpeg", imageBytes);
 
         Jwt jwt = getUserToken();
 
-        // Save test user and event first (this assumes user has admin rights on event with ID 1)
         UserEntity user = TestDataUtil.createValidTestUserEntity();
         userService.save(user);
 
@@ -171,7 +166,6 @@ public class FileUploadTests {
     }
     @Test
     public void testGetEventBannerWithInvalidIdShouldReturnNotFound() throws Exception {
-        // Act
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/uploads/events/999/banner"))
                 .andExpect(status().isNotFound());
@@ -211,7 +205,9 @@ public class FileUploadTests {
     @Test
     public void testUploadProfilePictureWithValidJwtShouldSucceed() throws Exception {
         Jwt jwt = getUserToken();
-        byte[] imageBytes = new byte[1024];
+        Path imagePath = Paths.get("src/test/resources/test-image-small.jpg");
+        byte[] imageBytes = Files.readAllBytes(imagePath);
+
         MockMultipartFile file = new MockMultipartFile("file", "profile.jpg", "image/jpeg", imageBytes);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -248,7 +244,9 @@ public class FileUploadTests {
     @Test
     public void testGetProfilePictureShouldReturnImage() throws Exception {
         Jwt jwt = getUserToken();
-        byte[] imageBytes = new byte[1024];
+        Path imagePath = Paths.get("src/test/resources/test-image-small.jpg");
+        byte[] imageBytes = Files.readAllBytes(imagePath);
+
         MockMultipartFile file = new MockMultipartFile("file", "profile.jpg", "image/jpeg", imageBytes);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -266,7 +264,9 @@ public class FileUploadTests {
     @Test
     public void testDeleteProfilePictureShouldSucceed() throws Exception {
         Jwt jwt = getUserToken();
-        byte[] imageBytes = new byte[1024];
+        Path imagePath = Paths.get("src/test/resources/test-image-small.jpg");
+        byte[] imageBytes = Files.readAllBytes(imagePath);
+
         MockMultipartFile file = new MockMultipartFile("file", "profile.jpg", "image/jpeg", imageBytes);
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -313,8 +313,10 @@ public class FileUploadTests {
 
     @Test
     public void testUploadAndRetrieveProfilePictureBLOB() throws Exception {
-        byte[] imageBytes = new byte[]{10, 20, 30, 40, 50};
-        MockMultipartFile file = new MockMultipartFile("file", "pf.jpg", "image/jpeg", imageBytes);
+        Path imagePath = Paths.get("src/test/resources/test-image-small.jpg");
+        byte[] imageBytes = Files.readAllBytes(imagePath);
+
+        MockMultipartFile file = new MockMultipartFile("file", "profile.jpg", "image/jpeg", imageBytes);
 
         UserEntity user = TestDataUtil.createValidTestUserEntity();
         userService.save(user);
@@ -338,6 +340,57 @@ public class FileUploadTests {
 
         assertArrayEquals(imageBytes, retrievedImageBytes, "Retrieved image should match uploaded image");
     }
+
+    @Test
+    public void testSetProfilePictureCreatesThumbnailAndGetUserThumbnailReturnsThumbnail() throws Exception {
+        byte[] imageBytes = Files.readAllBytes(Paths.get("src/test/resources/test-image-small.jpg"));
+        MockMultipartFile file = new MockMultipartFile("file", "pf.jpg", "image/jpeg", imageBytes);
+
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
+        user.setProfilePicture(file.getBytes());
+        userService.save(user);
+        Jwt jwt = jwtService.mockOauth2(user, 5, ChronoUnit.MINUTES);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .multipart("/uploads/users/" + user.getEmail() + "/profilePicture")
+                        .file(file)
+                        .header("Authorization", "Bearer " + jwt.getTokenValue()))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/uploads/users/" + user.getEmail() + "/profilePicture/thumb"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/jpeg"));
+    }
+
+
+    // TEST ONLY WORKS LOCALLY WITH LOCAL FILES IN RESOURCE FOLDER
+//    @Test
+//    public void testGenerateAndSaveThumbnailToDisk() throws Exception {
+//        byte[] imageBytes = Files.readAllBytes(Paths.get("src/test/resources/test-image-big.jpg"));
+//        MockMultipartFile file = new MockMultipartFile("file", "pf.jpg", "image/jpeg", imageBytes);
+//
+//        UserEntity user = TestDataUtil.createValidTestUserEntity();
+//        user.setProfilePicture(file.getBytes());
+//        userService.save(user);
+//
+//        Jwt jwt = jwtService.mockOauth2(user, 5, ChronoUnit.MINUTES);
+//
+//        mockMvc.perform(MockMvcRequestBuilders
+//                        .multipart("/uploads/users/" + user.getEmail() + "/profilePicture")
+//                        .file(file)
+//                        .header("Authorization", "Bearer " + jwt.getTokenValue()))
+//                .andExpect(status().isOk());
+//
+//        UserEntity updatedUser = userService.findOne(user.getEmail()).get();
+//
+//        Path outputDir = Paths.get("target/test-output");
+//        Files.createDirectories(outputDir);
+//
+//        Files.write(outputDir.resolve("original.jpg"), updatedUser.getProfilePicture());
+//        Files.write(outputDir.resolve("thumbnail.jpg"), updatedUser.getProfilePictureThumbnail());
+//    }
+
 
 
 }
