@@ -41,7 +41,12 @@ public class UserServiceImpl implements UserService {
 
     private EventService eventService;
 
-    public UserServiceImpl(UserRepository userRepository, ChallengeRepository challengeRepository, EventRepository eventRepository, FriendshipRepository friendshipRepository, ScoreService scoreService, EventService eventService) {
+    public UserServiceImpl(UserRepository userRepository,
+                           ChallengeRepository challengeRepository,
+                           EventRepository eventRepository,
+                           FriendshipRepository friendshipRepository,
+                           ScoreService scoreService,
+                           @Lazy EventService eventService) {
         this.userRepository = userRepository;
         this.challengeRepository = challengeRepository;
         this.eventRepository = eventRepository;
@@ -189,15 +194,6 @@ public class UserServiceImpl implements UserService {
         eventRepository.save(event);
         return toAdd;
     }
-//    @Override
-//    public EventEntity removeAdmin(EventEntity eventEntity, UserEntity toRemove) {
-//        if (!isAnAdmin(eventEntity, toRemove)) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not an admin"); //Tanken är att bara en själv kallar remove
-//        }
-//        toRemove = userService.removeAdmin(toRemove, eventEntity);
-//        eventEntity.getAdminUsers().remove(toRemove);
-//        return eventRepository.save(eventEntity);
-//    }
 
     @Override
     public UserEntity removeAdmin(UserEntity toRemove, EventEntity event) {
@@ -216,18 +212,6 @@ public class UserServiceImpl implements UserService {
         return toRemove;
     }
 }
-//    @Override
-//    public EventEntity addAdmin(EventEntity eventEntity, UserEntity toAdd, UserEntity userAddingThem) {
-//        if (!isAnAdmin(eventEntity, userAddingThem)) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can add new admins");
-//        }
-//        if (eventEntity.getAdminUsers().size() > 9) {
-//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Max Admins reached");
-//        }
-//        userService.makeAdmin(toAdd, eventEntity);
-//        eventEntity.getAdminUsers().add(toAdd);
-//        return eventRepository.save(eventEntity);
-//    }
 
 
 

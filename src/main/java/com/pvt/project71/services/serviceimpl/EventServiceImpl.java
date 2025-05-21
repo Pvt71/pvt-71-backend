@@ -8,6 +8,7 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.repositories.ScoreRepository;
+import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.UserService;
@@ -33,18 +34,20 @@ public class EventServiceImpl implements EventService {
     private final ScoreRepository scoreRepository;
     private final ScoreService scoreService;
     private final EventService eventService;
+    private final UserRepository userRepository;
     private EventRepository eventRepository;
     private UserService userService;
     private static final Duration MAX_PRE_CREATION_TIME = Duration.ofDays(30);
     private static final Duration MIN_DURATION_HOURS = Duration.ofHours(24);
     private static final Duration MAX_DURATION_DAYS = Duration.ofDays(365);
 
-    public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService, ScoreRepository scoreRepository, ScoreService scoreService, EventService eventService) {
+    public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService, ScoreRepository scoreRepository, ScoreService scoreService, EventService eventService, UserRepository userRepository) {
         this.eventRepository = eventRepository;
         this.userService = userService;
         this.scoreRepository = scoreRepository;
         this.scoreService = scoreService;
         this.eventService = eventService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -178,7 +181,7 @@ public class EventServiceImpl implements EventService {
                     .build();
 
             user.getBadges().add(badge);
-            userService.save(user);
+            userRepository.save(user);
         }
     }
 

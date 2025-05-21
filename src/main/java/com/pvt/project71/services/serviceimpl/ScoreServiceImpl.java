@@ -28,7 +28,10 @@ public class ScoreServiceImpl implements ScoreService {
     private final EventService eventService;
     private UserRepository userRepository;
 
-    public ScoreServiceImpl(ScoreRepository scoreRepository, @Lazy UserService userService, EventService eventService, UserRepository userRepository) {
+    public ScoreServiceImpl(ScoreRepository scoreRepository,
+                            @Lazy UserService userService,
+                            EventService eventService,
+                            UserRepository userRepository) {
         this.scoreRepository = scoreRepository;
         this.userService = userService;
         this.eventService = eventService;

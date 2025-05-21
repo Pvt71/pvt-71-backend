@@ -50,6 +50,29 @@ public class FileUploadTests {
         return jwtService.mockOauth2(TestDataUtil.createInvalidTestUserEntity(),1, ChronoUnit.MINUTES);
     }
 
+    @Test
+    public void testUploadEventBadgetShouldSucceed() throws Exception {
+        // Arrange
+        byte[] imageBytes = new byte[1024];
+        MockMultipartFile file = new MockMultipartFile("file", "banner.jpg", "image/jpeg", imageBytes);
+
+        Jwt jwt = getUserToken();
+
+        // Save test user and event first (this assumes user has admin rights on event with ID 1)
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
+        userService.save(user);
+
+        EventEntity event = TestDataUtil.createTestEventEntityA();
+        event.setAdminUsers(List.of(user));
+        eventService.save(event, user);
+
+        // Act
+        mockMvc.perform(MockMvcRequestBuilders
+                        .multipart("/uploads/events/" + event.getId() + "/badge")
+                        .file(file)
+                        .header("Authorization", "Bearer " + jwt.getTokenValue()))
+                .andExpect(status().isOk());
+    }
 
     @Test
     public void testUploadEventBannerWithValidJwtShouldSucceed() throws Exception {
