@@ -168,6 +168,11 @@ public class ChallengeServiceImpl implements ChallengeService {
         return toReturn;
     }
 
+    @Override
+    public List<ChallengeEntity> getCompleted(UserEntity user) {
+        return challengeRepository.findAllCompletedByUser(user.getEmail());
+    }
+
     private boolean checkValidDate(ChallengeEntity challengeEntity, EventEntity eventEntity) {
         if (!challengeEntity.getDates().getUpdatedAt().equals(challengeEntity.getDates().getCreatedAt())) {
             return true;

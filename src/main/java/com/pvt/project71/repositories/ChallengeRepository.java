@@ -11,22 +11,25 @@ import java.util.Objects;
 
 @Repository
 public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Integer> {
+
     @Query("""
     SELECT c, ca FROM ChallengeEntity c
     LEFT JOIN ChallengeAttemptEntity ca ON ca.challenge.id = c.id AND ca.id.userEmail = :userWhoWants
     WHERE c.creator.email = :email
     AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
     ORDER BY c.dates.updatedAt DESC
-""")
+    """)
     List<Object[]> findByCreatorEmail(String email, String userWhoWants);
+
     @Query("""
     SELECT c, ca FROM ChallengeEntity c
     LEFT JOIN ChallengeAttemptEntity ca ON ca.challenge.id = c.id AND ca.id.userEmail = :userEmail
     WHERE c.event.id = :id
     AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
     ORDER BY c.dates.updatedAt DESC
-""")
+    """)
     List<Object[]> findChallengeEntitiesByEvent_Id(Integer id, String userEmail);
+
     @Query("""
     SELECT c, ca FROM ChallengeEntity c
     LEFT JOIN ChallengeAttemptEntity ca ON ca.challenge.id = c.id AND ca.id.userEmail = :userWhoWants
@@ -34,7 +37,7 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
     AND c.event.id = :id
     AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
     ORDER BY c.dates.updatedAt DESC
-""")
+    """)
     List<Object[]> findByCreatorEmailAndEventId(String email, Integer id, String userWhoWants);
 
     @Query("""
@@ -44,6 +47,16 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
     AND c.event.isDefault = true
     AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
     ORDER BY c.dates.updatedAt DESC
-""")
+    """)
     List<Object[]> findAllByEventSchool(String school, String userEmail);
+
+    @Query("""
+    SELECT c FROM ChallengeEntity c
+    WHERE EXISTS 
+    (SELECT ca FROM ChallengeAttemptEntity ca
+    WHERE ca.challenge.id = c.id
+    AND ca.status = ACCEPTED
+    AND ca.id.userEmail =:userEmail)
+    """)
+    List<ChallengeEntity> findAllCompletedByUser(String userEmail);
 }
