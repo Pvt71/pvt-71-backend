@@ -95,7 +95,7 @@ public class BadgeTests {
         testEvent.setBadgePicture(fakeImage);
         eventService.save(testEvent, user);
 
-        EventEntity testEvent2 = TestDataUtil.createTestEventEntityA();
+        EventEntity testEvent2 = TestDataUtil.createTestEventEntityB();
         testEvent2.setAdminUsers(List.of(user));
         testEvent2.setBadgePicture(fakeImage);
         eventService.save(testEvent2, user);
@@ -118,7 +118,7 @@ public class BadgeTests {
                         .with(jwt().jwt(getUserToken(user)))
         ).andExpect(jsonPath("$.badges", hasSize(2))
         ).andExpect(jsonPath("$.badges[0].description").value("You were rank 1 in event: " + testEvent.getName())
-        ).andExpect(jsonPath("$.badges[1].description").value("You were rank 1 in event: " + testEvent.getName()));
+        ).andExpect(jsonPath("$.badges[1].description").value("You were rank 1 in event: " + testEvent2.getName()));
     }
 
     @Test
@@ -171,7 +171,7 @@ public class BadgeTests {
         testEventA.setBadgePicture(fakeImage);
         eventService.save(testEventA, userA);
 
-        EventEntity testEventB = TestDataUtil.createTestEventEntityA();
+        EventEntity testEventB = TestDataUtil.createTestEventEntityB();
         testEventB.setAdminUsers(List.of(userA, userB));
         testEventB.setBadgePicture(fakeImage);
         eventService.save(testEventB, userA);
