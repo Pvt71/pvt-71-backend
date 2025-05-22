@@ -9,10 +9,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.*;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -31,6 +34,8 @@ public class UserEntity {
 
     private String password;
 
+    private boolean newNotifications;
+
     @Lob
     @Column(name = "profile_picture", columnDefinition = "LONGBLOB")
     private byte[] profilePicture;
@@ -43,8 +48,6 @@ public class UserEntity {
     @JsonIgnore
     private List<EventEntity> events;
 
-
-
     @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     private List<ChallengeEntity> challenges;
@@ -56,6 +59,10 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<BadgeEntity> badges;
+
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    private List<NotificationEntity> notifications;
 
     @Override
     public boolean equals(Object o) {

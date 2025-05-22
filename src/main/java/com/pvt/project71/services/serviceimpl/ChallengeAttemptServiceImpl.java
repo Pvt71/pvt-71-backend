@@ -24,13 +24,15 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
     private EventService eventService;
     private ScoreService scoreService;
     private UserService userService;
+    private NotificationService notificationService;
 
-    public ChallengeAttemptServiceImpl(ChallengeService challengeService, ChallengeAttemptRepository challengeAttemptRepository, EventService eventService, ScoreService scoreService, UserService userService) {
+    public ChallengeAttemptServiceImpl(ChallengeService challengeService, ChallengeAttemptRepository challengeAttemptRepository, EventService eventService, ScoreService scoreService, UserService userService, NotificationService notificationService) {
         this.challengeService = challengeService;
         this.challengeAttemptRepository = challengeAttemptRepository;
         this.eventService = eventService;
         this.scoreService = scoreService;
         this.userService = userService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -49,6 +51,7 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
 
         if (challengeEntity.get().getProofType() == ProofType.REQUEST) {
             addChallengeAttemptToChallenge(challengeAttemptEntity, challengeEntity.get());
+            alertAllAdminsAboutRequest(challengeAttemptEntity);
             return challengeAttemptEntity;
 
         } if (challengeEntity.get().getProofType() == ProofType.CONTENT) {
@@ -103,6 +106,8 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
             scoreService.create(ScoreEntity.builder().scoreId(identifier)
                             .build());
         }
+        notificationService.add(userService.findOne(challengeAttemptEntity.getId().getUserEmail()).get(),
+                challengeAttemptEntity.getChallenge().getName() + " is completed!");
         challengeAttemptEntity.getChallenge().setCompletionCount(challengeAttemptEntity.getChallenge().getCompletionCount()+1);
         scoreService.addPoints(identifier, challengeAttemptEntity.getChallenge().getPoints());
         challengeAttemptEntity.setStatus(Status.ACCEPTED);
@@ -123,6 +128,9 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin can not reject their own attempt");
         }
         challengeAttemptEntity.setStatus(Status.REJECTED);
+        notificationService.add(userService.findOne(challengeAttemptEntity.getId().getUserEmail()).get(),
+                "Your attempt for " + challengeAttemptEntity.getChallenge().getName() + " was rejected by "
+                + rejectedBy.getUsername());
         return challengeAttemptRepository.save(challengeAttemptEntity);
     }
 
@@ -181,6 +189,19 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
     private ChallengeAttemptEntity acceptPairContent(ChallengeAttemptEntity scanner, ChallengeAttemptEntity owner) {
         accept(owner, owner.getChallenge().getCreator());
         return accept(scanner, owner.getChallenge().getCreator());
+    }
+
+    private void alertAllAdminsAboutRequest(ChallengeAttemptEntity challengeAttemptEntity) {
+        if (challengeAttemptEntity.getChallenge().getEvent().isDefault()) {
+            UserEntity user = challengeAttemptEntity.getChallenge().getCreator();
+            user.setNewNotifications(true);
+            userService.save(user);
+        } else {
+            for (UserEntity user : challengeAttemptEntity.getChallenge().getEvent().getAdminUsers()) {
+                user.setNewNotifications(true);
+                userService.save(user);
+            }
+        }
     }
 
 }
