@@ -1,8 +1,10 @@
 package com.pvt.project71;
 
+import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.NotificationRepository;
 import com.pvt.project71.repositories.UserRepository;
+import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.NotificationService;
 import com.pvt.project71.services.UserService;
@@ -21,6 +23,8 @@ import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,6 +48,8 @@ public class NotificationTests {
     private NotificationRepository notificationRepository;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private ChallengeService challengeService;
 
     @AfterEach
     public void cleanup() {
@@ -95,5 +101,35 @@ public class NotificationTests {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/notifications/fetch").with(jwt().jwt(getUserToken(user))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$[0].content").value("Notification4"));
+        mockMvc.perform(MockMvcRequestBuilders.get("/notifications/anyNew").with(jwt().jwt(getUserToken(user))))
+                .andExpect(status().isNoContent());
+    }
+    @Test
+    public void testSubmittingAChallengeAttemptGivesCreatorNotification() throws Exception {
+        ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
+        UserEntity user = fixAndSaveUser();
+        UserEntity userB = userService.save(TestDataUtil.createValidTestUserEntityB());
+        challengeEntity.setCreator(user);
+        challengeEntity = challengeService.save(challengeEntity, user);
+        mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit")
+                .with(jwt().jwt(getUserToken(userB))));
+        mockMvc.perform(MockMvcRequestBuilders.get("/notifications/anyNew").with(jwt().jwt(getUserToken(user))))
+                .andExpect(status().isOk());
+    }
+    @Test
+    public void testRejectingAttemptGivesUserNotification() throws Exception {
+        ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
+        UserEntity user = fixAndSaveUser();
+        UserEntity userB = userService.save(TestDataUtil.createValidTestUserEntityB());
+        challengeEntity.setCreator(user);
+        challengeEntity = challengeService.save(challengeEntity, user);
+        mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit")
+                .with(jwt().jwt(getUserToken(userB))));
+        mockMvc.perform(patch("/challenges/"+challengeEntity.getId() +"/reject/" + userB.getEmail())
+                .with(jwt().jwt(getUserToken(user))));
+        mockMvc.perform(MockMvcRequestBuilders.get("/notifications/anyNew").with(jwt().jwt(getUserToken(userB))))
+                .andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.get("/notifications/fetch").with(jwt().jwt(getUserToken(userB))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0]").exists());
     }
 }

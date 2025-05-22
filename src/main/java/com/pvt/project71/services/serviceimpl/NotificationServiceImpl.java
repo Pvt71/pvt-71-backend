@@ -26,7 +26,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @Transactional
+    //@Transactional
     public NotificationEntity add(UserEntity receiver, String content) {
         NotificationEntity notificationEntity = NotificationEntity.builder().content(content)
                 .receiver(receiver).receivedAt(LocalDateTime.now()).build();
