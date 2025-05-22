@@ -69,6 +69,8 @@ public class NotificationServiceImpl implements NotificationService {
             n.setRead(true);
         }
         notificationRepository.saveAll(notificationEntities);
+        receiver.setNewNotifications(false);
+        userService.save(receiver);
         return notificationEntities;
     }
 

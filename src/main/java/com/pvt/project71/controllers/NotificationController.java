@@ -44,7 +44,13 @@ public class NotificationController {
     @GetMapping("/notifications/fetch")
     public ResponseEntity<List<NotificationDto>> fetchUnread(@AuthenticationPrincipal Jwt userToken) {
         UserEntity user = checkAndRetrieveUserFromToken(userToken);
+        if (!user.isNewNotifications()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         List<NotificationEntity> notificationEntities = notificationService.fetchUnread(user);
+        if (notificationEntities.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         List<NotificationDto> dtos = notificationEntities.stream().map(notificationMapper::mapTo).toList();
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
@@ -53,6 +59,9 @@ public class NotificationController {
     public ResponseEntity<List<NotificationDto>> fetchAll(@AuthenticationPrincipal Jwt userToken) {
         UserEntity user = checkAndRetrieveUserFromToken(userToken);
         List<NotificationEntity> notificationEntities = notificationService.fetchAll(user);
+        if (notificationEntities.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         List<NotificationDto> dtos = notificationEntities.stream().map(notificationMapper::mapTo).toList();
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
