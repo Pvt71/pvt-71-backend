@@ -1,0 +1,35 @@
+package com.pvt.project71.repositories;
+
+import com.pvt.project71.domain.entities.NotificationEntity;
+import com.pvt.project71.domain.entities.UserEntity;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.UUID;
+
+@Repository
+public interface NotificationRepository extends CrudRepository<NotificationEntity, UUID> {
+    @Query("""
+    SELECT n FROM NotificationEntity n
+    WHERE n.receiver.email =:userEmail
+    AND n.read = false
+    ORDER BY n.receivedAt DESC
+    """)
+    List<NotificationEntity> fetchUnread(String userEmail);
+
+    @Query("""
+    SELECT n FROM NotificationEntity n
+    WHERE n.receiver.email =:userEmail
+    ORDER BY n.receivedAt DESC
+    """)
+    List<NotificationEntity> fetchAll(String userEmail);
+
+    @Query("""
+    DELETE FROM NotificationEntity n
+    WHERE n.receiver.email =:userEmail
+    AND n.read = true
+    """)
+    void deleteAllRead(String userEmail);
+}

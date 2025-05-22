@@ -66,6 +66,8 @@ public class UserServiceImpl implements UserService {
             user.setChallenges(new ArrayList<>());
         } if (user.getScores() == null) {
             user.setScores(new ArrayList<>());
+        } if (user.getNotifications() == null) {
+            user.setNotifications(new ArrayList<>());
         }
 
         user = userRepository.save(user);
@@ -161,6 +163,7 @@ public class UserServiceImpl implements UserService {
         toReturn.getChallenges().isEmpty();
         toReturn.getEvents().isEmpty();
         toReturn.getScores().isEmpty();
+        toReturn.getNotifications().isEmpty();
         return toReturn;
     }
 
@@ -213,6 +216,12 @@ public class UserServiceImpl implements UserService {
         event.getAdminUsers().remove(toRemove);
         eventRepository.save(event);
         return toRemove;
+    }
+
+    @Override
+    public Boolean hasNewNotifications(String userEmail) {
+        Optional<UserEntity> user = userRepository.findById(userEmail);
+        return user.isPresent() && user.get().isNewNotifications();
     }
 }
 //    @Override

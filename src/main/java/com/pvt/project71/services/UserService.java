@@ -6,7 +6,7 @@ import com.pvt.project71.domain.entities.UserEntity;
 import java.util.List;
 import java.util.Optional;
 
-public interface    UserService {
+public interface UserService {
 
     // CRUD - Create & Update (full)
     UserEntity save(UserEntity user);
@@ -29,4 +29,5 @@ public interface    UserService {
 
     UserEntity makeAdmin(UserEntity toAdd, EventEntity event, UserEntity userAddingThem);
     UserEntity removeAdmin(UserEntity user, EventEntity event);
+    Boolean hasNewNotifications(String userEmail);
 }
