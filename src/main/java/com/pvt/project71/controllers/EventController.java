@@ -69,6 +69,8 @@ public class EventController {
             return new ResponseEntity<EventDto>(HttpStatus.BAD_REQUEST);
         } if (!jwtService.isTokenValid(userToken)) {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        } if (event.getDates().getStartsAt() != null && event.getDates().getStartsAt().isBefore(LocalDateTime.now())) {
+            event.getDates().setStartsAt(null);
         }
         event.getDates().setCreatedAt(null);
         event.setParticipants(0);

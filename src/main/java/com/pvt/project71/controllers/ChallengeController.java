@@ -69,11 +69,12 @@ public class ChallengeController {
      */
     @PostMapping(path = "/challenges")
     public ResponseEntity<ChallengeDto> createChallenge(@Valid @RequestBody ChallengeDto challengeDto, @AuthenticationPrincipal Jwt userToken) {
-        if (challengeDto.getDates() == null || challengeDto.getDates().getEndsAt() == null ||
-                (challengeDto.getDates().getStartsAt() != null && challengeDto.getDates().getStartsAt().isBefore(LocalDateTime.now()))) {
+        if (challengeDto.getDates() == null || challengeDto.getDates().getEndsAt() == null) {
             return new ResponseEntity<ChallengeDto>(HttpStatus.BAD_REQUEST);
         } if (!jwtService.isTokenValid(userToken)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } if ((challengeDto.getDates().getStartsAt() != null && challengeDto.getDates().getStartsAt().isBefore(LocalDateTime.now()))) {
+            challengeDto.getDates().setStartsAt(null);
         }
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
         if (user.isEmpty()) {
