@@ -64,6 +64,10 @@ public class EventEntity {
     private boolean areYouAdmin;
 
 
+    @Lob
+    @Column(name = "badgePicture", columnDefinition = "LONGBLOB")
+    private byte[] badgePicture;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

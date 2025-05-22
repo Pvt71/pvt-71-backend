@@ -29,4 +29,5 @@ public interface EventService {
     EventEntity loadTheLazy(EventEntity toLoad);
     List<EventEntity> findAllBySchool(String school, UserEntity whoWantsThem);
 
+    void giveBadges(EventEntity finishedEvent);
 }

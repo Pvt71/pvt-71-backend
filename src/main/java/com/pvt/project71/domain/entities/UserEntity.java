@@ -9,13 +9,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.*;
 
 import java.util.List;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -55,6 +52,10 @@ public class UserEntity {
     @OneToMany(mappedBy = "scoreId.user", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonIgnore
     private List<ScoreEntity> scores;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<BadgeEntity> badges;
 
     @Override
     public boolean equals(Object o) {

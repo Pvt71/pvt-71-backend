@@ -1,11 +1,16 @@
 package com.pvt.project71.services.serviceimpl;
 
 import com.pvt.project71.domain.TimeStamps;
+import com.pvt.project71.domain.entities.BadgeEntity;
 import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.repositories.EventRepository;
+import com.pvt.project71.repositories.ScoreRepository;
+import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.UserService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,15 +32,19 @@ import java.util.stream.StreamSupport;
 @Service
 public class EventServiceImpl implements EventService {
 
+    private final ScoreRepository scoreRepository;
+    private final UserRepository userRepository;
     private EventRepository eventRepository;
     private UserService userService;
     private static final Duration MAX_PRE_CREATION_TIME = Duration.ofDays(30);
     private static final Duration MIN_DURATION_HOURS = Duration.ofHours(24);
     private static final Duration MAX_DURATION_DAYS = Duration.ofDays(365);
 
-    public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService) {
+    public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService, ScoreRepository scoreRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
         this.userService = userService;
+        this.scoreRepository = scoreRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -100,6 +110,7 @@ public class EventServiceImpl implements EventService {
             Optional.ofNullable(eventEntity.getName()).ifPresent(existingEvent::setName);
             Optional.ofNullable(eventEntity.getDescription()).ifPresent(existingEvent::setDescription);
             Optional.ofNullable(eventEntity.getBannerImage()).ifPresent(existingEvent::setBannerImage);
+            Optional.ofNullable(eventEntity.getBadgePicture()).ifPresent(existingEvent::setBadgePicture);
             return eventRepository.save(existingEvent);
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event does not exist!"));
     }
@@ -160,6 +171,26 @@ public class EventServiceImpl implements EventService {
         return events;
     }
 
+    @Override
+    @Transactional
+    public void giveBadges(EventEntity finishedEvent) {
+        List<ScoreEntity> scores = scoreRepository.findAllByScoreIdEventId(finishedEvent.getId());
 
+        for(int i = 0; i < scores.size(); i++){
+            UserEntity user = scores.get(i).getScoreId().getUser();
 
+            if(user.getBadges() == null){
+                user.setBadges(new ArrayList<>());
+            }
+
+            BadgeEntity badge = BadgeEntity.builder()
+                    .description("You were rank " + (i+1) + " in event: " + finishedEvent.getName())
+                    .image(finishedEvent.getBadgePicture())
+                    .user(user)
+                    .build();
+
+            user.getBadges().add(badge);
+            userRepository.save(user);
+        }
+    }
 }
