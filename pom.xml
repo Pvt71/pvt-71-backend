@@ -82,6 +82,12 @@
 			<version>3.2.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>net.coobird</groupId>
+			<artifactId>thumbnailator</artifactId>
+			<version>0.4.19</version>
+		</dependency>
+
 
 
 		<!-- AUTHORIZATION/SECURITY DEPENDENCIES -->

@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Optional;
+import net.coobird.thumbnailator.Thumbnails;
+import java.io.ByteArrayOutputStream;
 
 @RestController
 @RequestMapping("/uploads")
@@ -111,7 +113,6 @@ public class FileUploadController {
 
         imageValidator.validate(file);
 
-        // TODO : CHECK FOR VALID TOKEN
         if (!jwtService.isTokenValid(userToken)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -121,6 +122,14 @@ public class FileUploadController {
         }
 
         user.get().setProfilePicture(file.getBytes());
+
+        ByteArrayOutputStream thumbOut = new ByteArrayOutputStream();
+        Thumbnails.of(file.getInputStream())
+                .size(100, 100)
+                .outputFormat("JPG")
+                .toOutputStream(thumbOut);
+
+        user.get().setProfilePictureThumbnail(thumbOut.toByteArray());
 
         userService.partialUpdate(user.get().getEmail(), user.get());
 
@@ -138,6 +147,19 @@ public class FileUploadController {
                 .ok()
                 .header("Content-Type", "image/jpeg")
                 .body(optionalUser.get().getProfilePicture());
+    }
+
+    @GetMapping("/users/{email}/profilePicture/thumb")
+    public ResponseEntity<byte[]> getUserProfilePictureThumbnail(@PathVariable String email) {
+        Optional<UserEntity> optionalUser = userService.findOne(email);
+        if (optionalUser.isEmpty() || optionalUser.get().getProfilePictureThumbnail() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity
+                .ok()
+                .header("Content-Type", "image/jpeg")
+                .body(optionalUser.get().getProfilePictureThumbnail());
     }
 
     @DeleteMapping("/users/{email}/profilePicture")
