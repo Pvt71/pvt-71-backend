@@ -46,7 +46,7 @@ public class NotificationController {
     public ResponseEntity<List<NotificationDto>> fetchUnread(@AuthenticationPrincipal Jwt userToken) {
         UserEntity user = checkAndRetrieveUserFromToken(userToken);
         if (!user.isNewNotifications()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         List<NotificationEntity> notificationEntities = notificationService.fetchUnread(user);
         List<NotificationDto> dtos = notificationEntities.stream().map(notificationMapper::mapTo).toList();
