@@ -191,6 +191,19 @@ public class ChallengeAttemptTests {
                         jsonPath("$.content").value(CONTENT));
     }
     @Test
+    public void testAcceptingASubmittedAttemptwhenMaxCompletionIsReachedGives409() throws Exception{
+        ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
+        challengeEntity.setMaxCompletions(1);
+        challengeEntity.setCompletionCount(1);
+        UserEntity user = fixAndSaveUser();
+        challengeEntity.setCreator(user);
+        challengeEntity = challengeService.save(challengeEntity, user);
+        mockMvc.perform(post("/challenges/" +challengeEntity.getId() +"/submit/" + CONTENT).with(jwt().jwt(getOtherUserToken())));
+        mockMvc.perform(patch("/challenges/" + challengeEntity.getId() + "/accept/" + getOtherUserToken().getSubject())
+                        .with(jwt().jwt(getUserToken())))
+                .andExpect(status().isConflict());
+    }
+    @Test
     public void testRejectingASubmittedAttempt() throws Exception{
         ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
         UserEntity user = fixAndSaveUser();

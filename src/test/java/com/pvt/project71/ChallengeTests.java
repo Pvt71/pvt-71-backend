@@ -285,5 +285,20 @@ public class ChallengeTests {
         mockMvc.perform(MockMvcRequestBuilders.get("/challenges").with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(saved.getName()));
     }
+    @Test
+    public void testGetAllChallengeShouldNotShowChallengeWithMaxCompletionsReached() throws Exception {
+        ChallengeEntity testChallenge = TestDataUtil.createChallengeEnitityA();
+        testChallenge.setCompletionCount(1);
+        testChallenge.setMaxCompletions(1);
+        UserEntity testUser = TestDataUtil.createValidTestUserEntity();
+        userService.save(testUser);
+
+        testChallenge.setCreator(testUser);
+        
+        ChallengeEntity saved = challengeService.save(testChallenge, testUser);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/challenges").with(jwt().jwt(getUserToken()))).andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0]").doesNotExist());
+    }
 
 }

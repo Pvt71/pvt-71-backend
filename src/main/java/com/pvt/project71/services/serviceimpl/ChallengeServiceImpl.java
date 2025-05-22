@@ -46,6 +46,12 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     @Transactional
     public ChallengeEntity save(ChallengeEntity challengeEntity, UserEntity doneBy) {
+        if (challengeEntity.getCompletionCount() == null) {
+            challengeEntity.setCompletionCount(0);
+        } if (challengeEntity.getMaxCompletions() == null) {
+            challengeEntity.setMaxCompletions(0);
+        }
+        
         if (challengeEntity.getEvent() == null || challengeEntity.getEvent().getId() == 0) {
             EventEntity defaultEvent = eventService.getDefaultEvent(doneBy.getSchool());
             if (challengeEntity.getAttempts() == null) {
@@ -60,7 +66,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 challengeEntity.getDates().setStartsAt(challengeEntity.getDates().getCreatedAt());
             } if (!checkValidDate(challengeEntity, defaultEvent)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Challenge dates is not valid");
-            }
+            } 
 
             challengeEntity.setEvent(defaultEvent);
             challengeEntity = challengeRepository.save(challengeEntity);

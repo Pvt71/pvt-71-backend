@@ -82,6 +82,7 @@ public class ChallengeController {
         challengeDto.getDates().setCreatedAt(null);
         ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
         challengeEntity.setCreator(user.get());
+        challengeEntity.setCompletionCount(0);
         challengeEntity = challengeService.save(challengeEntity, user.get());
         return new ResponseEntity<>(challengeMapper.mapTo(challengeEntity), HttpStatus.CREATED);
     }
@@ -225,6 +226,8 @@ public class ChallengeController {
         challengeDto.setId(id);
         ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
         challengeEntity.setEvent(found.get().getEvent());
+        challengeEntity.setCompletionCount(found.get().getCompletionCount());
+        challengeEntity.setMaxCompletions(found.get().getMaxCompletions());
         ChallengeEntity updatedChallenge = challengeService.save(challengeEntity, user.get());
         return  new ResponseEntity<>(challengeMapper.mapTo(updatedChallenge), HttpStatus.OK);
     }

@@ -93,13 +93,17 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Attempt is already accepted");
         } if (challengeAttemptEntity.getId().getUserEmail().equals(acceptedBy.getEmail())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin can not accept their own attempt");
-        }
+        } if (challengeAttemptEntity.getChallenge().getMaxCompletions() != 0 
+            && challengeAttemptEntity.getChallenge().getMaxCompletions() <= challengeAttemptEntity.getChallenge().getCompletionCount()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT);
+            }
         ScoreId identifier = new ScoreId(userService.findOne(challengeAttemptEntity.getId().getUserEmail()
         ).get(), challengeAttemptEntity.getChallenge().getEvent());
         if (scoreService.findOne(identifier).isEmpty()) { //skapa en score om det inte finns
             scoreService.create(ScoreEntity.builder().scoreId(identifier)
                             .build());
         }
+        challengeAttemptEntity.getChallenge().setCompletionCount(challengeAttemptEntity.getChallenge().getCompletionCount()+1);
         scoreService.addPoints(identifier, challengeAttemptEntity.getChallenge().getPoints());
         challengeAttemptEntity.setStatus(Status.ACCEPTED);
         return challengeAttemptRepository.save(challengeAttemptEntity);
