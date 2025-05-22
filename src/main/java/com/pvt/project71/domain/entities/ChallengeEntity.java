@@ -28,6 +28,7 @@ public class ChallengeEntity {
 
     private String name;
     private Integer maxCompletions;
+    private Integer completionCount;
 
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)

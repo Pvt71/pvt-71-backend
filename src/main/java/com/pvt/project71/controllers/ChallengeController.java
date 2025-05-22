@@ -69,11 +69,12 @@ public class ChallengeController {
      */
     @PostMapping(path = "/challenges")
     public ResponseEntity<ChallengeDto> createChallenge(@Valid @RequestBody ChallengeDto challengeDto, @AuthenticationPrincipal Jwt userToken) {
-        if (challengeDto.getDates() == null || challengeDto.getDates().getEndsAt() == null ||
-                (challengeDto.getDates().getStartsAt() != null && challengeDto.getDates().getStartsAt().isBefore(LocalDateTime.now()))) {
+        if (challengeDto.getDates() == null || challengeDto.getDates().getEndsAt() == null) {
             return new ResponseEntity<ChallengeDto>(HttpStatus.BAD_REQUEST);
         } if (!jwtService.isTokenValid(userToken)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } if ((challengeDto.getDates().getStartsAt() != null && challengeDto.getDates().getStartsAt().isBefore(LocalDateTime.now()))) {
+            challengeDto.getDates().setStartsAt(null);
         }
         Optional<UserEntity> user = userService.findOne(userToken.getSubject());
         if (user.isEmpty()) {
@@ -82,6 +83,7 @@ public class ChallengeController {
         challengeDto.getDates().setCreatedAt(null);
         ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
         challengeEntity.setCreator(user.get());
+        challengeEntity.setCompletionCount(0);
         challengeEntity = challengeService.save(challengeEntity, user.get());
         return new ResponseEntity<>(challengeMapper.mapTo(challengeEntity), HttpStatus.CREATED);
     }
@@ -225,6 +227,8 @@ public class ChallengeController {
         challengeDto.setId(id);
         ChallengeEntity challengeEntity = challengeMapper.mapFrom(challengeDto);
         challengeEntity.setEvent(found.get().getEvent());
+        challengeEntity.setCompletionCount(found.get().getCompletionCount());
+        challengeEntity.setMaxCompletions(found.get().getMaxCompletions());
         ChallengeEntity updatedChallenge = challengeService.save(challengeEntity, user.get());
         return  new ResponseEntity<>(challengeMapper.mapTo(updatedChallenge), HttpStatus.OK);
     }
