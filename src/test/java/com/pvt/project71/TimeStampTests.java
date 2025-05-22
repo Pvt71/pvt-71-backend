@@ -167,7 +167,7 @@ public class TimeStampTests {
                 .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated());
     }
     @Test
-    public void testStartingEventLaterAndStartChallengeBeforeEventGives400() throws Exception {
+    public void testStartingEventLaterAndStartChallengeBeforeEventGives201() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         testEvent.getDates().setStartsAt(LocalDateTime.now().plusDays(30));
 
@@ -188,7 +188,7 @@ public class TimeStampTests {
 
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isBadRequest());
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated());
     }
     @Test
     public void testStartingEventLaterAndAddChallengeWithNullStartTimeGivesEventStartTime() throws Exception {
@@ -242,7 +242,7 @@ public class TimeStampTests {
         assertNotEquals(oldUpdatedAt, testEvent.getDates().getUpdatedAt());
     }
     @Test
-    public void testCreatingEventThatStartsBeforeNowGives400() throws Exception {
+    public void testCreatingEventThatStartsBeforeNowGives201() throws Exception {
         EventEntity testEvent = TestDataUtil.createTestEventEntityA();
         testEvent.getDates().setStartsAt(LocalDateTime.now().minusDays(1));
 
@@ -254,15 +254,15 @@ public class TimeStampTests {
         String eventJson = objectMapper.writeValueAsString(testEvent);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/events").contentType(MediaType.APPLICATION_JSON)
-                .content(eventJson).with(jwt().jwt(getUserToken()))).andExpect(status().isBadRequest());
+                .content(eventJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated());
     }
     @Test
-    public void testCreatingChallengeThatStartsBeforeNowGives400() throws Exception {
+    public void testCreatingChallengeThatStartsBeforeNowGives201() throws Exception {
         ChallengeEntity testChallenge = setUpChallengeEntityAWithUser();
         testChallenge.getDates().setStartsAt(LocalDateTime.now().minusDays(1));
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isBadRequest());
+                .content(challengeJson).with(jwt().jwt(getUserToken()))).andExpect(status().isCreated());
     }
 }

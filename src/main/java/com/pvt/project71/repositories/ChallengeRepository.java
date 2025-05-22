@@ -17,6 +17,7 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
     LEFT JOIN ChallengeAttemptEntity ca ON ca.challenge.id = c.id AND ca.id.userEmail = :userWhoWants
     WHERE c.creator.email = :email
     AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
+    AND (c.maxCompletions = 0 OR c.maxCompletions > c.completionCount)
     ORDER BY c.dates.updatedAt DESC
     """)
     List<Object[]> findByCreatorEmail(String email, String userWhoWants);
@@ -26,6 +27,7 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
     LEFT JOIN ChallengeAttemptEntity ca ON ca.challenge.id = c.id AND ca.id.userEmail = :userEmail
     WHERE c.event.id = :id
     AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
+    AND (c.maxCompletions = 0 OR c.maxCompletions > c.completionCount)
     ORDER BY c.dates.updatedAt DESC
     """)
     List<Object[]> findChallengeEntitiesByEvent_Id(Integer id, String userEmail);
@@ -36,6 +38,7 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
     WHERE c.creator.email = :email
     AND c.event.id = :id
     AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
+    AND (c.maxCompletions = 0 OR c.maxCompletions > c.completionCount)
     ORDER BY c.dates.updatedAt DESC
     """)
     List<Object[]> findByCreatorEmailAndEventId(String email, Integer id, String userWhoWants);
@@ -46,6 +49,7 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
     WHERE c.event.school = :school
     AND c.event.isDefault = true
     AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
+    AND (c.maxCompletions = 0 OR c.maxCompletions > c.completionCount)
     ORDER BY c.dates.updatedAt DESC
     """)
     List<Object[]> findAllByEventSchool(String school, String userEmail);

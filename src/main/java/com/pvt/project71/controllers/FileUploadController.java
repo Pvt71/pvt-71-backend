@@ -171,6 +171,7 @@ public class FileUploadController {
 
         UserEntity user = optionalUser.get();
         user.setProfilePicture(null);
+        user.setProfilePictureThumbnail(null);
         userService.partialUpdate(email, user);
 
         return ResponseEntity.noContent().build();
