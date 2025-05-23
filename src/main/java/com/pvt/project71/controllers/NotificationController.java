@@ -55,9 +55,6 @@ public class NotificationController {
     @GetMapping("/notifications/fetch")
     public ResponseEntity<List<Object>> fetchUnread(@AuthenticationPrincipal Jwt userToken) {
         UserEntity user = checkAndRetrieveUserFromToken(userToken);
-        if (!user.isNewNotifications()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
         List<ChallengeAttemptDto> attemptDtos = challengeAttemptService.getAttemptsUserCanAllow(user).stream()
                 .map(challengeAttemptMapper::mapTo)
                 .collect(toList());
