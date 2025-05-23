@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class NotificationDto {
 
+    private UUID uuid;
     private String content;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")

@@ -20,11 +20,4 @@ public interface NotificationRepository extends CrudRepository<NotificationEntit
     """)
     List<NotificationEntity> fetchAll(String userEmail);
 
-    @Modifying
-    @Transactional
-    @Query("""
-    DELETE FROM NotificationEntity n
-    WHERE n.receiver.email =:userEmail
-    """)
-    void deleteAllRead(String userEmail);
 }

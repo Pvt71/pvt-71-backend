@@ -10,18 +10,21 @@ import com.pvt.project71.services.ChallengeAttemptService;
 import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.NotificationService;
 import com.pvt.project71.services.UserService;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -65,6 +68,12 @@ public class NotificationController {
         allDtos.addAll(notificationDtos);
         return new ResponseEntity<>(allDtos, HttpStatus.OK);
     }
+    @DeleteMapping("/notifications/dismiss/{uuid}")
+    public ResponseEntity dismiss(@PathVariable("uuid") UUID uuid, @AuthenticationPrincipal Jwt userToken) {
+        UserEntity user = checkAndRetrieveUserFromToken(userToken);
+        notificationService.removeNotification(uuid, user);
+        return  new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 
     private UserEntity checkAndRetrieveUserFromToken(Jwt userToken) {
         if (!jwtService.isTokenValid(userToken)) {
@@ -76,4 +85,5 @@ public class NotificationController {
         }
         return user.get();
     }
+
 }
