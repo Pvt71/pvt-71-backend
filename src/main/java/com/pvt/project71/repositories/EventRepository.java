@@ -23,4 +23,14 @@ public interface EventRepository extends CrudRepository<EventEntity, Integer>,
 """)
     List<EventEntity> findBySchool(@Param("school") String school);
     Optional<EventEntity> findByName(String name);
+
+    @Query("""
+    SELECT e FROM EventEntity e
+    WHERE EXISTS (
+    SELECT u FROM e.adminUsers u
+    WHERE u.email =:email)
+    AND (e.dates.endsAt IS NULL OR e.dates.endsAt > CURRENT_TIMESTAMP)
+    ORDER BY e.dates.updatedAt DESC
+    """)
+    List<EventEntity> findByUserAdmin(String email);
 }

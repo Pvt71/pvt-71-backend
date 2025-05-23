@@ -172,6 +172,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public List<EventEntity> findAllUserIsAdminIn(UserEntity user) {
+        return eventRepository.findByUserAdmin(user.getEmail());
+    }
+
+    @Override
     @Transactional
     public void giveBadges(EventEntity finishedEvent) {
         List<ScoreEntity> scores = scoreRepository.findAllByScoreIdEventId(finishedEvent.getId());

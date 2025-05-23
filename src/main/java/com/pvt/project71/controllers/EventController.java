@@ -161,6 +161,19 @@ public class EventController {
 
         return ResponseEntity.ok(dtos);
     }
+    @GetMapping(path = "users/{email}/events")
+    public ResponseEntity<List<EventDto>> getEventsUserIsAdminIn(@PathVariable("email") String email) {
+        Optional<UserEntity> user = userService.findOne(email);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        List<EventEntity> events = eventService.findAllUserIsAdminIn(user.get());
+        List<EventDto> dtos = events.stream()
+                .map(eventMapper::mapTo)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
 
     /**
      * Get a specific Event.
