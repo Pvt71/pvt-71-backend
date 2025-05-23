@@ -23,6 +23,10 @@ public class EventMapper implements Mapper<EventEntity, EventDto> {
             dto.setBannerUrl("/uploads/events/" + eventEntity.getId() + "/banner");
         }
 
+        if (eventEntity.getBadgePicture() != null) {
+            dto.setBannerUrl("/uploads/events/" + eventEntity.getId() + "/badge");
+        }
+
         return dto;
     }
 
@@ -33,6 +37,8 @@ public class EventMapper implements Mapper<EventEntity, EventDto> {
 
         // Do not map bannerUrl
         entity.setBannerImage(null);
+
+        entity.setBadgePicture(null);
 
         return entity;
     }
