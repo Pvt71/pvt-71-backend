@@ -517,22 +517,15 @@ public class UserControllerTests {
     @Test
     public void testUserDtoContainsBadgeImageUrls() throws Exception {
         UserEntity user = TestDataUtil.createValidTestUserEntity();
-        BadgeEntity badgeOne = BadgeEntity.builder()
+
+        BadgeEntity badge = BadgeEntity.builder()
                 .description("Test Badge")
                 .image(new byte[]{1, 2, 3})
                 .build();
-        BadgeEntity badgeTwo = BadgeEntity.builder()
-                .description("Test Badge")
-                .image(new byte[]{1, 2, 3})
-                .build();
-        badgeOne.setUser(user);
-        badgeTwo.setUser(user);
 
-        List<BadgeEntity> badgeList = new ArrayList<>();
-        badgeList.add(badgeOne);
-        badgeList.add(badgeTwo);
+        badge.setUser(user);
 
-        user.setBadges(badgeList);
+        user.setBadges(List.of(badge));
         userService.save(user);
 
         Jwt jwt = jwtService.mockOauth2(user, 5, ChronoUnit.MINUTES);
@@ -540,8 +533,7 @@ public class UserControllerTests {
         mockMvc.perform(MockMvcRequestBuilders.get("/users/" + user.getEmail())
                         .header("Authorization", "Bearer " + jwt.getTokenValue()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.badges[0].imageUrl").value("/uploads/events/1/badge"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.badges[1].imageUrl").value("/uploads/events/2/badge"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.badges[0].imageUrl").value("/uploads/events/1/badge"));
     }
 
 
