@@ -107,11 +107,13 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
                             .build());
         }
         notificationService.add(userService.findOne(challengeAttemptEntity.getId().getUserEmail()).get(),
-                challengeAttemptEntity.getChallenge().getName() + " is completed!");
+                challengeAttemptEntity.getChallenge().getName() + " was accepted by " + acceptedBy.getUsername());
         challengeAttemptEntity.getChallenge().setCompletionCount(challengeAttemptEntity.getChallenge().getCompletionCount()+1);
         scoreService.addPoints(identifier, challengeAttemptEntity.getChallenge().getPoints());
         challengeAttemptEntity.setStatus(Status.ACCEPTED);
-        return challengeAttemptRepository.save(challengeAttemptEntity);
+        challengeAttemptEntity =  challengeAttemptRepository.save(challengeAttemptEntity);
+        alertAllAdminsAboutRequest(challengeAttemptEntity);
+        return challengeAttemptEntity;
     }
 
     @Override
@@ -131,7 +133,9 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
         notificationService.add(userService.findOne(challengeAttemptEntity.getId().getUserEmail()).get(),
                 "Your attempt for " + challengeAttemptEntity.getChallenge().getName() + " was rejected by "
                 + rejectedBy.getUsername());
-        return challengeAttemptRepository.save(challengeAttemptEntity);
+        challengeAttemptEntity = challengeAttemptRepository.save(challengeAttemptEntity);
+        alertAllAdminsAboutRequest(challengeAttemptEntity);
+        return challengeAttemptEntity;
     }
 
 
@@ -194,12 +198,10 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
     private void alertAllAdminsAboutRequest(ChallengeAttemptEntity challengeAttemptEntity) {
         if (challengeAttemptEntity.getChallenge().getEvent().isDefault()) {
             UserEntity user = challengeAttemptEntity.getChallenge().getCreator();
-            user.setNewNotifications(true);
-            userService.save(user);
+            notificationService.anyNotificationsLeft(user);
         } else {
             for (UserEntity user : challengeAttemptEntity.getChallenge().getEvent().getAdminUsers()) {
-                user.setNewNotifications(true);
-                userService.save(user);
+                notificationService.anyNotificationsLeft(user);
             }
         }
     }
