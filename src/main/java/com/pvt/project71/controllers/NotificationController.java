@@ -58,14 +58,14 @@ public class NotificationController {
         if (!user.isNewNotifications()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        List<ChallengeAttemptDto> dtos = challengeAttemptService.getAttemptsUserCanAllow(user).stream()
+        List<ChallengeAttemptDto> attemptDtos = challengeAttemptService.getAttemptsUserCanAllow(user).stream()
                 .map(challengeAttemptMapper::mapTo)
                 .collect(toList());
         List<NotificationEntity> notificationEntities = notificationService.fetchUnread(user);
-        List<NotificationDto> attemptDtos = notificationEntities.stream().map(notificationMapper::mapTo).toList();
+        List<NotificationDto> notificationDtos = notificationEntities.stream().map(notificationMapper::mapTo).toList();
         List<Object> allDtos = new ArrayList<>();
         allDtos.addAll(attemptDtos);
-        allDtos.addAll(notificationEntities);
+        allDtos.addAll(notificationDtos);
         return new ResponseEntity<>(allDtos, HttpStatus.OK);
     }
     
