@@ -16,6 +16,7 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
     SELECT c, ca FROM ChallengeEntity c
     LEFT JOIN ChallengeAttemptEntity ca ON ca.challenge.id = c.id AND ca.id.userEmail = :userWhoWants
     WHERE c.creator.email = :email
+    AND c.event.isDefault = true
     AND (c.dates.endsAt IS NULL OR c.dates.endsAt > CURRENT_TIMESTAMP)
     AND (c.maxCompletions = 0 OR c.maxCompletions > c.completionCount)
     ORDER BY c.dates.updatedAt DESC
