@@ -24,7 +24,7 @@ public class EventMapper implements Mapper<EventEntity, EventDto> {
         }
 
         if (eventEntity.getBadgePicture() != null) {
-            dto.setBannerUrl("/uploads/events/" + eventEntity.getId() + "/badge");
+            dto.setBadgeUrl("/uploads/events/" + eventEntity.getId() + "/badge");
         }
 
         return dto;
