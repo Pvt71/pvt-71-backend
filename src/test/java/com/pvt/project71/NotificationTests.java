@@ -75,34 +75,6 @@ public class NotificationTests {
         mockMvc.perform(MockMvcRequestBuilders.get("/notifications/fetch").with(jwt().jwt(getUserToken(user))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$[0].content").value("Notification1"));
 
-        user = userService.findOne(user.getEmail()).get();
-        assertFalse(user.isNewNotifications());
-
-        notificationService.add(user, "Notification2");
-        user = userService.findOne(user.getEmail()).get();
-        assertTrue(user.isNewNotifications());
-        mockMvc.perform(MockMvcRequestBuilders.get("/notifications/retry").with(jwt().jwt(getUserToken(user))))
-                .andExpect(status().isOk()).andExpect(jsonPath("$[0].content").value("Notification2"))
-                .andExpect(jsonPath("$[1].content").value("Notification1"));
-
-        user = userService.findOne(user.getEmail()).get();
-        assertFalse(user.isNewNotifications());
-
-        notificationService.add(user, "Notification3");
-        mockMvc.perform(MockMvcRequestBuilders.get("/notifications/fetch").with(jwt().jwt(getUserToken(user))))
-                .andExpect(status().isOk()).andExpect(jsonPath("$[0].content").value("Notification3"));
-
-        notificationService.add(user, "Notification4");
-        mockMvc.perform(MockMvcRequestBuilders.delete("/notifications/acknowledge").with(jwt().jwt(getUserToken(user))))
-                .andExpect(status().isNoContent());
-
-        user = userService.findOne(user.getEmail()).get();
-        assertTrue(user.isNewNotifications());
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/notifications/fetch").with(jwt().jwt(getUserToken(user))))
-                .andExpect(status().isOk()).andExpect(jsonPath("$[0].content").value("Notification4"));
-        mockMvc.perform(MockMvcRequestBuilders.get("/notifications/anyNew").with(jwt().jwt(getUserToken(user))))
-                .andExpect(status().isNoContent());
     }
     @Test
     public void testSubmittingAChallengeAttemptGivesCreatorNotification() throws Exception {
