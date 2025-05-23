@@ -240,4 +240,37 @@ public class FileUploadController {
 
         return ResponseEntity.noContent().build();
     }
+
+
+    //CHALLENGE ATTEMPT UPLOAD/GET
+    @PostMapping("/challenges/attempt/{id}/submit/{content}")
+    public ResponseEntity<Void> uploadPictureChallengeAttempt(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal Jwt userToken) throws IOException {
+
+        imageValidator.validate(file);
+
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/challenges/attempt/{id}/submit/{content}")
+    public ResponseEntity<byte[]> getPictureChallengeAttempt(@PathVariable String email) {
+        Optional<UserEntity> optionalUser = userService.findOne(email);
+        if (optionalUser.isEmpty() || optionalUser.get().getProfilePicture() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity
+                .ok()
+                .header("Content-Type", "image/jpeg")
+                .body(optionalUser.get().getProfilePicture());
+    }
 }
