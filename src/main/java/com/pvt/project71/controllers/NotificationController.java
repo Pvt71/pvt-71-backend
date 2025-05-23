@@ -1,9 +1,12 @@
 package com.pvt.project71.controllers;
 
+import com.pvt.project71.domain.dto.ChallengeAttemptDto;
 import com.pvt.project71.domain.dto.NotificationDto;
 import com.pvt.project71.domain.entities.NotificationEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.mappers.Mapper;
+import com.pvt.project71.mappers.mapperimpl.ChallengeAttemptMapper;
+import com.pvt.project71.services.ChallengeAttemptService;
 import com.pvt.project71.services.JwtService;
 import com.pvt.project71.services.NotificationService;
 import com.pvt.project71.services.UserService;
@@ -16,9 +19,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @RestController
 public class NotificationController {
@@ -27,12 +33,16 @@ public class NotificationController {
     private JwtService jwtService;
     private UserService userService;
     private Mapper<NotificationEntity, NotificationDto> notificationMapper;
+    private ChallengeAttemptService challengeAttemptService;
+    private ChallengeAttemptMapper challengeAttemptMapper;
 
-    public NotificationController(NotificationService notificationService, JwtService jwtService, UserService userService, Mapper<NotificationEntity, NotificationDto> notificationMapper) {
+    public NotificationController(NotificationService notificationService, JwtService jwtService, UserService userService, Mapper<NotificationEntity, NotificationDto> notificationMapper, ChallengeAttemptService challengeAttemptService, ChallengeAttemptMapper challengeAttemptMapper) {
         this.notificationService = notificationService;
         this.jwtService = jwtService;
         this.userService = userService;
         this.notificationMapper = notificationMapper;
+        this.challengeAttemptService = challengeAttemptService;
+        this.challengeAttemptMapper = challengeAttemptMapper;
     }
 
     @GetMapping("/notifications/anyNew")
@@ -43,14 +53,20 @@ public class NotificationController {
     }
 
     @GetMapping("/notifications/fetch")
-    public ResponseEntity<List<NotificationDto>> fetchUnread(@AuthenticationPrincipal Jwt userToken) {
+    public ResponseEntity<List<Object>> fetchUnread(@AuthenticationPrincipal Jwt userToken) {
         UserEntity user = checkAndRetrieveUserFromToken(userToken);
         if (!user.isNewNotifications()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+        List<ChallengeAttemptDto> dtos = challengeAttemptService.getAttemptsUserCanAllow(user).stream()
+                .map(challengeAttemptMapper::mapTo)
+                .collect(toList());
         List<NotificationEntity> notificationEntities = notificationService.fetchUnread(user);
-        List<NotificationDto> dtos = notificationEntities.stream().map(notificationMapper::mapTo).toList();
-        return new ResponseEntity<>(dtos, HttpStatus.OK);
+        List<NotificationDto> attemptDtos = notificationEntities.stream().map(notificationMapper::mapTo).toList();
+        List<Object> allDtos = new ArrayList<>();
+        allDtos.addAll(attemptDtos);
+        allDtos.addAll(notificationEntities);
+        return new ResponseEntity<>(allDtos, HttpStatus.OK);
     }
     
     @GetMapping("/notifications/retry")
