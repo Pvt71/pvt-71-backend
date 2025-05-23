@@ -107,7 +107,8 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
                             .build());
         }
         notificationService.add(userService.findOne(challengeAttemptEntity.getId().getUserEmail()).get(),
-                challengeAttemptEntity.getChallenge().getName() + " was accepted by " + acceptedBy.getUsername());
+                "Your completion of " + challengeAttemptEntity.getChallenge().getName()
+                        + " was accepted by " + acceptedBy.getUsername());
         challengeAttemptEntity.getChallenge().setCompletionCount(challengeAttemptEntity.getChallenge().getCompletionCount()+1);
         scoreService.addPoints(identifier, challengeAttemptEntity.getChallenge().getPoints());
         challengeAttemptEntity.setStatus(Status.ACCEPTED);
@@ -131,7 +132,7 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
         }
         challengeAttemptEntity.setStatus(Status.REJECTED);
         notificationService.add(userService.findOne(challengeAttemptEntity.getId().getUserEmail()).get(),
-                "Your attempt for " + challengeAttemptEntity.getChallenge().getName() + " was rejected by "
+                "Your completion of " + challengeAttemptEntity.getChallenge().getName() + " was rejected by "
                 + rejectedBy.getUsername());
         challengeAttemptEntity = challengeAttemptRepository.save(challengeAttemptEntity);
         alertAllAdminsAboutRequest(challengeAttemptEntity);
