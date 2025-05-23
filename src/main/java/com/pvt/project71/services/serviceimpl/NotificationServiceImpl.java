@@ -54,7 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
     public List<NotificationEntity> fetchUnread(UserEntity receiver) {
         List<NotificationEntity> notificationEntities = notificationRepository.fetchUnread(receiver.getEmail());
         for (NotificationEntity n : notificationEntities) {
-            n.setRead(true);
+            n.setSeen(true);
         }
         notificationRepository.saveAll(notificationEntities);
         receiver.setNewNotifications(false);
@@ -66,7 +66,7 @@ public class NotificationServiceImpl implements NotificationService {
     public List<NotificationEntity> fetchAll(UserEntity receiver) {
         List<NotificationEntity> notificationEntities = notificationRepository.fetchAll(receiver.getEmail());
         for (NotificationEntity n : notificationEntities) {
-            n.setRead(true);
+            n.setSeen(true);
         }
         notificationRepository.saveAll(notificationEntities);
         receiver.setNewNotifications(false);

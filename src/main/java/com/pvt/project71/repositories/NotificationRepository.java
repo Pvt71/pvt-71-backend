@@ -16,7 +16,7 @@ public interface NotificationRepository extends CrudRepository<NotificationEntit
     @Query("""
     SELECT n FROM NotificationEntity n
     WHERE n.receiver.email =:userEmail
-    AND n.read = false
+    AND n.seen = false
     ORDER BY n.receivedAt DESC
     """)
     List<NotificationEntity> fetchUnread(String userEmail);
@@ -33,7 +33,7 @@ public interface NotificationRepository extends CrudRepository<NotificationEntit
     @Query("""
     DELETE FROM NotificationEntity n
     WHERE n.receiver.email =:userEmail
-    AND n.read = true
+    AND n.seen = true
     """)
     void deleteAllRead(String userEmail);
 }
