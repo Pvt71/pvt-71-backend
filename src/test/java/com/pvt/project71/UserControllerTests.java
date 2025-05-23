@@ -2,7 +2,9 @@ package com.pvt.project71;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWT;
+import com.pvt.project71.domain.dto.BadgeDto;
 import com.pvt.project71.domain.dto.UserDto;
+import com.pvt.project71.domain.entities.BadgeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.JwtService;
@@ -25,6 +27,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
@@ -509,6 +513,37 @@ public class UserControllerTests {
                         .with(jwt().jwt(expiredToken))
         ).andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
+
+    @Test
+    public void testUserDtoContainsBadgeImageUrls() throws Exception {
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
+        BadgeEntity badgeOne = BadgeEntity.builder()
+                .description("Test Badge")
+                .image(new byte[]{1, 2, 3})
+                .build();
+        BadgeEntity badgeTwo = BadgeEntity.builder()
+                .description("Test Badge")
+                .image(new byte[]{1, 2, 3})
+                .build();
+        badgeOne.setUser(user);
+        badgeTwo.setUser(user);
+
+        List<BadgeEntity> badgeList = new ArrayList<>();
+        badgeList.add(badgeOne);
+        badgeList.add(badgeTwo);
+
+        user.setBadges(badgeList);
+        userService.save(user);
+
+        Jwt jwt = jwtService.mockOauth2(user, 5, ChronoUnit.MINUTES);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/users/" + user.getEmail())
+                        .header("Authorization", "Bearer " + jwt.getTokenValue()))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.badges[0].imageUrl").value("/uploads/events/1/badge"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.badges[1].imageUrl").value("/uploads/events/2/badge"));
+    }
+
 
 
 

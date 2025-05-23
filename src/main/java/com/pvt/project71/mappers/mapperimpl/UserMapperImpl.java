@@ -10,11 +10,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapperImpl implements Mapper<UserEntity, UserDto> {
 
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
+    private final BadgeMapper badgeMapper;
 
     @Autowired
-    public UserMapperImpl(ModelMapper modelMapper){
+    public UserMapperImpl(ModelMapper modelMapper, BadgeMapper badgeMapper) {
         this.modelMapper = modelMapper;
+        this.badgeMapper = badgeMapper;
     }
 
     @Override
@@ -25,6 +27,12 @@ public class UserMapperImpl implements Mapper<UserEntity, UserDto> {
             dto.setProfilePictureUrl("/uploads/users/" + userEntity.getEmail() + "/profilePicture");
         }
 
+        if (userEntity.getBadges() != null) {
+            dto.setBadges(userEntity.getBadges().stream()
+                    .map(badgeMapper::mapTo)
+                    .toList());
+        }
+
         return dto;
     }
 
@@ -32,8 +40,8 @@ public class UserMapperImpl implements Mapper<UserEntity, UserDto> {
     public UserEntity mapFrom(UserDto userDto) {
         UserEntity entity = modelMapper.map(userDto, UserEntity.class);
 
-        // Do not map profilePictureUrl
         entity.setProfilePicture(null);
+        entity.setBadges(null);
 
         return entity;
     }
