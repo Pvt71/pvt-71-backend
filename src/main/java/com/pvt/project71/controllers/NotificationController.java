@@ -58,27 +58,12 @@ public class NotificationController {
         List<ChallengeAttemptDto> attemptDtos = challengeAttemptService.getAttemptsUserCanAllow(user).stream()
                 .map(challengeAttemptMapper::mapTo)
                 .collect(toList());
-        List<NotificationEntity> notificationEntities = notificationService.fetchUnread(user);
+        List<NotificationEntity> notificationEntities = notificationService.fetchAll(user);
         List<NotificationDto> notificationDtos = notificationEntities.stream().map(notificationMapper::mapTo).toList();
         List<Object> allDtos = new ArrayList<>();
         allDtos.addAll(attemptDtos);
         allDtos.addAll(notificationDtos);
         return new ResponseEntity<>(allDtos, HttpStatus.OK);
-    }
-    
-    @GetMapping("/notifications/retry")
-    public ResponseEntity<List<NotificationDto>> fetchAll(@AuthenticationPrincipal Jwt userToken) {
-        UserEntity user = checkAndRetrieveUserFromToken(userToken);
-        List<NotificationEntity> notificationEntities = notificationService.fetchAll(user);
-        List<NotificationDto> dtos = notificationEntities.stream().map(notificationMapper::mapTo).toList();
-        return new ResponseEntity<>(dtos, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/notifications/acknowledge")
-    public ResponseEntity deleteAllReadNotifications(@AuthenticationPrincipal Jwt userToken) {
-        UserEntity user = checkAndRetrieveUserFromToken(userToken);
-        notificationService.deleteAllRead(user);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
     private UserEntity checkAndRetrieveUserFromToken(Jwt userToken) {

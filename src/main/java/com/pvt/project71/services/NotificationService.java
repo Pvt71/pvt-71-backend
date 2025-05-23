@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface NotificationService {
     NotificationEntity add(UserEntity receiver, String content);
-    List<NotificationEntity> fetchUnread(UserEntity receiver);
 
     List<NotificationEntity> fetchAll(UserEntity receiver);
-    void deleteAllRead(UserEntity receiver);
 }

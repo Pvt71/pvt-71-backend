@@ -30,5 +30,4 @@ public class NotificationEntity {
 
     private String content;
 
-    private boolean seen;
 }
