@@ -1,7 +1,9 @@
-package com.pvt.project71.services.serviceimpl;
+package com.pvt.project71.services.serviceimpl.security;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.pvt.project71.domain.entities.UserEntity;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.GoogleAuthService;
+import com.pvt.project71.services.security.JwtService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -15,8 +17,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class JwtServiceImpl implements JwtService {
+    private final GoogleAuthService googleAuthService;
     private final JwtEncoder encoder;
-    public JwtServiceImpl(JwtEncoder encoder) {
+
+    public JwtServiceImpl(GoogleAuthService googleAuthService, JwtEncoder encoder) {
+        this.googleAuthService = googleAuthService;
         this.encoder = encoder;
     }
 
@@ -38,7 +43,7 @@ public class JwtServiceImpl implements JwtService {
     }
     //NO AUTHENTICATION, USE WITH CAUTION AND NOT IN PRODUCTION!
     @Override
-     public Jwt mockOauth2(UserEntity userEntity, long duration, ChronoUnit timeUnit) {
+     public Jwt generateTokenFromUserEntity(UserEntity userEntity, long duration, ChronoUnit timeUnit) {
 
         Instant time = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder().issuer("self")
@@ -47,6 +52,18 @@ public class JwtServiceImpl implements JwtService {
                 .subject(userEntity.getEmail())
                 .build();
         return this.encoder.encode(JwtEncoderParameters.from(claims));
+    }
+
+    @Override
+    public Jwt generateJwtFromGoogle(String googleToken) {
+
+        GoogleIdToken idToken = googleAuthService.verifyToken(googleToken);
+
+        if (googleToken != null) {
+            UserEntity user = UserEntity.builder().email(idToken.getPayload().getEmail()).build();
+            return generateTokenFromUserEntity(user, 20,ChronoUnit.MINUTES);
+        }
+        return null;
     }
 
     @Override

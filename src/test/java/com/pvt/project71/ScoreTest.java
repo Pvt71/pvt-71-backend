@@ -1,6 +1,5 @@
 package com.pvt.project71;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pvt.project71.domain.dto.ScoreDto;
@@ -12,32 +11,25 @@ import com.pvt.project71.mappers.mapperimpl.UserMapperImpl;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.EventService;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.UserService;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.repositories.ScoreRepository;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -101,7 +92,7 @@ public class ScoreTest {
         event = eventService.save(event, user);
     }
     private Jwt getUserToken() {
-        return jwtService.mockOauth2(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
+        return jwtService.generateTokenFromUserEntity(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
     }
     @Test
     public void testGetValidScoreScoreHttpOk() throws Exception {

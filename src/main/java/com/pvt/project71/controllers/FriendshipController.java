@@ -8,7 +8,7 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.enums.Status;
 import com.pvt.project71.mappers.Mapper;
 import com.pvt.project71.services.FriendshipService;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

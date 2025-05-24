@@ -1,13 +1,11 @@
 package com.pvt.project71;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jwt.JWT;
-import com.pvt.project71.domain.dto.BadgeDto;
 import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.BadgeEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.UserRepository;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -27,7 +24,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -57,11 +53,11 @@ public class UserControllerTests {
     }
 
     private Jwt getUserToken(UserEntity userEntity){
-        return jwtService.mockOauth2(userEntity, 1, ChronoUnit.MINUTES);
+        return jwtService.generateTokenFromUserEntity(userEntity, 1, ChronoUnit.MINUTES);
     }
 
     private Jwt getExpiredUserToken(UserEntity userEntity){
-        return jwtService.mockOauth2(userEntity, 1,ChronoUnit.NANOS);
+        return jwtService.generateTokenFromUserEntity(userEntity, 1,ChronoUnit.NANOS);
     }
 
     @Test
@@ -528,7 +524,7 @@ public class UserControllerTests {
         user.setBadges(List.of(badge));
         userService.save(user);
 
-        Jwt jwt = jwtService.mockOauth2(user, 5, ChronoUnit.MINUTES);
+        Jwt jwt = jwtService.generateTokenFromUserEntity(user, 5, ChronoUnit.MINUTES);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/users/" + user.getEmail())
                         .header("Authorization", "Bearer " + jwt.getTokenValue()))

@@ -1,14 +1,11 @@
 package com.pvt.project71.controllers;
 
-import com.pvt.project71.domain.entities.BadgeEntity;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.services.EventService;
-import com.pvt.project71.services.FileStorageService;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
 import com.pvt.project71.util.ImageValidator;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +14,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import net.coobird.thumbnailator.Thumbnails;
 import java.io.ByteArrayOutputStream;

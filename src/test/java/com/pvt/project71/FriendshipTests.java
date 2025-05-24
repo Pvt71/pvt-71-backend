@@ -7,7 +7,7 @@ import com.pvt.project71.domain.enums.Status;
 import com.pvt.project71.repositories.FriendshipRepository;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.FriendshipService;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -61,11 +60,11 @@ public class FriendshipTests {
     }
 
     private Jwt getUserToken(UserEntity userEntity){
-        return jwtService.mockOauth2(userEntity, 1, ChronoUnit.MINUTES);
+        return jwtService.generateTokenFromUserEntity(userEntity, 1, ChronoUnit.MINUTES);
     }
 
     private Jwt getExpiredUserToken(UserEntity userEntity){
-        return jwtService.mockOauth2(userEntity, 1,ChronoUnit.NANOS);
+        return jwtService.generateTokenFromUserEntity(userEntity, 1,ChronoUnit.NANOS);
     }
 
     @Test

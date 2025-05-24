@@ -1,23 +1,15 @@
 package com.pvt.project71.controllers;
 
 import com.pvt.project71.domain.dto.UserDto;
-import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
-import com.pvt.project71.domain.entities.score.ScoreEntity;
-import com.pvt.project71.domain.entities.score.ScoreId;
 import com.pvt.project71.mappers.Mapper;
-import com.pvt.project71.mappers.mapperimpl.UserMapperImpl;
-import com.pvt.project71.services.EventService;
-import com.pvt.project71.services.JwtService;
-import com.pvt.project71.services.ScoreService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
-import jakarta.validation.Path;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -109,7 +101,7 @@ public class UserController {
      *      <ul>
      */
     @PostMapping(path = "/public/users")
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user){
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user, String googleToken){
         UserEntity userEntity = userMapper.mapFrom(user);
         UserEntity savedUserEntity = userService.save(userEntity);
         return new ResponseEntity<>(userMapper.mapTo(savedUserEntity), HttpStatus.CREATED);

@@ -1,21 +1,20 @@
 package com.pvt.project71.controllers;
 
 
-import com.pvt.project71.domain.dto.UserDto;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.mappers.mapperimpl.UserMapperImpl;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.GoogleAuthService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
-import jakarta.persistence.Entity;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.net.http.HttpResponse;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
@@ -25,10 +24,12 @@ public class LoginController {
     private final UserService userService;
     private final UserMapperImpl userMapper;
     private final JwtService jwtService;
-    public LoginController(UserService userService, UserMapperImpl userMapper, JwtService service) {
+    private final GoogleAuthService googleTokenService;
+    public LoginController(UserService userService, UserMapperImpl userMapper, JwtService service, GoogleAuthService googleTokenService) {
         this.userService = userService;
         this.userMapper = userMapper;
         this.jwtService = service;
+        this.googleTokenService = googleTokenService;
     }
 
     @GetMapping("/login/cred/{email}/{password}")
@@ -37,7 +38,7 @@ public class LoginController {
         if (userOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         UserEntity user = userOpt.get();
-        String token = jwtService.mockOauth2(user,1, ChronoUnit.HOURS).getTokenValue();
+        String token = jwtService.generateTokenFromUserEntity(user,1, ChronoUnit.HOURS).getTokenValue();
         if (user.getPassword() == null) {
             user.setPassword(password);
             user = userService.save(user);
@@ -46,14 +47,21 @@ public class LoginController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(token,HttpStatus.OK);
     }
-    @GetMapping("/login/cred/{email}/google/{authtoken}")
-    public ResponseEntity<String> loginWithToken(@NotBlank @Email @PathVariable String email, @PathVariable String authtoken){
+    @GetMapping("/login/google/{email}")
+    public ResponseEntity<String> loginWithToken(@RequestHeader("GAuth") String gAuth,@PathVariable  String email){
+         if (gAuth == null || !gAuth.startsWith("Bearer"))
+             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        GoogleIdToken googleToken = googleTokenService.verifyToken(gAuth.substring(7));
+        if (googleToken == null || !googleToken.getPayload().getEmail().equalsIgnoreCase(email))
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         Optional<UserEntity> userOpt = userService.findOne(email);
-        if (userOpt.isEmpty() || authtoken == null || authtoken.isBlank())
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (userOpt.isEmpty())
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         UserEntity user = userOpt.get();
-        String token = jwtService.mockOauth2(user,1, ChronoUnit.HOURS).getTokenValue();
-        return new ResponseEntity<>(token,HttpStatus.OK);
+        String jwt = jwtService.generateTokenFromUserEntity(user,1, ChronoUnit.HOURS).getTokenValue();
+        return new ResponseEntity<>(jwt,HttpStatus.OK);
     }
 
 }
+
+

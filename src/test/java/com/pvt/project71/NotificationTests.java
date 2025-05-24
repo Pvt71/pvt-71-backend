@@ -5,7 +5,7 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.repositories.NotificationRepository;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.ChallengeService;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.NotificationService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
@@ -57,7 +57,7 @@ public class NotificationTests {
     }
 
     private Jwt getUserToken(UserEntity userEntity){
-        return jwtService.mockOauth2(userEntity, 1, ChronoUnit.MINUTES);
+        return jwtService.generateTokenFromUserEntity(userEntity, 1, ChronoUnit.MINUTES);
     }
 
     private UserEntity fixAndSaveUser() {

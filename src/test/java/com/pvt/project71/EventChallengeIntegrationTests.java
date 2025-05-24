@@ -9,10 +9,8 @@ import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,15 +19,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -94,7 +89,7 @@ public class EventChallengeIntegrationTests {
         return userService.save(TestDataUtil.createValidTestUserEntity());
     }
     private Jwt getUserToken() {
-        return jwtService.mockOauth2(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
+        return jwtService.generateTokenFromUserEntity(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
     }
     @Test
     //@Transactional
@@ -183,7 +178,7 @@ public class EventChallengeIntegrationTests {
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
-                .content(challengeJson).with(jwt().jwt(jwtService.mockOauth2(testUser, 1, ChronoUnit.MINUTES)))).andExpect(status().isForbidden());
+                .content(challengeJson).with(jwt().jwt(jwtService.generateTokenFromUserEntity(testUser, 1, ChronoUnit.MINUTES)))).andExpect(status().isForbidden());
 
     }
     @Test

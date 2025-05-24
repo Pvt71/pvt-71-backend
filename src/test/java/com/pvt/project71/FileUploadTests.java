@@ -3,7 +3,7 @@ package com.pvt.project71;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.services.EventService;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +40,11 @@ public class FileUploadTests {
     private EventService eventService;
 
     private Jwt getUserToken() {
-        return jwtService.mockOauth2(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
+        return jwtService.generateTokenFromUserEntity(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
     }
 
     private Jwt getInvalidUserToken() {
-        return jwtService.mockOauth2(TestDataUtil.createInvalidTestUserEntity(),1, ChronoUnit.MINUTES);
+        return jwtService.generateTokenFromUserEntity(TestDataUtil.createInvalidTestUserEntity(),1, ChronoUnit.MINUTES);
     }
 
     @Test
@@ -394,7 +394,7 @@ public class FileUploadTests {
         event.setAdminUsers(List.of(user));
         eventService.save(event, user);
 
-        Jwt jwt = jwtService.mockOauth2(user, 5, ChronoUnit.MINUTES);
+        Jwt jwt = jwtService.generateTokenFromUserEntity(user, 5, ChronoUnit.MINUTES);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .multipart("/uploads/events/" + event.getId() + "/banner")
@@ -424,7 +424,7 @@ public class FileUploadTests {
         userService.save(user);
 
 
-        Jwt jwt = jwtService.mockOauth2(user, 5, ChronoUnit.MINUTES);
+        Jwt jwt = jwtService.generateTokenFromUserEntity(user, 5, ChronoUnit.MINUTES);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .multipart("/uploads/users/" + user.getEmail() + "/profilePicture")
@@ -451,7 +451,7 @@ public class FileUploadTests {
         UserEntity user = TestDataUtil.createValidTestUserEntity();
         user.setProfilePicture(file.getBytes());
         userService.save(user);
-        Jwt jwt = jwtService.mockOauth2(user, 5, ChronoUnit.MINUTES);
+        Jwt jwt = jwtService.generateTokenFromUserEntity(user, 5, ChronoUnit.MINUTES);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .multipart("/uploads/users/" + user.getEmail() + "/profilePicture")

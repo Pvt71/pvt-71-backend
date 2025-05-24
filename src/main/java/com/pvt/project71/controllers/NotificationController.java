@@ -7,10 +7,9 @@ import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.mappers.Mapper;
 import com.pvt.project71.mappers.mapperimpl.ChallengeAttemptMapper;
 import com.pvt.project71.services.ChallengeAttemptService;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.NotificationService;
 import com.pvt.project71.services.UserService;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 

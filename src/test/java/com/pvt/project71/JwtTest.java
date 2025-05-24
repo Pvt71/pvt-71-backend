@@ -2,7 +2,7 @@ package com.pvt.project71;
 
 
 import com.pvt.project71.domain.entities.UserEntity;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +10,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.oauth2.jwt.*;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -36,7 +35,7 @@ public class JwtTest {
     @Test
     public void testMockOAuth2DoesNotThrow(){
         UserEntity user = TestDataUtil.createValidTestUserEntity();
-        Jwt jwt = jwtService.mockOauth2(user,1, ChronoUnit.MINUTES);
+        Jwt jwt = jwtService.generateTokenFromUserEntity(user,1, ChronoUnit.MINUTES);
 
         Assertions.assertDoesNotThrow(new Executable() {
             @Override
@@ -49,13 +48,13 @@ public class JwtTest {
     public void testExpireddMockAuth2ThrowsBadJwT(){
         UserEntity user = TestDataUtil.createValidTestUserEntity();
         //Ensure that token expires
-        Jwt jwt = jwtService.mockOauth2(user,1, ChronoUnit.NANOS);
+        Jwt jwt = jwtService.generateTokenFromUserEntity(user,1, ChronoUnit.NANOS);
         Assertions.assertThrowsExactly(BadJwtException.class,() ->  decoder.decode(jwt.getTokenValue()));
     }
     @Test
     public void testInvalidJwtSignatureThrowsBadJwt(){
         //Valid jwt
-        Jwt jwt = jwtService.mockOauth2(TestDataUtil.createValidTestUserEntity(),1,ChronoUnit.MINUTES);
+        Jwt jwt = jwtService.generateTokenFromUserEntity(TestDataUtil.createValidTestUserEntity(),1,ChronoUnit.MINUTES);
         String[] values = jwt.getTokenValue().split("\\.");
         //Change signature to invalid one
         values[2] = Base64.getUrlEncoder().withoutPadding().encodeToString(INVALID_SIGNATURE.getBytes());
@@ -66,7 +65,7 @@ public class JwtTest {
     @Test
     public void testMockOAuth2DecodedValueIsCorrect(){
         UserEntity user = TestDataUtil.createValidTestUserEntity();
-        Jwt jwt = jwtService.mockOauth2(user,1, ChronoUnit.MINUTES);
+        Jwt jwt = jwtService.generateTokenFromUserEntity(user,1, ChronoUnit.MINUTES);
        Assertions.assertEquals(user.getEmail(),decoder.decode(jwt.getTokenValue()).getSubject());
     }
 

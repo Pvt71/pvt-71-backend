@@ -8,7 +8,7 @@ import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.ChallengeService;
 import com.pvt.project71.services.EventService;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +20,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -28,7 +27,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -68,7 +66,7 @@ public class ChallengeTests {
     }
 
     private Jwt getUserToken() {
-        return jwtService.mockOauth2(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
+        return jwtService.generateTokenFromUserEntity(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
     }
     private UserEntity fixAndSaveUser() {
         return userService.save(TestDataUtil.createValidTestUserEntity());
@@ -96,7 +94,7 @@ public class ChallengeTests {
         ChallengeDto testChallenge = TestDataUtil.createChallengeDtoA();
         testChallenge.setPoints(10);
         String challengeJson = objectMapper.writeValueAsString(testChallenge);
-        Jwt jwt = jwtService.mockOauth2(fixAndSaveUser(), 1, ChronoUnit.NANOS);
+        Jwt jwt = jwtService.generateTokenFromUserEntity(fixAndSaveUser(), 1, ChronoUnit.NANOS);
         Thread.sleep(1);
         mockMvc.perform(MockMvcRequestBuilders.post("/challenges").contentType(MediaType.APPLICATION_JSON)
                 .content(challengeJson).with(jwt().jwt(jwt)))

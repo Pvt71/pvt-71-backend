@@ -1,11 +1,10 @@
 package com.pvt.project71;
 
-import com.pvt.project71.domain.TimeStamps;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.services.EventService;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.Test;
@@ -21,9 +20,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -31,7 +28,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -52,11 +48,11 @@ public class BadgeTests {
     private JwtService jwtService;
 
     private Jwt getUserToken(UserEntity userEntity){
-        return jwtService.mockOauth2(userEntity, 1, ChronoUnit.MINUTES);
+        return jwtService.generateTokenFromUserEntity(userEntity, 1, ChronoUnit.MINUTES);
     }
 
     private Jwt getExpiredUserToken(UserEntity userEntity){
-        return jwtService.mockOauth2(userEntity, 1,ChronoUnit.NANOS);
+        return jwtService.generateTokenFromUserEntity(userEntity, 1,ChronoUnit.NANOS);
     }
 
     @Test

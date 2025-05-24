@@ -1,18 +1,14 @@
 package com.pvt.project71.controllers;
 
 import com.pvt.project71.domain.dto.ChallengeAttemptDto;
-import com.pvt.project71.domain.dto.ChallengeDto;
-import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
 import com.pvt.project71.domain.entities.ChallengeAttemptId;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.enums.ProofType;
-import com.pvt.project71.domain.enums.Status;
 import com.pvt.project71.mappers.mapperimpl.ChallengeAttemptMapper;
 import com.pvt.project71.services.ChallengeAttemptService;
-import com.pvt.project71.services.JwtService;
+import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,9 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 

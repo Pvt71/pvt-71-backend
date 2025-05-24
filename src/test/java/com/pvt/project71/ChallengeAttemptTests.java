@@ -10,6 +10,7 @@ import com.pvt.project71.repositories.ChallengeAttemptRepository;
 import com.pvt.project71.repositories.ChallengeRepository;
 import com.pvt.project71.repositories.ScoreRepository;
 import com.pvt.project71.services.*;
+import com.pvt.project71.services.security.JwtService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -78,10 +78,10 @@ public class ChallengeAttemptTests {
     }
 
     private Jwt getUserToken() {
-        return jwtService.mockOauth2(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
+        return jwtService.generateTokenFromUserEntity(TestDataUtil.createValidTestUserEntity(),1, ChronoUnit.MINUTES);
     }
     private Jwt getOtherUserToken() {
-        return jwtService.mockOauth2(TestDataUtil.createValidTestUserEntityB(),1, ChronoUnit.MINUTES);
+        return jwtService.generateTokenFromUserEntity(TestDataUtil.createValidTestUserEntityB(),1, ChronoUnit.MINUTES);
     }
     private UserEntity fixAndSaveUser() {
         return userService.save(TestDataUtil.createValidTestUserEntity());
@@ -344,7 +344,7 @@ public class ChallengeAttemptTests {
         UserEntity userC = UserEntity.builder().email("GOOB@Goob.com").school("Unemployed").username("Coolguy")
                 .build();
         userC = userService.save(userC);
-        Jwt userCJwt = jwtService.mockOauth2(userC, 1, ChronoUnit.MINUTES);
+        Jwt userCJwt = jwtService.generateTokenFromUserEntity(userC, 1, ChronoUnit.MINUTES);
         mockMvc.perform(post("/challenges/" + challengeEntity.getId() + "/submit/" + CONTENT)
                 .with(jwt().jwt(userCJwt)));
         mockMvc.perform(post("/challenges/" + challengeEntityB.getId() + "/submit/" + CONTENT)
@@ -376,7 +376,7 @@ public class ChallengeAttemptTests {
         ChallengeEntity challengeEntity = TestDataUtil.createChallengeEnitityA();
         challengeEntity.setCreator(user);
         challengeService.save(challengeEntity, user);
-        Jwt userBJwt = jwtService.mockOauth2(userB, 1, ChronoUnit.MINUTES);
+        Jwt userBJwt = jwtService.generateTokenFromUserEntity(userB, 1, ChronoUnit.MINUTES);
         mockMvc.perform(post("/challenges/" + challengeEntity.getId() + "/submit/" + CONTENT)
                 .with(jwt().jwt(userBJwt)));
         mockMvc.perform(patch("/challenges/"+ challengeEntity.getId() + "/accept/"+userB.getEmail())
