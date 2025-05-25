@@ -55,7 +55,6 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
             return verifer.verify(token);
 
         } catch (Exception e) {
-            logger.debug("ERROR TOKEN " + e);
             return null;
         }
     }
