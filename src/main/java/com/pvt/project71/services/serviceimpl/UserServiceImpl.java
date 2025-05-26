@@ -161,6 +161,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<String> getSchools(){
+        return userRepository.findAllSchools();
+    }
+
+    @Override
     @Transactional
     public UserEntity loadTheLazy(UserEntity user) {
         UserEntity toReturn = userRepository.findById(user.getEmail()).get();

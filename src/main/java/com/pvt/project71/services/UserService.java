@@ -23,6 +23,8 @@ public interface UserService {
     // CRUD - Delete
     void delete(String email);
 
+    List<String> getSchools();
+
     boolean isExists(String email);
     UserEntity loadTheLazy(UserEntity user);
     boolean isAnAdmin(UserEntity userEntity, EventEntity eventEntity);

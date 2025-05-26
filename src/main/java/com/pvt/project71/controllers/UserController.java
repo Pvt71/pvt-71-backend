@@ -293,4 +293,9 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @GetMapping(path = "/schools")
+    public ResponseEntity<List<String>> getSchools(){
+        return new ResponseEntity<>(userService.getSchools(), HttpStatus.OK);
+    }
+
 }

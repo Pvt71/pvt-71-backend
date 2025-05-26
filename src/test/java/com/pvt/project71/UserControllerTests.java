@@ -26,7 +26,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -533,6 +535,18 @@ public class UserControllerTests {
     }
 
 
+    @Test
+    public void testGetSchoolsWork() throws Exception {
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
+        UserEntity user2 = TestDataUtil.createValidTestUserEntityB();
+        userRepository.save(user);
+        userRepository.save(user2);
 
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/schools")
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(jsonPath("$", hasSize(2)));
+    }
 
 }

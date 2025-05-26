@@ -53,7 +53,7 @@ public class TestDataUtil {
         return UserEntity.builder()
                 .email("TestB@test.com")
                 .username("TestNameB")
-                .school(SCHOOL_NAME)
+                .school("Another school name")
                 .profilePicture(createTestImageBytes())
                 .build();
     }
