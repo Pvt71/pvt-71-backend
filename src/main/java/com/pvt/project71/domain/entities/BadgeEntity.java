@@ -21,7 +21,7 @@ public class BadgeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String description;
+    private int rank;
 
     @Lob
     @Column(name = "image", columnDefinition = "LONGBLOB")

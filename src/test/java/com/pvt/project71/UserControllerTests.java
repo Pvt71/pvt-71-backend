@@ -525,7 +525,7 @@ public class UserControllerTests {
         UserEntity user = TestDataUtil.createValidTestUserEntity();
 
         BadgeEntity badge = BadgeEntity.builder()
-                .description("Test Badge")
+                .rank(3)
                 .image(new byte[]{1, 2, 3})
                 .build();
 

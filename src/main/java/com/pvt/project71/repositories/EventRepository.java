@@ -8,6 +8,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,4 +34,20 @@ public interface EventRepository extends CrudRepository<EventEntity, Integer>,
     ORDER BY e.dates.updatedAt DESC
     """)
     List<EventEntity> findByUserAdmin(String email);
+
+    @Query("""
+    SELECT e FROM EventEntity e
+    WHERE e.isDefault = false
+    AND e.dates.endsAt < CURRENT_TIMESTAMP
+    AND e.badgesGiven = false
+    """)
+    List<EventEntity> findAllExpiredEvents();
+
+    @Query("""
+    DELETE FROM EventEntity e
+    WHERE e.isDefault = false
+    AND e.dates.endsAt< :t
+    
+    """)
+    void deleteOldEvents(LocalDateTime t);
 }

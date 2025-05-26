@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BadgeDto {
 
-    private String description;
+    private int rank;
+
 
     private String imageUrl;
 

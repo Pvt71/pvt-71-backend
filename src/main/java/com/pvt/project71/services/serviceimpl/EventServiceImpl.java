@@ -10,6 +10,7 @@ import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.repositories.ScoreRepository;
 import com.pvt.project71.repositories.UserRepository;
 import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.NotificationService;
 import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.UserService;
 import org.springframework.context.annotation.Lazy;
@@ -36,15 +37,18 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private EventRepository eventRepository;
     private UserService userService;
+    private NotificationService notificationService;
     private static final Duration MAX_PRE_CREATION_TIME = Duration.ofDays(30);
     private static final Duration MIN_DURATION_HOURS = Duration.ofMinutes(1);
     private static final Duration MAX_DURATION_DAYS = Duration.ofDays(365);
 
-    public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService, ScoreRepository scoreRepository, UserRepository userRepository) {
+    public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService, ScoreRepository scoreRepository, UserRepository userRepository,
+                             @Lazy NotificationService notificationService) {
         this.eventRepository = eventRepository;
         this.userService = userService;
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -177,10 +181,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional
     public void giveBadges(EventEntity finishedEvent) {
         List<ScoreEntity> scores = scoreRepository.findAllByScoreIdEventId(finishedEvent.getId());
-
+        if (finishedEvent.getBadgePicture() == null) {
+            return;
+        }
         for(int i = 0; i < scores.size(); i++){
             UserEntity user = scores.get(i).getScoreId().getUser();
 
@@ -189,13 +194,26 @@ public class EventServiceImpl implements EventService {
             }
 
             BadgeEntity badge = BadgeEntity.builder()
-                    .description("You were rank " + (i+1) + " in event: " + finishedEvent.getName())
+                    .rank(i+1)
                     .image(finishedEvent.getBadgePicture())
                     .user(user)
                     .build();
 
             user.getBadges().add(badge);
-            userRepository.save(user);
+            userService.save(user);
+            notificationService.add(user, "Event is over! You got rank " + (i+1) + " in " + finishedEvent.getName()
+            + ". Check your badges");
         }
+
+    }
+
+    @Override
+    public List<EventEntity> findAllExpiredEvents() {
+        return eventRepository.findAllExpiredEvents();
+    }
+
+    @Override
+    public void deleteOldOnes() {
+        eventRepository.deleteOldEvents(LocalDateTime.now().minusDays(7));
     }
 }

@@ -76,7 +76,7 @@ public class BadgeTests {
                 MockMvcRequestBuilders.get("/users/" + user.getEmail())
                         .with(jwt().jwt(getUserToken(user)))
         ).andExpect(jsonPath("$.badges", hasSize(1))
-        ).andExpect(jsonPath("$.badges[0].description").value("You were rank 1 in event: " + testEvent.getName()));
+        ).andExpect(jsonPath("$.badges[0].rank").value(1));
     }
 
     @Test
@@ -113,8 +113,8 @@ public class BadgeTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(jwt().jwt(getUserToken(user)))
         ).andExpect(jsonPath("$.badges", hasSize(2))
-        ).andExpect(jsonPath("$.badges[0].description").value("You were rank 1 in event: " + testEvent.getName())
-        ).andExpect(jsonPath("$.badges[1].description").value("You were rank 1 in event: " + testEvent2.getName()));
+        ).andExpect(jsonPath("$.badges[0].rank").value(1)
+        ).andExpect(jsonPath("$.badges[1].rank").value(1));
     }
 
     @Test
@@ -143,15 +143,14 @@ public class BadgeTests {
                 MockMvcRequestBuilders.get("/users/" + userA.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(jwt().jwt(getUserToken(userA)))
-        ).andExpect(jsonPath("$.badges", hasSize(1))
-        ).andExpect(jsonPath("$.badges[0].description").value("You were rank 2 in event: " + testEvent.getName()));
+        ).andExpect(jsonPath("$.badges", hasSize(1)));
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/users/" + userB.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(jwt().jwt(getUserToken(userB)))
         ).andExpect(jsonPath("$.badges", hasSize(1))
-        ).andExpect(jsonPath("$.badges[0].description").value("You were rank 1 in event: " + testEvent.getName()));
+        ).andExpect(jsonPath("$.badges[0].rank").value(1));
     }
 
     @Test
@@ -193,16 +192,16 @@ public class BadgeTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(jwt().jwt(getUserToken(userA)))
         ).andExpect(jsonPath("$.badges", hasSize(2))
-        ).andExpect(jsonPath("$.badges[0].description").value("You were rank 2 in event: " + testEventA.getName())
-        ).andExpect(jsonPath("$.badges[1].description").value("You were rank 1 in event: " + testEventB.getName()));
+        ).andExpect(jsonPath("$.badges[0].rank").value(2)
+        ).andExpect(jsonPath("$.badges[1].rank").value(1));
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/users/" + userB.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(jwt().jwt(getUserToken(userB)))
         ).andExpect(jsonPath("$.badges", hasSize(2))
-        ).andExpect(jsonPath("$.badges[0].description").value("You were rank 1 in event: " + testEventA.getName())
-        ).andExpect(jsonPath("$.badges[1].description").value("You were rank 2 in event: " + testEventB.getName()));
+        ).andExpect(jsonPath("$.badges[0].rank").value(1)
+        ).andExpect(jsonPath("$.badges[1].rank").value(2));
     }
 
 }

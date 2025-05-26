@@ -39,6 +39,8 @@ public class EventEntity {
 
     private String location;
 
+    private boolean badgesGiven;
+
 
     @Lob
     @Column(name = "banner_image", columnDefinition = "LONGBLOB")

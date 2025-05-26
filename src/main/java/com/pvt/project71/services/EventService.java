@@ -31,4 +31,7 @@ public interface EventService {
     List<EventEntity> findAllUserIsAdminIn(UserEntity user);
 
     void giveBadges(EventEntity finishedEvent);
+
+    List<EventEntity> findAllExpiredEvents();
+    void deleteOldOnes();
 }
