@@ -31,6 +31,8 @@ public class EventDto {
 
     private TimeStamps dates;
 
+    private String location;
+
     private boolean areYouAdmin;
 
 

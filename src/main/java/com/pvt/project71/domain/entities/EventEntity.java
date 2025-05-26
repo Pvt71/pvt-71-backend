@@ -37,6 +37,9 @@ public class EventEntity {
 
     private boolean isDefault = false;
 
+    private String location;
+
+
     @Lob
     @Column(name = "banner_image", columnDefinition = "LONGBLOB")
     private byte[] bannerImage;
