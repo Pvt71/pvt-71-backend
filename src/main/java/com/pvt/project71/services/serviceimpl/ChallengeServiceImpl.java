@@ -50,8 +50,9 @@ public class ChallengeServiceImpl implements ChallengeService {
             challengeEntity.setCompletionCount(0);
         } if (challengeEntity.getMaxCompletions() == null) {
             challengeEntity.setMaxCompletions(0);
+        } if (challengeEntity.getPoints() > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TOO MANY POINTS");
         }
-        
         if (challengeEntity.getEvent() == null || challengeEntity.getEvent().getId() == 0) {
             EventEntity defaultEvent = eventService.getDefaultEvent(doneBy.getSchool());
             if (challengeEntity.getAttempts() == null) {
