@@ -116,4 +116,15 @@ public class ScoreController {
         return new ResponseEntity<>(scores, HttpStatus.OK);
     }
 
+    @DeleteMapping("/events/{id}/leave")
+    public ResponseEntity leaveEvent(@PathVariable("id") Integer id, @AuthenticationPrincipal Jwt userToken) {
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        scoreService.delete(user.get().getEmail(), id);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 }
