@@ -116,5 +116,4 @@ public class ScoreController {
         return new ResponseEntity<>(scores, HttpStatus.OK);
     }
 
-
 }
