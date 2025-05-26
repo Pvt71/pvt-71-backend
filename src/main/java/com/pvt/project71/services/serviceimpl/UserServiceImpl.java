@@ -166,6 +166,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<ScoreEntity> getDefaultScore(String email){
+        return userRepository.findScoresFromUserSchool(email);
+    }
+
+    @Override
     @Transactional
     public UserEntity loadTheLazy(UserEntity user) {
         UserEntity toReturn = userRepository.findById(user.getEmail()).get();

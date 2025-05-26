@@ -2,6 +2,7 @@ package com.pvt.project71.services;
 
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.score.ScoreEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,7 @@ public interface UserService {
     void delete(String email);
 
     List<String> getSchools();
+    Optional<ScoreEntity> getDefaultScore(String email);
 
     boolean isExists(String email);
     UserEntity loadTheLazy(UserEntity user);

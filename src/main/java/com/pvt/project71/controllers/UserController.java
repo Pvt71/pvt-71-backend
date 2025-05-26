@@ -2,7 +2,9 @@ package com.pvt.project71.controllers;
 
 import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.mappers.Mapper;
+import com.pvt.project71.repositories.ScoreRepository;
 import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
 import jakarta.validation.Valid;
@@ -296,6 +298,25 @@ public class UserController {
     @GetMapping(path = "/schools")
     public ResponseEntity<List<String>> getSchools(){
         return new ResponseEntity<>(userService.getSchools(), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/users/getDefaultScore")
+    public ResponseEntity<ScoreEntity> getDefaultScore(@AuthenticationPrincipal Jwt userToken){
+        if(userToken == null || !jwtService.isTokenValid(userToken)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        String emailFromToken = userToken.getSubject();
+        if(!userService.isExists(emailFromToken)){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Optional< ScoreEntity > optionalScore = userService.getDefaultScore(emailFromToken);
+        if(optionalScore.isPresent()){
+            return new ResponseEntity<>(optionalScore.get(), HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
 }

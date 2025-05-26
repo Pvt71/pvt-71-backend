@@ -3,8 +3,12 @@ package com.pvt.project71;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pvt.project71.domain.dto.UserDto;
 import com.pvt.project71.domain.entities.BadgeEntity;
+import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.repositories.UserRepository;
+import com.pvt.project71.services.EventService;
+import com.pvt.project71.services.ScoreService;
 import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
 import org.junit.jupiter.api.AfterEach;
@@ -48,6 +52,10 @@ public class UserControllerTests {
     private UserRepository userRepository;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private EventService eventService;
+    @Autowired
+    private ScoreService scoreService;
 
     @AfterEach
     public void cleanup() {
@@ -549,4 +557,30 @@ public class UserControllerTests {
         ).andExpect(jsonPath("$", hasSize(2)));
     }
 
+    @Test
+    public void testGetDefaultScoreReturnsCorrectScore() throws Exception {
+        UserEntity user = TestDataUtil.createValidTestUserEntity();
+        userService.save(user);
+        Jwt userToken = getUserToken(user);
+
+        EventEntity event = TestDataUtil.createTestEventEntityA();
+        event.setAdminUsers(List.of(user));
+        eventService.save(event, user);
+
+        EventEntity event2 = TestDataUtil.createTestEventEntityB();
+        event2.setSchool("Another school");
+        event2.setAdminUsers(List.of(user));
+        eventService.save(event2, user);
+
+        ScoreEntity score1 = TestDataUtil.createValidScoreEntity(user,event);
+        scoreService.create(score1);
+        ScoreEntity score2 = TestDataUtil.createValidScoreEntity(user,event2);
+        scoreService.create(score2);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/users/getDefaultScore")
+                        .with(jwt().jwt(userToken))
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.scoreId.event.school").value(user.getSchool()));
+    }
 }
