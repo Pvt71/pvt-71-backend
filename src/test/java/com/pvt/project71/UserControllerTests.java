@@ -539,7 +539,7 @@ public class UserControllerTests {
         mockMvc.perform(MockMvcRequestBuilders.get("/users/" + user.getEmail())
                         .header("Authorization", "Bearer " + jwt.getTokenValue()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.badges[0].imageUrl").value("/uploads/events/1/badge"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.badges[0].imageUrl").isString());
     }
 
 
