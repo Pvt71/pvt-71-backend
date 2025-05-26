@@ -76,9 +76,9 @@ public class UserServiceImpl implements UserService {
 
         user = userRepository.save(user);
         EventEntity usersDefault = eventService.getDefaultEvent(user.getSchool());
-        try {
+        if (scoreService.findOne(new ScoreId(user, usersDefault)).isEmpty()) {
             scoreService.create(ScoreEntity.builder().scoreId(new ScoreId(user, usersDefault)).build());
-        } catch (ResponseStatusException responseStatusException) {}
+        }
         return user;
     }
 
