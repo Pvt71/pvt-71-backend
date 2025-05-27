@@ -1,9 +1,7 @@
 package com.pvt.project71.controllers;
 
-import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
-import com.pvt.project71.domain.entities.ChallengeAttemptId;
-import com.pvt.project71.domain.entities.EventEntity;
-import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.domain.entities.*;
+import com.pvt.project71.repositories.BadgeRepository;
 import com.pvt.project71.services.ChallengeAttemptService;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.security.JwtService;
@@ -35,18 +33,22 @@ public class FileUploadController {
 
     private final ChallengeAttemptService challengeAttemptService;
 
+    private final BadgeRepository badgeRepository;
+
     @Autowired
     public FileUploadController(EventService eventService,
                                 ImageValidator imageValidator,
                                 UserService userService,
                                 JwtService jwtService,
-                                ChallengeAttemptService challengeAttemptService) {
+                                ChallengeAttemptService challengeAttemptService,
+                                BadgeRepository badgeRepository) {
 
         this.eventService = eventService;
         this.userService = userService;
         this.imageValidator = imageValidator;
         this.jwtService = jwtService;
         this.challengeAttemptService = challengeAttemptService;
+        this.badgeRepository = badgeRepository;
     }
 
     //EVENT BADGES
@@ -94,14 +96,14 @@ public class FileUploadController {
     //Ny get mapping för via user
     @GetMapping("/badges/{id}")
     public ResponseEntity<byte[]> getBadge(@PathVariable Integer id) {
-        Optional<EventEntity> optionalEvent = eventService.findOne(id);
-        if (optionalEvent.isEmpty()) {
+        Optional<BadgeEntity> badge = badgeRepository.findById(id);
+        if (badge.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity
                 .ok()
                 .header("Content-Type", "image/jpeg")
-                .body(optionalEvent.get().getBadgePicture());
+                .body(badge.get().getImage());
     }
 
     @DeleteMapping("/events/{id}/badge")
