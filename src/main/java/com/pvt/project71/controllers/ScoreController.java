@@ -115,6 +115,24 @@ public class ScoreController {
         List<ScoreDto> scores = scoreEntities.get().stream().map(scoreMapper::mapTo).toList();
         return new ResponseEntity<>(scores, HttpStatus.OK);
     }
+    @GetMapping(path = "/users/getDefaultScore")
+    public ResponseEntity<ScoreDto> getDefaultScore(@AuthenticationPrincipal Jwt userToken){
+        if(userToken == null || !jwtService.isTokenValid(userToken)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        String emailFromToken = userToken.getSubject();
+        if(!userService.isExists(emailFromToken)){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Optional< ScoreEntity > optionalScore = userService.getDefaultScore(emailFromToken);
+        if(optionalScore.isPresent()){
+            return new ResponseEntity<>(scoreMapper.mapTo(optionalScore.get()), HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
     @DeleteMapping("/events/{id}/leave")
     public ResponseEntity leaveEvent(@PathVariable("id") Integer id, @AuthenticationPrincipal Jwt userToken) {

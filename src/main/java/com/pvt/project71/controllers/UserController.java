@@ -300,23 +300,6 @@ public class UserController {
         return new ResponseEntity<>(userService.getSchools(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/users/getDefaultScore")
-    public ResponseEntity<ScoreEntity> getDefaultScore(@AuthenticationPrincipal Jwt userToken){
-        if(userToken == null || !jwtService.isTokenValid(userToken)){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
 
-        String emailFromToken = userToken.getSubject();
-        if(!userService.isExists(emailFromToken)){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        Optional< ScoreEntity > optionalScore = userService.getDefaultScore(emailFromToken);
-        if(optionalScore.isPresent()){
-            return new ResponseEntity<>(optionalScore.get(), HttpStatus.OK);
-        }
-        else
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
 
 }
