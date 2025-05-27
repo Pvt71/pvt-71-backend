@@ -121,9 +121,14 @@ public class ScoreController {
         if (!jwtService.isTokenValid(userToken)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        Optional<EventEntity> event = eventService.findOne(id);
         if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } if (event.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        event.get().setParticipants(event.get().getParticipants()-1);
+        eventService.save(event.get(), event.get().getAdminUsers().get(0));
         scoreService.delete(user.get().getEmail(), id);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }

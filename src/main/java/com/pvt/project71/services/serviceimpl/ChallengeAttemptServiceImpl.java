@@ -62,7 +62,7 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
                 accept(challengeAttemptEntity, challengeEntity.get().getCreator());
                 challengeAttemptEntity.setStatus(Status.ACCEPTED);
                 return challengeAttemptEntity;
-            } throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Content sent was not equal to the expected content");
+            } throw new ResponseStatusException(HttpStatus.NO_CONTENT, "Content sent was not equal to the expected content");
         } else { //annars är det paircontent
             List<ChallengeAttemptEntity> matchingAttempts = challengeAttemptRepository.findAllByChallengeAndContent(
                     challengeEntity.get(), challengeAttemptEntity.getContent());

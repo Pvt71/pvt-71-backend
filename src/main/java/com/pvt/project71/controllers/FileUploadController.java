@@ -245,6 +245,7 @@ public class FileUploadController {
 
 
     // CHALLENGE ATTEMPT IMAGE UPLOAD/GET
+
     @PostMapping("/challenges/{id}/submit/image")
     public ResponseEntity<Void> uploadChallengeAttemptImage(
             @PathVariable("id") Integer id,
@@ -295,7 +296,7 @@ public class FileUploadController {
                 .body(optionalChallengeAttempt.get().getChallengeImage());
     }
     @GetMapping("/challenges/{id}/attempts/{email}/image/thumb")
-    public ResponseEntity<byte[]> getChallengeAttemptThumbnail(@PathVariable String email, @PathVariable Integer id) {
+    public ResponseEntity<byte[]> getChallengeAttempt(@PathVariable String email, @PathVariable Integer id) {
 
         Optional<ChallengeAttemptEntity> optionalChallengeAttempt = challengeAttemptService.
                 find(ChallengeAttemptId.builder().challengeId(id).userEmail(email).build());
