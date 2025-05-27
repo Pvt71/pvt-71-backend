@@ -50,8 +50,8 @@ public class FileUploadTests {
     @Test
     public void testUploadEventBadgeShouldSucceed() throws Exception {
         // Arrange
-        byte[] imageBytes = new byte[1024];
-        MockMultipartFile file = new MockMultipartFile("file", "banner.jpg", "image/jpeg", imageBytes);
+        byte[] imageBytes = Files.readAllBytes(Paths.get("src/test/resources/test-image-small.jpg"));
+        MockMultipartFile file = new MockMultipartFile("file", "pf.jpg", "image/jpeg", imageBytes);
 
         Jwt jwt = getUserToken();
 
@@ -94,8 +94,8 @@ public class FileUploadTests {
 
     @Test
     public void testGetEventBadgeShouldReturnImage() throws Exception {
-        byte[] imageBytes = new byte[1024];
-        MockMultipartFile file = new MockMultipartFile("file", "banner.jpg", "image/jpeg", imageBytes);
+        byte[] imageBytes = Files.readAllBytes(Paths.get("src/test/resources/test-image-small.jpg"));
+        MockMultipartFile file = new MockMultipartFile("file", "pf.jpg", "image/jpeg", imageBytes);
 
         Jwt jwt = getUserToken();
 
@@ -127,8 +127,8 @@ public class FileUploadTests {
 
     @Test
     public void testDeleteEventBadgeShouldSucceed() throws Exception {
-        byte[] imageBytes = new byte[1024];
-        MockMultipartFile file = new MockMultipartFile("file", "banner.jpg", "image/jpeg", imageBytes);
+        byte[] imageBytes = Files.readAllBytes(Paths.get("src/test/resources/test-image-small.jpg"));
+        MockMultipartFile file = new MockMultipartFile("file", "pf.jpg", "image/jpeg", imageBytes);
 
         UserEntity user = TestDataUtil.createValidTestUserEntity();
         userService.save(user);

@@ -73,8 +73,14 @@ public class FileUploadController {
 
         imageValidator.validate(file);
 
+        ByteArrayOutputStream badgeOut = new ByteArrayOutputStream();
+        Thumbnails.of(file.getInputStream())
+                .size(100, 100)
+                .outputFormat("JPG")
+                .toOutputStream(badgeOut);
+
         EventEntity event = optionalEvent.get();
-        event.setBadgePicture(file.getBytes());
+        event.setBadgePicture(badgeOut.toByteArray());
 
         eventService.partialUpdate(event.getId(), event, user.get());
         return ResponseEntity.ok().build();
