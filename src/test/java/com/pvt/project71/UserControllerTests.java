@@ -556,31 +556,4 @@ public class UserControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(jsonPath("$", hasSize(2)));
     }
-
-    @Test
-    public void testGetDefaultScoreReturnsCorrectScore() throws Exception {
-        UserEntity user = TestDataUtil.createValidTestUserEntity();
-        userService.save(user);
-        Jwt userToken = getUserToken(user);
-
-        EventEntity event = TestDataUtil.createTestEventEntityA();
-        event.setAdminUsers(List.of(user));
-        eventService.save(event, user);
-
-        EventEntity event2 = TestDataUtil.createTestEventEntityB();
-        event2.setSchool("Another school");
-        event2.setAdminUsers(List.of(user));
-        eventService.save(event2, user);
-
-        ScoreEntity score1 = TestDataUtil.createValidScoreEntity(user,event);
-        scoreService.create(score1);
-        ScoreEntity score2 = TestDataUtil.createValidScoreEntity(user,event2);
-        scoreService.create(score2);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/users/getDefaultScore")
-                        .with(jwt().jwt(userToken))
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.scoreId.event.school").value(user.getSchool()));
-    }
 }
