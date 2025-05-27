@@ -27,10 +27,10 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
     private final   HttpTransport transport;
     private  final GoogleIdTokenVerifier verifer;
 
-    @Value("${google.client.secret}")
+    @Value("${backend.secret}")
     private String backendSecret;
 
-    @Value("${google.client.secret.frontend}")
+    @Value("${frontend.secret}")
     private String frontendSecret;
 
     public GoogleAuthServiceImpl() throws GeneralSecurityException, IOException {
