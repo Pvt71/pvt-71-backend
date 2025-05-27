@@ -466,6 +466,7 @@ public class FileUploadTests {
     }
 
 
+
     // TEST ONLY WORKS LOCALLY WITH LOCAL FILES IN RESOURCE FOLDER
 //    @Test
 //    public void testGenerateAndSaveThumbnailToDisk() throws Exception {

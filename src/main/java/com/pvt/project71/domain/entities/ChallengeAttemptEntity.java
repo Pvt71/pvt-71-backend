@@ -29,7 +29,14 @@ public class ChallengeAttemptEntity {
 
     private String username;
 
-    private boolean isContentHidden;
+
+    @Lob
+    @Column(name = "challenge_image", columnDefinition = "LONGBLOB")
+    private byte[] challengeImage;
+
+    @Lob
+    @Column(name = "challenge_image_thumbnail", columnDefinition = "LONGBLOB")
+    private byte[] challengeThumbnail;
 
     @Override
     public boolean equals(Object o) {

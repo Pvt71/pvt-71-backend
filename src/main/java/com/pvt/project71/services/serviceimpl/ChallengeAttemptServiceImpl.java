@@ -129,6 +129,10 @@ public class ChallengeAttemptServiceImpl implements ChallengeAttemptService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Attempt is already accepted");
         } if (challengeAttemptEntity.getId().getUserEmail().equals(rejectedBy.getEmail())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin can not reject their own attempt");
+        } if (challengeAttemptEntity.getChallengeImage() != null) {
+            challengeAttemptEntity.setChallengeImage(null);
+        } if (!challengeAttemptEntity.getContent().isBlank()) {
+            challengeAttemptEntity.setContent("");
         }
         challengeAttemptEntity.setStatus(Status.REJECTED);
         notificationService.add(userService.findOne(challengeAttemptEntity.getId().getUserEmail()).get(),

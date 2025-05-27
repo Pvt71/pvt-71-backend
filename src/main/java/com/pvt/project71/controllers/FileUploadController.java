@@ -1,7 +1,10 @@
 package com.pvt.project71.controllers;
 
+import com.pvt.project71.domain.entities.ChallengeAttemptEntity;
+import com.pvt.project71.domain.entities.ChallengeAttemptId;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
+import com.pvt.project71.services.ChallengeAttemptService;
 import com.pvt.project71.services.EventService;
 import com.pvt.project71.services.security.JwtService;
 import com.pvt.project71.services.UserService;
@@ -30,16 +33,20 @@ public class FileUploadController {
 
     private final JwtService jwtService;
 
+    private final ChallengeAttemptService challengeAttemptService;
+
     @Autowired
     public FileUploadController(EventService eventService,
                                 ImageValidator imageValidator,
                                 UserService userService,
-                                JwtService jwtService) {
+                                JwtService jwtService,
+                                ChallengeAttemptService challengeAttemptService) {
 
         this.eventService = eventService;
         this.userService = userService;
         this.imageValidator = imageValidator;
         this.jwtService = jwtService;
+        this.challengeAttemptService = challengeAttemptService;
     }
 
     //EVENT BADGES
@@ -234,5 +241,71 @@ public class FileUploadController {
         userService.partialUpdate(email, user);
 
         return ResponseEntity.noContent().build();
+    }
+
+
+    // CHALLENGE ATTEMPT IMAGE UPLOAD/GET
+    @PostMapping("/challenges/{id}/submit/image")
+    public ResponseEntity<Void> uploadChallengeAttemptImage(
+            @PathVariable("id") Integer id,
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal Jwt userToken) throws IOException {
+
+        imageValidator.validate(file);
+
+        if (!jwtService.isTokenValid(userToken)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<UserEntity> user = userService.findOne(userToken.getSubject());
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Optional<ChallengeAttemptEntity> challengeAttempt = challengeAttemptService
+                .find(ChallengeAttemptId.builder().challengeId(id).userEmail(user.get().getEmail()).build());
+        if (challengeAttempt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        challengeAttempt.get().setChallengeImage(file.getBytes());
+
+        ByteArrayOutputStream thumbOut = new ByteArrayOutputStream();
+        Thumbnails.of(file.getInputStream())
+                .size(100, 100)
+                .outputFormat("JPG")
+                .toOutputStream(thumbOut);
+
+        challengeAttempt.get().setChallengeThumbnail(thumbOut.toByteArray());
+        challengeAttemptService.save(challengeAttempt.get());
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/challenges/{id}/attempts/{email}/image")
+    public ResponseEntity<byte[]> getChallengeAttemptImage(@PathVariable String email, @PathVariable Integer id) {
+
+        Optional<ChallengeAttemptEntity> optionalChallengeAttempt = challengeAttemptService.
+                find(ChallengeAttemptId.builder().challengeId(id).userEmail(email).build());
+        if (optionalChallengeAttempt.isEmpty() || optionalChallengeAttempt.get().getChallengeImage() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity
+                .ok()
+                .header("Content-Type", "image/jpeg")
+                .body(optionalChallengeAttempt.get().getChallengeImage());
+    }
+    @GetMapping("/challenges/{id}/attempts/{email}/image/thumb")
+    public ResponseEntity<byte[]> getChallengeAttemptThumbnail(@PathVariable String email, @PathVariable Integer id) {
+
+        Optional<ChallengeAttemptEntity> optionalChallengeAttempt = challengeAttemptService.
+                find(ChallengeAttemptId.builder().challengeId(id).userEmail(email).build());
+        if (optionalChallengeAttempt.isEmpty() || optionalChallengeAttempt.get().getChallengeThumbnail() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity
+                .ok()
+                .header("Content-Type", "image/jpeg")
+                .body(optionalChallengeAttempt.get().getChallengeThumbnail());
     }
 }

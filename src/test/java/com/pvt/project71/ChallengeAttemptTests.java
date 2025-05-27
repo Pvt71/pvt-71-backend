@@ -217,7 +217,7 @@ public class ChallengeAttemptTests {
                         jsonPath("$.status").value("REJECTED"),
                         jsonPath("$.id.userEmail").value(getOtherUserToken().getSubject()),
                         jsonPath("$.id.challengeId").value(challengeEntity.getId()),
-                        jsonPath("$.content").value(CONTENT));
+                        jsonPath("$.content").value(""));
     }
     @Test
     public void testAttemptingARejectedAttemptAgain() throws Exception {

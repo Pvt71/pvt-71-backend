@@ -21,6 +21,8 @@ public class ChallengeAttemptDto {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime submittedAt;
     private String content;
+    private String imageUrl;
+    private String thumbnailUrl;
     private String challengeName;
     private String username;
 }
