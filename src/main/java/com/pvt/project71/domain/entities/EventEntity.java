@@ -68,6 +68,8 @@ public class EventEntity {
 
     private boolean areYouAdmin;
 
+    private boolean areYouRegistered;
+
 
     @Lob
     @Column(name = "badgePicture", columnDefinition = "LONGBLOB")

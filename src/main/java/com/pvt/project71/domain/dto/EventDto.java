@@ -35,5 +35,7 @@ public class EventDto {
 
     private boolean areYouAdmin;
 
+    private boolean areYouRegistered;
+
 
 }

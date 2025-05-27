@@ -6,6 +6,7 @@ import com.pvt.project71.domain.entities.ChallengeEntity;
 import com.pvt.project71.domain.entities.EventEntity;
 import com.pvt.project71.domain.entities.UserEntity;
 import com.pvt.project71.domain.entities.score.ScoreEntity;
+import com.pvt.project71.domain.entities.score.ScoreId;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.repositories.ScoreRepository;
 import com.pvt.project71.repositories.UserRepository;
@@ -170,6 +171,7 @@ public class EventServiceImpl implements EventService {
         for (EventEntity e : events) {
             if (e.getAdminUsers().contains(whoWantsThem)) {
                 e.setAreYouAdmin(true);
+                e.setAreYouRegistered(scoreRepository.existsById(ScoreId.builder().event(e).user(whoWantsThem).build()));
             }
         }
         return events;
