@@ -13,6 +13,7 @@ import com.pvt.project71.services.security.GoogleAuthService;
 import com.pvt.project71.services.security.GoogleAuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -25,11 +26,18 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
 
     private final   HttpTransport transport;
     private  final GoogleIdTokenVerifier verifer;
+
+    @Value("${google.client.secret}")
+    private String backendSecret;
+
+    @Value("${google.client.secret.frontend}")
+    private String frontendSecret;
+
     public GoogleAuthServiceImpl() throws GeneralSecurityException, IOException {
         this.transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         this.verifer = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-                .setAudience(Arrays.asList("706477747617-lh8s0ujcrq3ious7qc34nva2j06uesv0.apps.googleusercontent.com", "706477747617-lgfqp8rkmq646khjibtfg77hm1vhvq1k.apps.googleusercontent.com"))
+                .setAudience(Arrays.asList(frontendSecret, backendSecret))
                 .setAcceptableTimeSkewSeconds(60)
                 .build();
 
