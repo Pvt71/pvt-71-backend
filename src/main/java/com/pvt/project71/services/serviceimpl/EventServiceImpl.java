@@ -40,7 +40,7 @@ public class EventServiceImpl implements EventService {
     private UserService userService;
     private NotificationService notificationService;
     private static final Duration MAX_PRE_CREATION_TIME = Duration.ofDays(30);
-    private static final Duration MIN_DURATION_HOURS = Duration.ofMinutes(1);
+    private static final Duration MIN_DURATION_HOURS = Duration.ofHours(1);
     private static final Duration MAX_DURATION_DAYS = Duration.ofDays(365);
 
     public EventServiceImpl (EventRepository eventRepository, @Lazy UserService userService, ScoreRepository scoreRepository, UserRepository userRepository,

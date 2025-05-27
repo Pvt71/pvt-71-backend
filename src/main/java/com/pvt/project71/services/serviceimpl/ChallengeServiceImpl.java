@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @Service
 public class ChallengeServiceImpl implements ChallengeService {
 
-    private static final Duration MIN_DURATION = Duration.ofMinutes(1);
+    private static final Duration MIN_DURATION = Duration.ofMinutes(5);
     private static final Duration MAX_DURATION = Duration.ofDays(365);
 
     //Denna är plus på events startTime om event inte börjat än
