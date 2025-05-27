@@ -58,7 +58,7 @@ public class LoginController {
         if (userOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         UserEntity user = userOpt.get();
-        String jwt = jwtService.generateTokenFromUserEntity(user,1, ChronoUnit.HOURS).getTokenValue();
+        String jwt = jwtService.generateTokenFromUserEntity(user,7, ChronoUnit.DAYS).getTokenValue();
         return new ResponseEntity<>(jwt,HttpStatus.OK);
     }
 
