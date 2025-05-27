@@ -91,6 +91,18 @@ public class FileUploadController {
                 .body(optionalEvent.get().getBadgePicture());
 
     }
+    //Ny get mapping för via user
+    @GetMapping("/badges/{id}")
+    public ResponseEntity<byte[]> getBadge(@PathVariable Integer id) {
+        Optional<EventEntity> optionalEvent = eventService.findOne(id);
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity
+                .ok()
+                .header("Content-Type", "image/jpeg")
+                .body(optionalEvent.get().getBadgePicture());
+    }
 
     @DeleteMapping("/events/{id}/badge")
     public ResponseEntity<Void> deleteBadgeFromEvent(

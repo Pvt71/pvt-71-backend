@@ -23,7 +23,7 @@ public class BadgeMapper implements Mapper<BadgeEntity, BadgeDto> {
         BadgeDto dto = modelMapper.map(badgeEntity, BadgeDto.class);
 
         if (badgeEntity.getImage() != null) {
-            dto.setImageUrl("/uploads/events/" + badgeEntity.getId() + "/badge");
+            dto.setImageUrl("/uploads/badge/" + badgeEntity.getId());
         }
         return dto;
     }
