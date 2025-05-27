@@ -171,8 +171,8 @@ public class EventServiceImpl implements EventService {
         for (EventEntity e : events) {
             if (e.getAdminUsers().contains(whoWantsThem)) {
                 e.setAreYouAdmin(true);
-                e.setAreYouRegistered(scoreRepository.existsById(ScoreId.builder().event(e).user(whoWantsThem).build()));
             }
+            e.setAreYouRegistered(scoreRepository.existsById(ScoreId.builder().event(e).user(whoWantsThem).build()));
         }
         return events;
     }
