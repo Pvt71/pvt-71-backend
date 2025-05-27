@@ -7,10 +7,7 @@ import com.pvt.project71.domain.entities.score.ScoreEntity;
 import com.pvt.project71.repositories.EventRepository;
 import com.pvt.project71.repositories.ScoreRepository;
 import com.pvt.project71.repositories.UserRepository;
-import com.pvt.project71.services.EventService;
-import com.pvt.project71.services.NotificationService;
-import com.pvt.project71.services.ScheduleService;
-import com.pvt.project71.services.UserService;
+import com.pvt.project71.services.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +17,11 @@ import java.util.List;
 public class ScheduleServiceImpl implements ScheduleService {
 
     private EventService eventService;
+    private ChallengeService challengeService;
 
-    public ScheduleServiceImpl(EventService eventService) {
+    public ScheduleServiceImpl(EventService eventService, ChallengeService challengeService) {
         this.eventService = eventService;
+        this.challengeService = challengeService;
     }
 
     @Override
@@ -40,6 +39,6 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Scheduled(fixedRate =  86400000)
     public void monitorDaily() {
         eventService.deleteOldOnes();
-
+        challengeService.deleteOldOnes();
     }
 }

@@ -1,7 +1,9 @@
 package com.pvt.project71.repositories;
 
 import com.pvt.project71.domain.entities.EventEntity;
+import jakarta.transaction.Transactional;
 import org.hibernate.query.Page;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -43,6 +45,8 @@ public interface EventRepository extends CrudRepository<EventEntity, Integer>,
     """)
     List<EventEntity> findAllExpiredEvents();
 
+    @Modifying
+    @Transactional
     @Query("""
     DELETE FROM EventEntity e
     WHERE e.isDefault = false

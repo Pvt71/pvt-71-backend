@@ -180,6 +180,11 @@ public class ChallengeServiceImpl implements ChallengeService {
         return challengeRepository.findAllCompletedByUser(user.getEmail());
     }
 
+    @Override
+    public void deleteOldOnes() {
+        challengeRepository.deleteOldChallenges(LocalDateTime.now().minusDays(3));
+    }
+
     private boolean checkValidDate(ChallengeEntity challengeEntity, EventEntity eventEntity) {
         if (!challengeEntity.getDates().getUpdatedAt().equals(challengeEntity.getDates().getCreatedAt())) {
             return true;

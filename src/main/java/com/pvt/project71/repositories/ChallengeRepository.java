@@ -1,11 +1,13 @@
 package com.pvt.project71.repositories;
 
 import com.pvt.project71.domain.entities.ChallengeEntity;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -65,4 +67,12 @@ public interface ChallengeRepository extends CrudRepository<ChallengeEntity, Int
     AND ca.id.userEmail =:userEmail)
     """)
     List<ChallengeEntity> findAllCompletedByUser(String userEmail);
+
+    @Modifying
+    @Transactional
+    @Query("""
+    DELETE FROM ChallengeEntity c
+    WHERE c.dates.endsAt< :t
+    """)
+    void deleteOldChallenges(LocalDateTime t);
 }
