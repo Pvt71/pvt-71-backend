@@ -32,8 +32,6 @@ public class UserEntity {
 
     private String school;
 
-    private String password;
-
     private boolean newNotifications;
 
     @Lob
