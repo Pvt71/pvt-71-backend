@@ -39,14 +39,9 @@ public class LoginController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         UserEntity user = userOpt.get();
         String token = jwtService.generateTokenFromUserEntity(user,1, ChronoUnit.HOURS).getTokenValue();
-        if (user.getPassword() == null) {
-            user.setPassword(password);
-            user = userService.save(user);
-            return new ResponseEntity<>(token,HttpStatus.OK);
-        } else   if (!user.getPassword().equals(password))
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(token,HttpStatus.OK);
     }
+
     @GetMapping("/login/google/{email}")
     public ResponseEntity<String> loginWithToken(@RequestHeader("GAuth") String gAuth,@PathVariable  String email){
          if (gAuth == null || !gAuth.startsWith("Bearer"))
