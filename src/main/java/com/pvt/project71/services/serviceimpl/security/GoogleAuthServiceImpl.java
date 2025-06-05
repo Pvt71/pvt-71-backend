@@ -27,11 +27,17 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
     private final   HttpTransport transport;
     private  final GoogleIdTokenVerifier verifer;
 
+    @Value("${frontend.secret}")
+    private String frontendSecret;
+
+    @Value("${backend.secret}")
+    private String backendSecret;
+
     public GoogleAuthServiceImpl() throws GeneralSecurityException, IOException {
         this.transport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         this.verifer = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-                .setAudience(Arrays.asList("706477747617-lh8s0ujcrq3ious7qc34nva2j06uesv0.apps.googleusercontent.com", "706477747617-lgfqp8rkmq646khjibtfg77hm1vhvq1k.apps.googleusercontent.com"))
+                .setAudience(Arrays.asList(frontendSecret, backendSecret))
                 .setAcceptableTimeSkewSeconds(60)
                 .build();
 
